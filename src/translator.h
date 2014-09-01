@@ -15,19 +15,31 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: acomp.cpp
+ * File: translator.h
  * Description: 
  * Author: Lovro Kalinovcic
  * 
  */
 
-#include <cstdlib>
+#ifndef TRANSLATOR_H_
+#define TRANSLATOR_H_
 
-#include "translator.h"
+#include <iostream>
 
-int main()
+#include <string>
+
+class AspelTranslator
 {
-	AspelTranslator aspTrans(std::cin, std::cout);
+public:
+	AspelTranslator(std::istream& in, std::ostream& out);
+	~AspelTranslator();
+private:
+	char m_look;
 
-	return EXIT_SUCCESS;
-}
+	std::istream& m_in;
+	std::ostream& m_out;
+
+	inline void nextChar() { m_in >> m_look; }
+};
+
+#endif /* TRANSLATOR_H_ */
