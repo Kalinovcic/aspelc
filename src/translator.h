@@ -37,7 +37,7 @@ public:
     AspelTranslator(std::istream& in, std::ostream& out);
     ~AspelTranslator();
 
-    inline void testf() { block(); }
+    inline void testf() { block("-", "-"); }
 private:
     char m_look;
     int m_labelCounter;
@@ -163,16 +163,18 @@ private:
         writeln("load " + name);
     }
 
-    inline void block()
+    inline void block(std::string breakLabel, std::string continueLabel)
     {
         match('{');
         while(m_look != '}')
         {
-            if(m_look == '?') doif();
+            if(m_look == '?') doif(breakLabel, continueLabel);
             else if(m_look == '@') dowhile();
             else
             {
-                assignment();
+                if(m_look == '#') dobreak(breakLabel);
+                else if(m_look == '$') docontinue(continueLabel);
+                else assignment();
                 match(';');
             }
         }
@@ -186,7 +188,7 @@ private:
         match(')');
     }
 
-    inline void doif()
+    inline void doif(std::string breakLabel, std::string continueLabel)
     {
         match("?");
         condition();
@@ -196,7 +198,7 @@ private:
 
         writeln("ifn " + toElse);
 
-        block();
+        block(breakLabel, continueLabel);
 
         bool hasElse = m_look == ':';
 
@@ -212,7 +214,7 @@ private:
 
         if(hasElse)
         {
-            block();
+            block(breakLabel, continueLabel);
             writeLabel(toEnd);
         }
     }
@@ -227,9 +229,25 @@ private:
         writeLabel(toStart);
         condition();
         writeln("ifn " + toEnd);
-        block();
+        block(toEnd, toStart);
         writeln("goto " + toStart);
         writeLabel(toEnd);
+    }
+
+    inline void dobreak(std::string breakLabel)
+    {
+        match('#');
+        if(breakLabel == "-")
+            abort("no label to break to");
+        writeln("goto " + breakLabel);
+    }
+
+    inline void docontinue(std::string continueLabel)
+    {
+        match('$');
+        if(continueLabel == "-")
+            abort("no label to continue from");
+        writeln("goto " + continueLabel);
     }
 
     inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }
