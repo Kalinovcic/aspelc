@@ -27,6 +27,7 @@ AspelTranslator::AspelTranslator(std::istream& in, std::ostream& out)
 : m_in(in), m_out(out)
 {
     nextChar();
+    skipWhite();
 }
 
 AspelTranslator::~AspelTranslator()
@@ -44,6 +45,7 @@ std::string AspelTranslator::getName()
         ss << m_look;
         nextChar();
     }
+    skipWhite();
     return ss.str();
 }
 
@@ -56,5 +58,6 @@ int32_t AspelTranslator::getI32()
         result = result * 10 + (m_look - '0');
         nextChar();
     }
+    skipWhite();
     return result;
 }

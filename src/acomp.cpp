@@ -23,11 +23,16 @@
 
 #include <cstdlib>
 
+#include <iostream>
+#include <fstream>
+
 #include "translator.h"
 
 int main()
 {
-    AspelTranslator aspTrans(std::cin, std::cout);
+    std::ifstream in("test.aspel", std::ios::in | std::ios::binary);
+
+    AspelTranslator aspTrans(in, std::cout);
 	aspTrans.assignment2();
 
 	return EXIT_SUCCESS;
