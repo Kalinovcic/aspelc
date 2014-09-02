@@ -27,12 +27,15 @@
 #include <fstream>
 
 #include "translator.h"
+#include "scanner.h"
 
 int main()
 {
     std::ifstream in("test.aspel", std::ios::in | std::ios::binary);
 
-    AspelTranslator aspTrans(in, std::cout);
+    LexicalScanner scanner(in);
+
+    AspelTranslator aspTrans(scanner, std::cout);
 	aspTrans.testf();
 
 	return EXIT_SUCCESS;

@@ -29,23 +29,23 @@
 #include <string>
 #include <sstream>
 
-#include <stdint.h>
+#include "scanner.h"
 
 class AspelTranslator
 {
 public:
-    AspelTranslator(std::istream& in, std::ostream& out);
+    AspelTranslator(LexicalScanner& scanner, std::ostream& out);
     ~AspelTranslator();
 
     inline void testf() { block("-", "-"); }
 private:
-    char m_look;
+    std::string m_token;
     int m_labelCounter;
 
-    std::istream& m_in;
+    LexicalScanner& m_scanner;
     std::ostream& m_out;
 
-    inline void nextChar() { m_in.read(&m_look, 1); }
+    inline void nextToken() { m_token = m_scanner.scan(); }
     inline void error(std::string msg)     const { std::cout << "\nerror: " << msg; }
     inline void abort(std::string reason)  const { error(reason); exit(1); }
     inline void expected(std::string item) const { abort(item + " expected"); }
@@ -53,43 +53,34 @@ private:
     inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
     inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
-    inline bool isAddop(char c) const { return c == '+' || c == '-'; }
-    inline bool isMulop(char c) const { return c == '*' || c == '/'; }
-    inline bool isOrop(char c) const { return c == '|' || c == '^'; }
-    inline bool isRelop(char c) const { return c == '=' || c == '#' || c == '<' || c == '>'; }
+    inline bool isAddop(std::string c) const { return c == "+" || c == "-"; }
+    inline bool isMulop(std::string c) const { return c == "*" || c == "/"; }
+    inline bool isOrop(std::string c) const { return c == "|" || c == "^"; }
+    inline bool isRelop(std::string c) const { return c == "=" || c == "!=" || c == "<" || c == ">"; }
     inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
-    inline bool isBool(char c) const { return c == 'T' || c == 'F'; }
-
-    inline void skipWhite()
-    {
-        while(isWhite(m_look))
-            nextChar();
-    }
-
-    inline void match(char x)
-    {
-        if(m_look != x) expected(std::string("'") + x + "'");
-        else
-        {
-            nextChar();
-            skipWhite();
-        }
-    }
+    inline bool isBool(std::string c) const { return c == "true" || c == "false"; }
 
     inline void match(std::string x)
     {
-        for(unsigned int i = 0; i < x.size(); i++)
-        {
-            if(m_look != x[i])
-                expected("'" + x + "'");
-            nextChar();
-        }
-        skipWhite();
+        if(m_token != x) expected("'" + x + "'");
+        nextToken();
     }
 
-    std::string getWord();
-    std::string getName();
-    int32_t getI32();
+    inline std::string getName()
+    {
+        if(!isAlpha(m_token[0])) expected("name");
+        std::string name = m_token;
+        nextToken();
+        return name;
+    }
+
+    inline std::string getNumber()
+    {
+        if(!isDigit(m_token[0])) expected("number");
+        std::string number = m_token;
+        nextToken();
+        return number;
+    }
 
     inline void write(std::string cont) const { m_out << cont; }
     inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
@@ -100,11 +91,11 @@ private:
     inline void identifier()
     {
         std::string name = getName();
-        if(m_look == '(')
+        if(m_token == "(")
         {
-            match('(');
+            match("(");
             // TODO: parameters
-            match(')');
+            match(")");
             writeln("call " + name);
         }
         else
@@ -113,38 +104,36 @@ private:
 
     inline void factor()
     {
-        if(m_look == '(')
+        if(m_token == "(")
         {
-            match('(');
+            match("(");
             expression();
-            match(')');
+            match(")");
         }
-        else if(isAlpha(m_look))
+        else if(isAlpha(m_token[0]))
         {
             identifier();
         }
         else
         {
-            writeln("push " + toString(getI32()));
+            writeln("push " + getNumber());
         }
     }
 
     inline void signedFactor()
     {
-        if(m_look == '+' || m_look == '-')
+        if(m_token == "+") nextToken();
+        else if(m_token == "-")
         {
-            nextChar();
-            if(m_look == '-')
+            nextToken();
+            if(isDigit(m_token[0]))
             {
-                if(isDigit(m_look))
-                {
-                    writeln("push -" + toString(getI32()));
-                }
-                else
-                {
-                    factor();
-                    writeln("neg");
-                }
+                writeln("push -" + getNumber());
+            }
+            else
+            {
+                factor();
+                writeln("neg");
             }
         }
         else
@@ -155,14 +144,14 @@ private:
 
     inline void mul()
     {
-        match('*');
+        match("*");
         factor();
         writeln("mul");
     }
 
     inline void div()
     {
-        match('/');
+        match("/");
         factor();
         writeln("div");
     }
@@ -170,24 +159,23 @@ private:
     inline void term()
     {
         signedFactor();
-        while(isMulop(m_look))
-            switch(m_look)
-            {
-            case '*': mul(); break;
-            case '/': div(); break;
-            }
+        while(isMulop(m_token))
+        {
+            if(m_token == "*") mul();
+            else if(m_token == "/") div();
+        }
     }
 
     inline void add()
     {
-        match('+');
+        match("+");
         term();
         writeln("add");
     }
 
     inline void sub()
     {
-        match('-');
+        match("-");
         term();
         writeln("sub");
     }
@@ -195,38 +183,37 @@ private:
     inline void expression()
     {
         term();
-        while(isAddop(m_look))
-            switch(m_look)
-            {
-            case '+': add(); break;
-            case '-': sub(); break;
-            }
+        while(isAddop(m_token))
+        {
+            if(m_token == "+") add();
+            else if(m_token == "-") sub();
+        }
     }
 
     inline void equals()
     {
-        match('=');
+        match("=");
         expression();
         writeln("eq");
     }
 
     inline void notEqual()
     {
-        match('#');
+        match("!=");
         expression();
         writeln("ne");
     }
 
     inline void less()
     {
-        match('<');
+        match("<");
         expression();
         writeln("lt");
     }
 
     inline void greater()
     {
-        match('>');
+        match(">");
         expression();
         writeln("gt");
     }
@@ -234,28 +221,26 @@ private:
     inline void relation()
     {
         expression();
-        if(isRelop(m_look))
-            switch(m_look)
-            {
-            case '=': equals(); break;
-            case '#': notEqual(); break;
-            case '<': less(); break;
-            case '>': greater(); break;
-            }
+        if(isRelop(m_token))
+        {
+            if(m_token == "=") equals();
+            else if(m_token == "!=") notEqual();
+            else if(m_token == "<") less();
+            else if(m_token == ">") greater();
+        }
     }
 
     inline bool getBool()
     {
-        std::cout << "hey " << m_look << "\n";
-        if(!isBool(m_look)) expected("boolean literal");
-        bool result = m_look == 'T';
-        nextChar();
+        if(!isBool(m_token)) expected("boolean literal");
+        bool result = m_token == "true";
+        nextToken();
         return result;
     }
 
     inline void boolFactor()
     {
-        if(isBool(m_look))
+        if(isBool(m_token))
         {
             if(getBool()) writeln("push true");
             else writeln("push false");
@@ -265,9 +250,9 @@ private:
 
     inline void notFactor()
     {
-        if(m_look == '!')
+        if(m_token == "!")
         {
-            match('!');
+            match("!");
             boolFactor();
             writeln("not");
         }
@@ -279,7 +264,7 @@ private:
 
     inline void booland()
     {
-        match('&');
+        match("&");
         notFactor();
         writeln("and");
     }
@@ -287,20 +272,20 @@ private:
     inline void boolTerm()
     {
         notFactor();
-        while(m_look == '&')
+        while(m_token == "&")
             booland();
     }
 
     inline void boolor()
     {
-        match('|');
+        match("|");
         boolTerm();
         writeln("or");
     }
 
     inline void boolxor()
     {
-        match('^');
+        match("^");
         boolTerm();
         writeln("xor");
     }
@@ -309,50 +294,49 @@ private:
     {
         boolTerm();
 
-        while(isOrop(m_look))
-            switch(m_look)
-            {
-            case '|': boolor(); break;
-            case '^': boolxor(); break;
-            }
+        while(isOrop(m_token))
+        {
+            if(m_token == "|") boolor();
+            else if(m_token == "^") boolxor();
+        }
     }
 
     inline void assignment()
     {
         std::string name = getName();
-        match('=');
+        match("=");
         boolExpression();
         writeln("load " + name);
     }
 
     inline void block(std::string breakLabel, std::string continueLabel)
     {
-        match('{');
-        while(m_look != '}')
+        match("{");
+        while(m_token != "}")
         {
-            if(m_look == '?') doif(breakLabel, continueLabel);
-            else if(m_look == '@') dowhile();
+            if(m_token == "if") doif(breakLabel, continueLabel);
+            else if(m_token == "while") dowhile();
             else
             {
-                if(m_look == '#') dobreak(breakLabel);
-                else if(m_look == '$') docontinue(continueLabel);
+                if(m_token == "break") dobreak(breakLabel);
+                else if(m_token == "continue") docontinue(continueLabel);
                 else assignment();
-                match(';');
+                match(";");
             }
         }
-        match('}');
+        match("}");
     }
 
     inline void condition()
     {
-        match('(');
+        match("(");
         boolExpression();
-        match(')');
+        match(")");
     }
 
     inline void doif(std::string breakLabel, std::string continueLabel)
     {
-        match("?");
+        match("if");
         condition();
 
         std::string toElse = newLabel();
@@ -362,11 +346,11 @@ private:
 
         block(breakLabel, continueLabel);
 
-        bool hasElse = m_look == ':';
+        bool hasElse = m_token == "else";
 
         if(hasElse)
         {
-            match(':');
+            match("else");
 
             toEnd = newLabel();
             writeln("goto " + toEnd);
@@ -383,7 +367,7 @@ private:
 
     inline void dowhile()
     {
-        match("@");
+        match("while");
 
         std::string toStart = newLabel();
         std::string toEnd = newLabel();
@@ -398,7 +382,7 @@ private:
 
     inline void dobreak(std::string breakLabel)
     {
-        match('#');
+        match("break");
         if(breakLabel == "-")
             abort("no label to break to");
         writeln("goto " + breakLabel);
@@ -406,24 +390,13 @@ private:
 
     inline void docontinue(std::string continueLabel)
     {
-        match('$');
+        match("continue");
         if(continueLabel == "-")
             abort("no label to continue from");
         writeln("goto " + continueLabel);
     }
 
-    inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(int16_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(int32_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(int64_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
-
-    inline std::string toString(uint8_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(uint16_t val) const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(uint32_t val) const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(uint64_t val) const { std::stringstream ss; ss << val; return ss.str(); }
-
-    inline std::string toString(float val)    const { std::stringstream ss; ss << val; return ss.str(); }
-    inline std::string toString(double val)   const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };
 
 #endif /* TRANSLATOR_H_ */

@@ -15,23 +15,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: translator.cpp
+ * File: scanner.cpp
  * Description: 
  * Author: Lovro Kalinovcic
  * 
  */
 
-#include "translator.h"
+#include "scanner.h"
 
-AspelTranslator::AspelTranslator(LexicalScanner& scanner, std::ostream& out)
-: m_scanner(scanner), m_out(out)
+LexicalScanner::LexicalScanner(std::istream& in)
+: m_in(in)
 {
-    m_labelCounter = 0;
-
-    nextToken();
+    nextChar();
 }
 
-AspelTranslator::~AspelTranslator()
+LexicalScanner::~LexicalScanner()
 {
 
 }
