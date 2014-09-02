@@ -25,3 +25,4 @@
 .cproject
 Debug/acompiler
 Debug/src/*
+/Debug/

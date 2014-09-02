@@ -25,8 +25,10 @@
 #define TRANSLATOR_H_
 
 #include <iostream>
-
+#include <cstdlib>
 #include <string>
+
+#include <stdint.h>
 
 class AspelTranslator
 {
@@ -40,6 +42,24 @@ private:
 	std::ostream& m_out;
 
 	inline void nextChar() { m_in >> m_look; }
+	inline void error(std::string msg) { std::cout << "\nerror: " << msg; }
+	inline void abort(std::string reason) { error(reason); exit(1); }
+	inline void expected(std::string item) { abort(item + " expected"); }
+
+	inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+	inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
+
+	inline void match(char x)
+	{
+		if(m_look == x) nextChar();
+		else expected(std::string("'") + x + "'");
+	}
+
+	std::string getName();
+	int64_t getInteger();
+
+	inline void write(std::string cont) { m_out << cont; }
+	inline void writeln(std::string cont) { m_out << cont << "\n"; }
 };
 
 #endif /* TRANSLATOR_H_ */
