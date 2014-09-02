@@ -37,6 +37,20 @@ AspelTranslator::~AspelTranslator()
 
 }
 
+std::string AspelTranslator::getWord()
+{
+    std::stringstream ss;
+    if(!isAlpha(m_look))
+        expected("word");
+    while(isAlpha(m_look))
+    {
+        ss << m_look;
+        nextChar();
+    }
+    skipWhite();
+    return ss.str();
+}
+
 std::string AspelTranslator::getName()
 {
     std::stringstream ss;

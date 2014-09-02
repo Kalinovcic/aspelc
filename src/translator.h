@@ -53,8 +53,12 @@ private:
     inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
     inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
-    inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
+    inline bool isAddop(char c) const { return c == '+' || c == '-'; }
+    inline bool isMulop(char c) const { return c == '*' || c == '/'; }
+    inline bool isOrop(char c) const { return c == '|' || c == '^'; }
+    inline bool isRelop(char c) const { return c == '=' || c == '#' || c == '<' || c == '>'; }
     inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+    inline bool isBool(char c) const { return c == 'T' || c == 'F'; }
 
     inline void skipWhite()
     {
@@ -83,6 +87,7 @@ private:
         skipWhite();
     }
 
+    std::string getWord();
     std::string getName();
     int32_t getI32();
 
@@ -98,14 +103,12 @@ private:
         if(m_look == '(')
         {
             match('(');
-            // TODO: paramaters
+            // TODO: parameters
             match(')');
-            writeln(std::string("call ") + name);
+            writeln("call " + name);
         }
         else
-        {
-            writeln(std::string("fetch ") + name);
-        }
+            writeln("fetch " + name);
     }
 
     inline void factor()
@@ -122,17 +125,52 @@ private:
         }
         else
         {
-            writeln(std::string("push ") + toString(getI32()));
+            writeln("push " + toString(getI32()));
         }
     }
 
-    inline void mul() { match('*'); factor(); writeln("mul"); }
-    inline void div() { match('/'); factor(); writeln("div"); }
+    inline void signedFactor()
+    {
+        if(m_look == '+' || m_look == '-')
+        {
+            nextChar();
+            if(m_look == '-')
+            {
+                if(isDigit(m_look))
+                {
+                    writeln("push -" + toString(getI32()));
+                }
+                else
+                {
+                    factor();
+                    writeln("neg");
+                }
+            }
+        }
+        else
+        {
+            factor();
+        }
+    }
+
+    inline void mul()
+    {
+        match('*');
+        factor();
+        writeln("mul");
+    }
+
+    inline void div()
+    {
+        match('/');
+        factor();
+        writeln("div");
+    }
 
     inline void term()
     {
-        factor();
-        while(m_look == '*' || m_look == '/')
+        signedFactor();
+        while(isMulop(m_look))
             switch(m_look)
             {
             case '*': mul(); break;
@@ -140,14 +178,24 @@ private:
             }
     }
 
-    inline void add() { match('+'); term(); writeln("add"); }
-    inline void sub() { match('-'); term(); writeln("sub"); }
+    inline void add()
+    {
+        match('+');
+        term();
+        writeln("add");
+    }
+
+    inline void sub()
+    {
+        match('-');
+        term();
+        writeln("sub");
+    }
 
     inline void expression()
     {
-        if(isAddop(m_look)) writeln("push 0");
-        else term();
-        while(m_look == '+' || m_look == '-')
+        term();
+        while(isAddop(m_look))
             switch(m_look)
             {
             case '+': add(); break;
@@ -155,11 +203,125 @@ private:
             }
     }
 
+    inline void equals()
+    {
+        match('=');
+        expression();
+        writeln("eq");
+    }
+
+    inline void notEqual()
+    {
+        match('#');
+        expression();
+        writeln("ne");
+    }
+
+    inline void less()
+    {
+        match('<');
+        expression();
+        writeln("lt");
+    }
+
+    inline void greater()
+    {
+        match('>');
+        expression();
+        writeln("gt");
+    }
+
+    inline void relation()
+    {
+        expression();
+        if(isRelop(m_look))
+            switch(m_look)
+            {
+            case '=': equals(); break;
+            case '#': notEqual(); break;
+            case '<': less(); break;
+            case '>': greater(); break;
+            }
+    }
+
+    inline bool getBool()
+    {
+        std::cout << "hey " << m_look << "\n";
+        if(!isBool(m_look)) expected("boolean literal");
+        bool result = m_look == 'T';
+        nextChar();
+        return result;
+    }
+
+    inline void boolFactor()
+    {
+        if(isBool(m_look))
+        {
+            if(getBool()) writeln("push true");
+            else writeln("push false");
+        }
+        else relation();
+    }
+
+    inline void notFactor()
+    {
+        if(m_look == '!')
+        {
+            match('!');
+            boolFactor();
+            writeln("not");
+        }
+        else
+        {
+            boolFactor();
+        }
+    }
+
+    inline void booland()
+    {
+        match('&');
+        notFactor();
+        writeln("and");
+    }
+
+    inline void boolTerm()
+    {
+        notFactor();
+        while(m_look == '&')
+            booland();
+    }
+
+    inline void boolor()
+    {
+        match('|');
+        boolTerm();
+        writeln("or");
+    }
+
+    inline void boolxor()
+    {
+        match('^');
+        boolTerm();
+        writeln("xor");
+    }
+
+    inline void boolExpression()
+    {
+        boolTerm();
+
+        while(isOrop(m_look))
+            switch(m_look)
+            {
+            case '|': boolor(); break;
+            case '^': boolxor(); break;
+            }
+    }
+
     inline void assignment()
     {
         std::string name = getName();
         match('=');
-        expression();
+        boolExpression();
         writeln("load " + name);
     }
 
