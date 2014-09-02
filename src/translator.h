@@ -54,7 +54,7 @@ private:
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
     inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
     inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
-    inline bool isWhite(char c) const { return c == ' ' || c == '\n' || c == '\r'; }
+    inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
 
     inline void skipWhite()
     {
