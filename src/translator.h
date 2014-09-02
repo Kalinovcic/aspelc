@@ -27,6 +27,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <sstream>
 
 #include <stdint.h>
 
@@ -35,13 +36,15 @@ class AspelTranslator
 public:
 	AspelTranslator(std::istream& in, std::ostream& out);
 	~AspelTranslator();
+
+	void expression();
 private:
 	char m_look;
 
 	std::istream& m_in;
 	std::ostream& m_out;
 
-	inline void nextChar() { m_in >> m_look; }
+	inline void nextChar() { m_in.read(&m_look, 1); }
 	inline void error(std::string msg) { std::cout << "\nerror: " << msg; }
 	inline void abort(std::string reason) { error(reason); exit(1); }
 	inline void expected(std::string item) { abort(item + " expected"); }
@@ -56,10 +59,27 @@ private:
 	}
 
 	std::string getName();
-	int64_t getInteger();
+	int32_t getI32();
 
 	inline void write(std::string cont) { m_out << cont; }
-	inline void writeln(std::string cont) { m_out << cont << "\n"; }
+	inline void writeln(std::string cont) { write(cont); m_out << "\n"; }
+
+	inline void term() { writeln(std::string("push i32 ") + toString(getI32()));}
+	inline void add() { match('+'); term(); writeln("addi32"); }
+	inline void sub() { match('-'); term(); writeln("subi32"); }
+
+	inline std::string toString(int8_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(int16_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(int32_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(int64_t val) { std::stringstream ss; ss << val; return ss.str(); }
+
+	inline std::string toString(uint8_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(uint16_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(uint32_t val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(uint64_t val) { std::stringstream ss; ss << val; return ss.str(); }
+
+	inline std::string toString(float val) { std::stringstream ss; ss << val; return ss.str(); }
+	inline std::string toString(double val) { std::stringstream ss; ss << val; return ss.str(); }
 };
 
 #endif /* TRANSLATOR_H_ */
