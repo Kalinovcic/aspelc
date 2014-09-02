@@ -346,7 +346,7 @@ private:
     inline void condition()
     {
         match('(');
-        writeln("push 1");
+        boolExpression();
         match(')');
     }
 
