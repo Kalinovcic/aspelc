@@ -65,6 +65,22 @@ private:
     inline void write(std::string cont) const { m_out << cont; }
     inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
 
+    inline void identifier()
+    {
+        std::string name = getName();
+        if(m_look == '(')
+        {
+            match('(');
+            // TODO: paramaters
+            match(')');
+            writeln(std::string("call ") + name);
+        }
+        else
+        {
+            writeln(std::string("load ") + name);
+        }
+    }
+
     inline void factor()
     {
         if(m_look == '(')
@@ -75,7 +91,7 @@ private:
         }
         else if(isAlpha(m_look))
         {
-            writeln(std::string("load ") + getName());
+            identifier();
         }
         else
         {
