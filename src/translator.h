@@ -168,7 +168,7 @@ private:
         match('{');
         while(m_look != '}')
         {
-            if(m_look == '?') test();
+            if(m_look == '?') doif();
             else
             {
                 assignment();
@@ -185,7 +185,7 @@ private:
         match(')');
     }
 
-    inline void test()
+    inline void doif()
     {
         match("?");
         condition();
