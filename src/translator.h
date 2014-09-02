@@ -169,6 +169,7 @@ private:
         while(m_look != '}')
         {
             if(m_look == '?') doif();
+            else if(m_look == '@') dowhile();
             else
             {
                 assignment();
@@ -214,6 +215,21 @@ private:
             block();
             writeLabel(toEnd);
         }
+    }
+
+    inline void dowhile()
+    {
+        match("@");
+
+        std::string toStart = newLabel();
+        std::string toEnd = newLabel();
+
+        writeLabel(toStart);
+        condition();
+        writeln("ifn " + toEnd);
+        block();
+        writeln("goto " + toStart);
+        writeLabel(toEnd);
     }
 
     inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }
