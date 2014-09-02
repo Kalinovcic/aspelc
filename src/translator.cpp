@@ -26,7 +26,7 @@
 AspelTranslator::AspelTranslator(std::istream& in, std::ostream& out)
 : m_in(in), m_out(out)
 {
-	nextChar();
+    nextChar();
 }
 
 AspelTranslator::~AspelTranslator()
@@ -36,24 +36,24 @@ AspelTranslator::~AspelTranslator()
 
 std::string AspelTranslator::getName()
 {
-	std::stringstream ss;
-	if(!isAlpha(m_look)) expected("name");
-	while(isAlpha(m_look))
-	{
-		ss << m_look;
-		nextChar();
-	}
-	return ss.str();
+    std::stringstream ss;
+    if(!isAlpha(m_look)) expected("name");
+    while(isAlpha(m_look))
+    {
+        ss << m_look;
+        nextChar();
+    }
+    return ss.str();
 }
 
 int32_t AspelTranslator::getI32()
 {
-	if(!isDigit(m_look)) expected("integer");
-	int32_t result = 0;
-	while(isDigit(m_look))
-	{
-		result = result * 10 + (m_look - '0');
-		nextChar();
-	}
-	return result;
+    if(!isDigit(m_look)) expected("integer");
+    int32_t result = 0;
+    while(isDigit(m_look))
+    {
+        result = result * 10 + (m_look - '0');
+        nextChar();
+    }
+    return result;
 }

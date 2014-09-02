@@ -27,7 +27,7 @@
 
 int main()
 {
-	AspelTranslator aspTrans(std::cin, std::cout);
+    AspelTranslator aspTrans(std::cin, std::cout);
 	aspTrans.expression2();
 
 	return EXIT_SUCCESS;

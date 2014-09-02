@@ -34,96 +34,96 @@
 class AspelTranslator
 {
 public:
-	AspelTranslator(std::istream& in, std::ostream& out);
-	~AspelTranslator();
+    AspelTranslator(std::istream& in, std::ostream& out);
+    ~AspelTranslator();
 
-	inline void expression2() { expression(); }
+    inline void expression2() { expression(); }
 private:
-	char m_look;
+    char m_look;
 
-	std::istream& m_in;
-	std::ostream& m_out;
+    std::istream& m_in;
+    std::ostream& m_out;
 
-	inline void nextChar() { m_in.read(&m_look, 1); }
-	inline void error(std::string msg)	   const { std::cout << "\nerror: " << msg; }
-	inline void abort(std::string reason)  const { error(reason); exit(1); }
-	inline void expected(std::string item) const { abort(item + " expected"); }
+    inline void nextChar() { m_in.read(&m_look, 1); }
+    inline void error(std::string msg)     const { std::cout << "\nerror: " << msg; }
+    inline void abort(std::string reason)  const { error(reason); exit(1); }
+    inline void expected(std::string item) const { abort(item + " expected"); }
 
-	inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
-	inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
-	inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
+    inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+    inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
+    inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
 
-	inline void match(char x)
-	{
-		if(m_look == x) nextChar();
-		else expected(std::string("'") + x + "'");
-	}
+    inline void match(char x)
+    {
+        if(m_look == x) nextChar();
+        else expected(std::string("'") + x + "'");
+    }
 
-	std::string getName();
-	int32_t getI32();
+    std::string getName();
+    int32_t getI32();
 
-	inline void write(std::string cont) const { m_out << cont; }
-	inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
+    inline void write(std::string cont) const { m_out << cont; }
+    inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
 
-	inline void factor()
-	{
-		if(m_look == '(')
-		{
-			match('(');
-			expression();
-			match(')');
-		}
-		else if(isAlpha(m_look))
-		{
-			writeln(std::string("load ") + getName());
-		}
-		else
-		{
-			writeln(std::string("push ") + toString(getI32()));
-		}
-	}
+    inline void factor()
+    {
+        if(m_look == '(')
+        {
+            match('(');
+            expression();
+            match(')');
+        }
+        else if(isAlpha(m_look))
+        {
+            writeln(std::string("load ") + getName());
+        }
+        else
+        {
+            writeln(std::string("push ") + toString(getI32()));
+        }
+    }
 
-	inline void mul() { match('*'); factor(); writeln("mul"); }
-	inline void div() { match('/'); factor(); writeln("div"); }
+    inline void mul() { match('*'); factor(); writeln("mul"); }
+    inline void div() { match('/'); factor(); writeln("div"); }
 
-	inline void term()
-	{
-		factor();
-		while(m_look == '*' || m_look == '/')
-			switch(m_look)
-			{
-			case '*': mul(); break;
-			case '/': div(); break;
-			}
-	}
+    inline void term()
+    {
+        factor();
+        while(m_look == '*' || m_look == '/')
+            switch(m_look)
+            {
+            case '*': mul(); break;
+            case '/': div(); break;
+            }
+    }
 
-	inline void add() { match('+'); term(); writeln("add"); }
-	inline void sub() { match('-'); term(); writeln("sub"); }
+    inline void add() { match('+'); term(); writeln("add"); }
+    inline void sub() { match('-'); term(); writeln("sub"); }
 
-	inline void expression()
-	{
-		if(isAddop(m_look)) writeln("push 0");
-		else term();
-		while(m_look == '+' || m_look == '-')
-			switch(m_look)
-			{
-			case '+': add(); break;
-			case '-': sub(); break;
-			}
-	}
+    inline void expression()
+    {
+        if(isAddop(m_look)) writeln("push 0");
+        else term();
+        while(m_look == '+' || m_look == '-')
+            switch(m_look)
+            {
+            case '+': add(); break;
+            case '-': sub(); break;
+            }
+    }
 
-	inline std::string toString(int8_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(int16_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(int32_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(int64_t val) { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(int16_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(int32_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(int64_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
 
-	inline std::string toString(uint8_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(uint16_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(uint32_t val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(uint64_t val) { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(uint8_t val)  const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(uint16_t val) const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(uint32_t val) const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(uint64_t val) const { std::stringstream ss; ss << val; return ss.str(); }
 
-	inline std::string toString(float val) { std::stringstream ss; ss << val; return ss.str(); }
-	inline std::string toString(double val) { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(float val)    const { std::stringstream ss; ss << val; return ss.str(); }
+    inline std::string toString(double val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };
 
 #endif /* TRANSLATOR_H_ */
