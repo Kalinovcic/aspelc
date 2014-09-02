@@ -38,6 +38,7 @@ public:
     ~AspelTranslator();
 
     inline void expression2() { expression(); }
+    inline void assignment2() { assignment(); }
 private:
     char m_look;
 
@@ -51,6 +52,7 @@ private:
 
     inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
+    inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
     inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
 
     inline void match(char x)
@@ -77,7 +79,7 @@ private:
         }
         else
         {
-            writeln(std::string("load ") + name);
+            writeln(std::string("fetch ") + name);
         }
     }
 
@@ -126,6 +128,14 @@ private:
             case '+': add(); break;
             case '-': sub(); break;
             }
+    }
+
+    inline void assignment()
+    {
+        std::string name = getName();
+        match('=');
+        expression();
+        writeln("load " + name);
     }
 
     inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }

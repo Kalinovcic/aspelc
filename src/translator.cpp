@@ -37,8 +37,9 @@ AspelTranslator::~AspelTranslator()
 std::string AspelTranslator::getName()
 {
     std::stringstream ss;
-    if(!isAlpha(m_look)) expected("name");
-    while(isAlpha(m_look))
+    if(!isAlpha(m_look))
+        expected("name");
+    while(isAlnum(m_look))
     {
         ss << m_look;
         nextChar();
