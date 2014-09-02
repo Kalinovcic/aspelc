@@ -45,12 +45,13 @@ private:
 	std::ostream& m_out;
 
 	inline void nextChar() { m_in.read(&m_look, 1); }
-	inline void error(std::string msg) { std::cout << "\nerror: " << msg; }
-	inline void abort(std::string reason) { error(reason); exit(1); }
-	inline void expected(std::string item) { abort(item + " expected"); }
+	inline void error(std::string msg)	   const { std::cout << "\nerror: " << msg; }
+	inline void abort(std::string reason)  const { error(reason); exit(1); }
+	inline void expected(std::string item) const { abort(item + " expected"); }
 
 	inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
 	inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
+	inline bool isAddop(char c) const { return c >= '+' && c <= '-'; }
 
 	inline void match(char x)
 	{
@@ -61,13 +62,29 @@ private:
 	std::string getName();
 	int32_t getI32();
 
-	inline void write(std::string cont) { m_out << cont; }
-	inline void writeln(std::string cont) { write(cont); m_out << "\n"; }
+	inline void write(std::string cont) const { m_out << cont; }
+	inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
 
-	inline void factor() { writeln(std::string("push i32 ") + toString(getI32())); }
+	inline void factor()
+	{
+		if(m_look == '(')
+		{
+			match('(');
+			expression();
+			match(')');
+		}
+		else if(isAlpha(m_look))
+		{
+			writeln(std::string("load ") + getName());
+		}
+		else
+		{
+			writeln(std::string("push ") + toString(getI32()));
+		}
+	}
 
-	inline void mul() { match('*'); factor(); writeln("muli32"); }
-	inline void div() { match('/'); factor(); writeln("divi32"); }
+	inline void mul() { match('*'); factor(); writeln("mul"); }
+	inline void div() { match('/'); factor(); writeln("div"); }
 
 	inline void term()
 	{
@@ -80,12 +97,13 @@ private:
 			}
 	}
 
-	inline void add() { match('+'); term(); writeln("addi32"); }
-	inline void sub() { match('-'); term(); writeln("subi32"); }
+	inline void add() { match('+'); term(); writeln("add"); }
+	inline void sub() { match('-'); term(); writeln("sub"); }
 
 	inline void expression()
 	{
-		term();
+		if(isAddop(m_look)) writeln("push 0");
+		else term();
 		while(m_look == '+' || m_look == '-')
 			switch(m_look)
 			{
