@@ -37,7 +37,7 @@ public:
     AspelTranslator(std::istream& in, std::ostream& out);
     ~AspelTranslator();
 
-    inline void testf() { test(); }
+    inline void testf() { block(); }
 private:
     char m_look;
     int m_labelCounter;
@@ -168,16 +168,52 @@ private:
         match('{');
         while(m_look != '}')
         {
-            assignment();
-            match(';');
+            if(m_look == '?') test();
+            else
+            {
+                assignment();
+                match(';');
+            }
         }
         match('}');
     }
 
+    inline void condition()
+    {
+        match('(');
+        writeln("push 1");
+        match(')');
+    }
+
     inline void test()
     {
-        match("if");
+        match("?");
+        condition();
+
+        std::string toElse = newLabel();
+        std::string toEnd;
+
+        writeln("ifn " + toElse);
+
         block();
+
+        bool hasElse = m_look == ':';
+
+        if(hasElse)
+        {
+            match(':');
+
+            toEnd = newLabel();
+            writeln("goto " + toEnd);
+        }
+
+        writeLabel(toElse);
+
+        if(hasElse)
+        {
+            block();
+            writeLabel(toEnd);
+        }
     }
 
     inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }

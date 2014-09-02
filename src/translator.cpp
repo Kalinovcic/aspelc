@@ -24,8 +24,10 @@
 #include "translator.h"
 
 AspelTranslator::AspelTranslator(std::istream& in, std::ostream& out)
-: m_in(in), m_out(out), m_labelCounter(0)
+: m_in(in), m_out(out)
 {
+    m_labelCounter = 0;
+
     nextChar();
     skipWhite();
 }
