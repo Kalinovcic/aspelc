@@ -57,7 +57,6 @@ private:
     inline bool isMulop(std::string c) const { return c == "*" || c == "/"; }
     inline bool isOrop(std::string c) const { return c == "|" || c == "^"; }
     inline bool isRelop(std::string c) const { return c == "=" || c == "!=" || c == "<" || c == ">"; }
-    inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
     inline bool isBool(std::string c) const { return c == "true" || c == "false"; }
 
     inline void match(std::string x)
