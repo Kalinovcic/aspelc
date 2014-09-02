@@ -33,7 +33,7 @@ int main()
     std::ifstream in("test.aspel", std::ios::in | std::ios::binary);
 
     AspelTranslator aspTrans(in, std::cout);
-	aspTrans.assignment2();
+	aspTrans.testf();
 
 	return EXIT_SUCCESS;
 }

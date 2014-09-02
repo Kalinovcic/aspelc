@@ -37,10 +37,10 @@ public:
     AspelTranslator(std::istream& in, std::ostream& out);
     ~AspelTranslator();
 
-    inline void expression2() { expression(); }
-    inline void assignment2() { assignment(); }
+    inline void testf() { test(); }
 private:
     char m_look;
+    int m_labelCounter;
 
     std::istream& m_in;
     std::ostream& m_out;
@@ -72,11 +72,25 @@ private:
         }
     }
 
+    inline void match(std::string x)
+    {
+        for(unsigned int i = 0; i < x.size(); i++)
+        {
+            if(m_look != x[i])
+                expected("'" + x + "'");
+            nextChar();
+        }
+        skipWhite();
+    }
+
     std::string getName();
     int32_t getI32();
 
     inline void write(std::string cont) const { m_out << cont; }
     inline void writeln(std::string cont) const { write(cont); m_out << "\n"; }
+
+    inline std::string newLabel() { return "l" + toString(m_labelCounter++); }
+    inline void writeLabel(std::string labelname) { writeln(labelname + ":"); }
 
     inline void identifier()
     {
@@ -147,6 +161,23 @@ private:
         match('=');
         expression();
         writeln("load " + name);
+    }
+
+    inline void block()
+    {
+        match('{');
+        while(m_look != '}')
+        {
+            assignment();
+            match(';');
+        }
+        match('}');
+    }
+
+    inline void test()
+    {
+        match("if");
+        block();
     }
 
     inline std::string toString(int8_t val)   const { std::stringstream ss; ss << val; return ss.str(); }
