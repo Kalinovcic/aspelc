@@ -37,7 +37,7 @@ public:
 	AspelTranslator(std::istream& in, std::ostream& out);
 	~AspelTranslator();
 
-	void expression();
+	inline void expression2() { expression(); }
 private:
 	char m_look;
 
@@ -64,9 +64,35 @@ private:
 	inline void write(std::string cont) { m_out << cont; }
 	inline void writeln(std::string cont) { write(cont); m_out << "\n"; }
 
-	inline void term() { writeln(std::string("push i32 ") + toString(getI32()));}
+	inline void factor() { writeln(std::string("push i32 ") + toString(getI32())); }
+
+	inline void mul() { match('*'); factor(); writeln("muli32"); }
+	inline void div() { match('/'); factor(); writeln("divi32"); }
+
+	inline void term()
+	{
+		factor();
+		while(m_look == '*' || m_look == '/')
+			switch(m_look)
+			{
+			case '*': mul(); break;
+			case '/': div(); break;
+			}
+	}
+
 	inline void add() { match('+'); term(); writeln("addi32"); }
 	inline void sub() { match('-'); term(); writeln("subi32"); }
+
+	inline void expression()
+	{
+		term();
+		while(m_look == '+' || m_look == '-')
+			switch(m_look)
+			{
+			case '+': add(); break;
+			case '-': sub(); break;
+			}
+	}
 
 	inline std::string toString(int8_t val) { std::stringstream ss; ss << val; return ss.str(); }
 	inline std::string toString(int16_t val) { std::stringstream ss; ss << val; return ss.str(); }

@@ -34,17 +34,6 @@ AspelTranslator::~AspelTranslator()
 
 }
 
-void AspelTranslator::expression()
-{
-	term();
-	while(m_look == '+' || m_look == '-')
-		switch(m_look)
-		{
-		case '+': add(); break;
-		case '-': sub(); break;
-		}
-}
-
 std::string AspelTranslator::getName()
 {
 	std::stringstream ss;
