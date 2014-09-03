@@ -1,12 +1,13 @@
-function happy
+function happy(d)
 {
-    if(b() == 51)
+    if(b() == d)
     {
         while(a() < b())
         {
             c = c + 1;
         }
         c = c * sqrt(a() - b());
+        happy(c);
     }
     else
     {
@@ -15,6 +16,7 @@ function happy
             c = c - 1;
         }
         c = c * sqrt(a() + b());
+        happy(-c);
     }
 }
 

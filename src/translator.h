@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "scanner.h"
 
@@ -100,11 +101,26 @@ private:
             if(m_token == "function")
             {
                 std::string functionName = nextToken();
+                std::vector<std::string> argvars;
+
                 nextToken();
+                match("(");
+
+                argvars.push_back(getName());
+                while(m_token == ",")
+                {
+                    match(",");
+                    argvars.push_back(getName());
+                }
+
+                match(")");
 
                 write(":" + functionName + "\n");
+                for(unsigned int i = argvars.size(); i; i--)
+                    writeln("load " + argvars[i - 1]);
+
                 block("-", "-");
-                writeln("return");
+                writeln(".");
             }
             else
             {
