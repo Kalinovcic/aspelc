@@ -95,7 +95,8 @@ void AspelTranslator::exprSuff()
         }
         else
         {
-            writeln("fetch " + name);
+            if(isBool(name)) writeln("push " + name);
+            else writeln("fetch " + name);
         }
     }
     else if(m_token == "(")
