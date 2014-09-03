@@ -26,3 +26,7 @@
 Debug/acompiler
 Debug/src/*
 /Debug/
+
+# Aspel Files
+*.aml
+*.aspel
