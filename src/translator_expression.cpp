@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator_expression.cpp
- * Description: 
+ * Description: Methods from AspelTranslator for translating expressions.
  * Author: Lovro Kalinovcic
  * 
  */

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: scanner.h
- * Description: 
+ * Description: Contains the LexicalScanner class, used for lexical scanning.
  * Author: Lovro Kalinovcic
  * 
  */

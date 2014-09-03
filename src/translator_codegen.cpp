@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator_codegen.cpp
- * Description: 
+ * Description: Methods from AspelTranslator for code generation.
  * Author: Lovro Kalinovcic
  * 
  */
@@ -45,4 +45,11 @@ void AspelTranslator::callFunction(std::string name)
     }
     match(")");
     writeln("call " + name + " " + toString(paramc));
+}
+
+void AspelTranslator::assignment(std::string name)
+{
+    match("=");
+    expression();
+    writeln("load " + name);
 }

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator_error.cpp
- * Description: 
+ * Description: Methods from AspelTranslator for error handling.
  * Author: Lovro Kalinovcic
  * 
  */

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: scanner.cpp
- * Description: 
+ * Description: Contains a constructor and destructor for the LexicalScanner class.
  * Author: Lovro Kalinovcic
  * 
  */

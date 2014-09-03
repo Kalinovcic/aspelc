@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator.cpp
- * Description: 
+ * Description: Basic methods from AspelTranslator for recognizing token types.
+ *              Also contains a constructor and destructor.
  * Author: Lovro Kalinovcic
  * 
  */

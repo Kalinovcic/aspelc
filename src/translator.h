@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator.h
- * Description: 
+ * Description: Contains the AspelTranslator class, used for translating Aspel
+ *              code to AML (Aspel Mnemonic Language).
  * Author: Lovro Kalinovcic
  * 
  */
@@ -75,6 +76,7 @@ private:
     std::string newLabel();
     void writeLabel(std::string labelName);
     void callFunction(std::string name);
+    void assignment(std::string name);
 
     // expression
     void exprSuff();
@@ -90,13 +92,6 @@ private:
     void exprLAND();
     void exprLOR();
     void expression();
-
-    inline void assignment(std::string name)
-    {
-        match("=");
-        expression();
-        writeln("load " + name);
-    }
 
     inline void block(std::string breakLabel, std::string continueLabel)
     {
@@ -126,76 +121,11 @@ private:
         match("}");
     }
 
-    inline void condition()
-    {
-        match("(");
-        if(m_token == ")")
-            expected("condition");
-        expression();
-        match(")");
-    }
-
-    inline void doif(std::string breakLabel, std::string continueLabel)
-    {
-        match("if");
-        condition();
-
-        std::string toElse = newLabel();
-        std::string toEnd;
-
-        writeln("ifn " + toElse);
-
-        block(breakLabel, continueLabel);
-
-        bool hasElse = m_token == "else";
-
-        if(hasElse)
-        {
-            match("else");
-
-            toEnd = newLabel();
-            writeln("goto " + toEnd);
-        }
-
-        writeLabel(toElse);
-
-        if(hasElse)
-        {
-            block(breakLabel, continueLabel);
-            writeLabel(toEnd);
-        }
-    }
-
-    inline void dowhile()
-    {
-        match("while");
-
-        std::string toStart = newLabel();
-        std::string toEnd = newLabel();
-
-        writeLabel(toStart);
-        condition();
-        writeln("ifn " + toEnd);
-        block(toEnd, toStart);
-        writeln("goto " + toStart);
-        writeLabel(toEnd);
-    }
-
-    inline void dobreak(std::string breakLabel)
-    {
-        match("break");
-        if(breakLabel == "-")
-            abort("no label to break to");
-        writeln("goto " + breakLabel);
-    }
-
-    inline void docontinue(std::string continueLabel)
-    {
-        match("continue");
-        if(continueLabel == "-")
-            abort("no label to continue from");
-        writeln("goto " + continueLabel);
-    }
+    void condition();
+    void doif(std::string breakLabel, std::string continueLabel);
+    void dowhile();
+    void dobreak(std::string breakLabel);
+    void docontinue(std::string continueLabel);
 
     inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };

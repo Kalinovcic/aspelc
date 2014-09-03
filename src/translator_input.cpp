@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator_input.cpp
- * Description: 
+ * Description: Methods from AspelTranslator for getting input from a LexicalScanner,
+ *              checking a tokens type and matching.
  * Author: Lovro Kalinovcic
  * 
  */

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
  * File: translator_output.cpp
- * Description: 
+ * Description: Methods from AspelTranslator for writing output.
  * Author: Lovro Kalinovcic
  * 
  */
