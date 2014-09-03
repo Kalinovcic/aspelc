@@ -1,5 +1,6 @@
-function happy {
-    if(b() == false)
+function happy
+{
+    if(b() == 51)
     {
         while(a() < b())
         {

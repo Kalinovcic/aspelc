@@ -27,6 +27,7 @@ LexicalScanner::LexicalScanner(std::istream& in)
 : m_in(in)
 {
     nextChar();
+    m_line = 0;
 }
 
 LexicalScanner::~LexicalScanner()
