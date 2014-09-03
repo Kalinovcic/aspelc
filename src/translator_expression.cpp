@@ -104,6 +104,10 @@ void AspelTranslator::exprSuff()
         expression();
         match(")");
     }
+    else
+    {
+        expected("literal or identifier");
+    }
 }
 void AspelTranslator::exprPref()
 {
