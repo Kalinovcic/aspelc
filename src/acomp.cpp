@@ -29,9 +29,15 @@
 #include "translator.h"
 #include "scanner.h"
 
-int main()
+int main(int argc, char** argv)
 {
-    std::ifstream in("test.aspel", std::ios::in | std::ios::binary);
+    if(argc != 2)
+    {
+        std::cerr << "error: no input files\n";
+        exit(1);
+    }
+
+    std::ifstream in(argv[1], std::ios::in | std::ios::binary);
 
     LexicalScanner scanner(in);
 
