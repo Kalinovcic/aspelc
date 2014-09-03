@@ -29,6 +29,13 @@
 #include "translator.h"
 #include "scanner.h"
 
+bool endsWith(std::string const& str, std::string const& ending)
+{
+    if(str.length() >= ending.length())
+        return str.compare(str.length() - ending.length(), ending.length(), ending) == 0;
+    return false;
+}
+
 int main(int argc, char** argv)
 {
     if(argc != 2)
@@ -37,11 +44,21 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    std::ifstream in(argv[1], std::ios::in | std::ios::binary);
+    std::string sourcePath = argv[1];
+    if(!endsWith(sourcePath, ".aspel"))
+    {
+        std::cerr << "error: invalid extension, expected \".aspel\"\n";
+        exit(1);
+    }
+
+    std::string outputPath = sourcePath.substr(0, sourcePath.length() - 6) + ".aml";
+
+    std::ifstream in(sourcePath.c_str(), std::ios::in | std::ios::binary);
+    std::ofstream out(outputPath.c_str(), std::ios::out);
 
     LexicalScanner scanner(in);
 
-    AspelTranslator aspTrans(scanner, std::cout);
+    AspelTranslator aspTrans(scanner, out);
 	aspTrans.testf();
 
 	return EXIT_SUCCESS;

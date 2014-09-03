@@ -38,7 +38,7 @@ public:
     AspelTranslator(LexicalScanner& scanner, std::ostream& out);
     ~AspelTranslator();
 
-    inline void testf() { block("-", "-"); }
+    inline void testf() { program(); }
 private:
     std::string m_token;
     int m_labelCounter;
@@ -92,6 +92,26 @@ private:
     void exprLAND();
     void exprLOR();
     void expression();
+
+    inline void program()
+    {
+        while(m_token != "")
+        {
+            if(m_token == "function")
+            {
+                std::string functionName = nextToken();
+                nextToken();
+
+                write(":" + functionName + "\n");
+                block("-", "-");
+                writeln("return");
+            }
+            else
+            {
+                expected("function declaration");
+            }
+        }
+    }
 
     inline void block(std::string breakLabel, std::string continueLabel)
     {

@@ -1,4 +1,4 @@
-{
+function happy {
     if(b() == false)
     {
         while(a() < b())
