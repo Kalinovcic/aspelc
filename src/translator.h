@@ -47,6 +47,10 @@ private:
     LexicalScanner& m_scanner;
     std::ostream& m_out;
 
+    bool m_void;
+    std::vector<std::string> m_globalvars;
+    std::vector<std::string> m_localvars;
+
     // base
     bool isAlpha(char c) const;
     bool isDigit(char c) const;
@@ -80,6 +84,7 @@ private:
     void assignment(std::string name);
 
     // expression
+    void fetchVariable(std::string name);
     void exprSuff();
     void exprPref();
     void exprMul();
@@ -100,31 +105,50 @@ private:
         {
             if(m_token == "function")
             {
-                std::string functionName = nextToken();
-                std::vector<std::string> argvars;
+                match("function");
 
-                nextToken();
-                match("(");
-
-                argvars.push_back(getName());
-                while(m_token == ",")
+                m_void = false;
+                if(m_token == "void")
                 {
-                    match(",");
-                    argvars.push_back(getName());
+                    match("void");
+                    m_void = true;
                 }
 
+                std::string functionName = m_token;
+                std::vector<std::string> argvars;
+                nextToken();
+
+                match("(");
+                if(m_token != ")")
+                {
+                    argvars.push_back(getName());
+                    while(m_token == ",")
+                    {
+                        match(",");
+                        argvars.push_back(getName());
+                    }
+                }
                 match(")");
 
                 write(":" + functionName + "\n");
                 for(unsigned int i = argvars.size(); i; i--)
+                {
                     writeln("load " + argvars[i - 1]);
+                    m_localvars.push_back(argvars[i - 1]);
+                }
 
                 block("-", "-");
-                writeln(".");
+                write("\t. " + toString(m_localvars.size()) + "\n");
+                m_localvars.clear();
+            }
+            else if(m_token == "var")
+            {
+                doglobalvar();
+                match(";");
             }
             else
             {
-                expected("function declaration");
+                expected("global var or function declaration");
             }
         }
     }
@@ -142,6 +166,8 @@ private:
                 {
                     if(m_token == "break") dobreak(breakLabel);
                     else if(m_token == "continue") docontinue(breakLabel);
+                    else if(m_token == "return") doreturn();
+                    else if(m_token == "var") dovar();
                     match(";");
                 }
             }
@@ -162,6 +188,24 @@ private:
     void dowhile();
     void dobreak(std::string breakLabel);
     void docontinue(std::string continueLabel);
+    void doreturn();
+
+    inline void dovar()
+    {
+        match("var");
+        std::string name = getName();
+        m_localvars.push_back(name);
+
+        if(m_token == "=")
+            assignment(name);
+    }
+
+    inline void doglobalvar()
+    {
+        match("var");
+        std::string name = getName();
+        m_globalvars.push_back(name);
+    }
 
     inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };

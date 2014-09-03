@@ -93,3 +93,11 @@ void AspelTranslator::docontinue(std::string continueLabel)
         abort("no label to continue from");
     writeln("goto " + continueLabel);
 }
+
+void AspelTranslator::doreturn()
+{
+    match("return");
+    if(!m_void)
+        expression();
+    writeln("return");
+}
