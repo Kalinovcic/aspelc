@@ -87,16 +87,25 @@ private:
     inline std::string newLabel() { return "l" + toString(m_labelCounter++); }
     inline void writeLabel(std::string labelname) { writeln(labelname + ":"); }
 
+    inline void callFunction(std::string name)
+    {
+        match("(");
+        int paramc = 0;
+        while(m_token != ")")
+        {
+            if(paramc) match(",");
+            paramc++;
+            boolExpression();
+        }
+        match(")");
+        writeln("call " + name + " " + toString(paramc));
+    }
+
     inline void identifier()
     {
         std::string name = getName();
         if(m_token == "(")
-        {
-            match("(");
-            // TODO: parameters
-            match(")");
-            writeln("call " + name);
-        }
+            callFunction(name);
         else
             writeln("fetch " + name);
     }
@@ -300,9 +309,8 @@ private:
         }
     }
 
-    inline void assignment()
+    inline void assignValue(std::string name)
     {
-        std::string name = getName();
         match("=");
         boolExpression();
         writeln("load " + name);
@@ -319,7 +327,13 @@ private:
             {
                 if(m_token == "break") dobreak(breakLabel);
                 else if(m_token == "continue") docontinue(continueLabel);
-                else assignment();
+                else
+                {
+                    std::string name = getName();
+                    if(m_token == "=") assignValue(name);
+                    else if(m_token == "(") callFunction(name);
+                    else expected("assignment or call");
+                }
                 match(";");
             }
         }
