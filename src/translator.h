@@ -37,7 +37,7 @@ public:
     AspelTranslator(LexicalScanner& scanner, std::ostream& out);
     ~AspelTranslator();
 
-    inline void testf() { block("-", "-"); }
+    inline void testf() { exprLOR(); }
 private:
     std::string m_token;
     int m_labelCounter;
@@ -77,33 +77,24 @@ private:
     void callFunction(std::string name);
 
     // expression
-    void identifier();
-    void factor();
-    void signedFactor();
-    void mul();
-    void div();
-    void term();
-    void add();
-    void sub();
+    void exprSuff();
+    void exprPref();
+    void exprMul();
+    void exprAdd();
+    void exprBShift();
+    void exprRel();
+    void exprRelEqual();
+    void exprBAND();
+    void exprBXOR();
+    void exprBOR();
+    void exprLAND();
+    void exprLOR();
     void expression();
-    void equals();
-    void notEqual();
-    void less();
-    void greater();
-    void relation();
-    bool getBool();
-    void boolFactor();
-    void notFactor();
-    void booland();
-    void boolTerm();
-    void boolor();
-    void boolxor();
-    void boolExpression();
 
     inline void assignValue(std::string name)
     {
         match("=");
-        boolExpression();
+        expression();
         writeln("load " + name);
     }
 
@@ -134,7 +125,7 @@ private:
     inline void condition()
     {
         match("(");
-        boolExpression();
+        expression();
         match(")");
     }
 

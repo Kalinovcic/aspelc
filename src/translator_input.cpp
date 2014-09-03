@@ -39,8 +39,10 @@ std::string AspelTranslator::getName()
 
 std::string AspelTranslator::getNumber()
 {
-    if(!isDigit(m_token[0])) expected("number");
     std::string number = m_token;
+    for(unsigned int i = 0; i < number.size(); i++)
+        if(!isDigit(number[i]))
+            expected("number");
     nextToken();
     return number;
 }

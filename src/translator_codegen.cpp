@@ -41,7 +41,7 @@ void AspelTranslator::callFunction(std::string name)
     {
         if(paramc) match(",");
         paramc++;
-        boolExpression();
+        exprLOR();
     }
     match(")");
     writeln("call " + name + " " + toString(paramc));

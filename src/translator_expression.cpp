@@ -23,210 +23,300 @@
 
 #include "translator.h"
 
-void AspelTranslator::identifier()
-{
-    std::string name = getName();
-    if(m_token == "(")
-        callFunction(name);
-    else
-        writeln("fetch " + name);
-}
+#include <cstdio>
 
-void AspelTranslator::factor()
+#define OPERATOR_UNARY_PLUS     "+"
+#define OPERATOR_UNARY_MINUS    "-"
+#define OPERATOR_LOGICAL_NOT    "!"
+#define OPERATOR_BITWISE_NOT    "~"
+#define OPERATOR_MULTIPLICATION "*"
+#define OPERATOR_DIVISION       "/"
+#define OPERATOR_REMAINDER      "%"
+#define OPERATOR_ADDITION       "+"
+#define OPERATOR_SUBTRACTION    "-"
+#define OPERATOR_SHIFTLEFT      "<<"
+#define OPERATOR_SHIFTRIGHT     ">>"
+#define OPERATOR_LESS           "<"
+#define OPERATOR_LESSEQUAL      "<="
+#define OPERATOR_GREATER        ">"
+#define OPERATOR_GREATEREQUAL   ">="
+#define OPERATOR_EQUAL          "=="
+#define OPERATOR_NOT_EQUAL      "!="
+#define OPERATOR_BITWISE_AND    "&"
+#define OPERATOR_BITWISE_XOR    "^"
+#define OPERATOR_BITWISE_OR     "|"
+#define OPERATOR_LOGICAL_AND    "&&"
+#define OPERATOR_LOGICAL_OR     "||"
+
+#define INSTRUCTION_UNARY_PLUS     ""
+#define INSTRUCTION_UNARY_MINUS    "neg"
+#define INSTRUCTION_LOGICAL_NOT    "lnot"
+#define INSTRUCTION_BITWISE_NOT    "not"
+#define INSTRUCTION_MULTIPLICATION "mul"
+#define INSTRUCTION_DIVISION       "div"
+#define INSTRUCTION_REMAINDER      "rem"
+#define INSTRUCTION_ADDITION       "add"
+#define INSTRUCTION_SUBTRACTION    "sub"
+#define INSTRUCTION_SHIFTLEFT      "shr"
+#define INSTRUCTION_SHIFTRIGHT     "shl"
+#define INSTRUCTION_LESS           "lt"
+#define INSTRUCTION_LESSEQUAL      "le"
+#define INSTRUCTION_GREATER        "gt"
+#define INSTRUCTION_GREATEREQUAL   "ge"
+#define INSTRUCTION_EQUAL          "eq"
+#define INSTRUCTION_NOT_EQUAL      "ne"
+#define INSTRUCTION_BITWISE_AND    "and"
+#define INSTRUCTION_BITWISE_XOR    "xor"
+#define INSTRUCTION_BITWISE_OR     "or"
+#define INSTRUCTION_LOGICAL_AND    "land"
+#define INSTRUCTION_LOGICAL_OR     "lor"
+
+void AspelTranslator::exprSuff()
 {
-    if(m_token == "(")
+    //printf("suff\n");
+    if(isDigit(m_token[0]))
+    {
+        std::string number = getNumber();
+        writeln("push " + number);
+    }
+    else if(isAlpha(m_token[0]))
+    {
+        std::string name = getName();
+        if(m_token == "(")
+        {
+            callFunction(name);
+        }
+        else if(m_token == "[")
+        {
+            match("[");
+            // get index
+            match("]");
+            writeln("<array get>");
+        }
+        else
+        {
+            writeln("fetch " + name);
+        }
+    }
+    else if(m_token == "(")
     {
         match("(");
         expression();
         match(")");
     }
-    else if(isAlpha(m_token[0]))
+}
+void AspelTranslator::exprPref()
+{
+    //printf("pref\n");
+    if(m_token == OPERATOR_UNARY_PLUS)
     {
-        identifier();
+        match(OPERATOR_UNARY_PLUS);
+        exprSuff();
+    }
+    else if(m_token == OPERATOR_UNARY_MINUS)
+    {
+        match(OPERATOR_UNARY_MINUS);
+        exprSuff();
+        writeln(INSTRUCTION_UNARY_MINUS);
+    }
+    else if(m_token == OPERATOR_LOGICAL_NOT)
+    {
+        match(OPERATOR_LOGICAL_NOT);
+        exprSuff();
+        writeln(INSTRUCTION_LOGICAL_NOT);
+    }
+    else if(m_token == OPERATOR_BITWISE_NOT)
+    {
+        match(OPERATOR_BITWISE_NOT);
+        exprSuff();
+        writeln(INSTRUCTION_BITWISE_NOT);
     }
     else
     {
-        writeln("push " + getNumber());
+        exprSuff();
     }
 }
-
-void AspelTranslator::signedFactor()
+/*************************************************/
+void AspelTranslator::exprMul()
 {
-    if(m_token == "+") nextToken();
-    else if(m_token == "-")
+    //printf("mul\n");
+    exprPref();
+    while(m_token == OPERATOR_MULTIPLICATION
+       || m_token == OPERATOR_DIVISION)
     {
-        nextToken();
-        if(isDigit(m_token[0]))
+        if(m_token == OPERATOR_MULTIPLICATION)
         {
-            writeln("push -" + getNumber());
+            match(OPERATOR_MULTIPLICATION);
+            exprPref();
+            writeln(INSTRUCTION_MULTIPLICATION);
         }
-        else
+        else if(m_token == OPERATOR_DIVISION)
         {
-            factor();
-            writeln("neg");
+            match(OPERATOR_DIVISION);
+            exprPref();
+            writeln(INSTRUCTION_DIVISION);
         }
     }
-    else
+}
+void AspelTranslator::exprAdd()
+{
+    //printf("add\n");
+    exprMul();
+    while(m_token == OPERATOR_ADDITION
+       || m_token == OPERATOR_SUBTRACTION)
     {
-        factor();
+        if(m_token == OPERATOR_ADDITION)
+        {
+            match(OPERATOR_ADDITION);
+            exprMul();
+            writeln(INSTRUCTION_ADDITION);
+        }
+        else if(m_token == OPERATOR_SUBTRACTION)
+        {
+            match(OPERATOR_SUBTRACTION);
+            exprMul();
+            writeln(INSTRUCTION_SUBTRACTION);
+        }
     }
 }
-
-void AspelTranslator::mul()
+/*************************************************/
+void AspelTranslator::exprBShift()
 {
-    match("*");
-    factor();
-    writeln("mul");
-}
-
-void AspelTranslator::div()
-{
-    match("/");
-    factor();
-    writeln("div");
-}
-
-void AspelTranslator::term()
-{
-    signedFactor();
-    while(isMulop(m_token))
+    //printf("bshift\n");
+    exprAdd();
+    while(m_token == OPERATOR_SHIFTLEFT
+       || m_token == OPERATOR_SHIFTRIGHT)
     {
-        if(m_token == "*") mul();
-        else if(m_token == "/") div();
+        if(m_token == OPERATOR_SHIFTLEFT)
+        {
+            match(OPERATOR_SHIFTLEFT);
+            exprAdd();
+            writeln(INSTRUCTION_SHIFTLEFT);
+        }
+        else if(m_token == OPERATOR_SHIFTRIGHT)
+        {
+            match(OPERATOR_SHIFTRIGHT);
+            exprAdd();
+            writeln(INSTRUCTION_SHIFTRIGHT);
+        }
     }
 }
-
-void AspelTranslator::add()
+/*************************************************/
+void AspelTranslator::exprRel()
 {
-    match("+");
-    term();
-    writeln("add");
+    //printf("rel\n");
+    exprBShift();
+    while(m_token == OPERATOR_LESS
+       || m_token == OPERATOR_LESSEQUAL
+       || m_token == OPERATOR_GREATER
+       || m_token == OPERATOR_GREATEREQUAL)
+    {
+        if(m_token == OPERATOR_LESS)
+        {
+            match(OPERATOR_LESS);
+            exprBShift();
+            writeln(INSTRUCTION_LESS);
+        }
+        else if(m_token == OPERATOR_LESSEQUAL)
+        {
+            match(OPERATOR_LESSEQUAL);
+            exprBShift();
+            writeln(INSTRUCTION_LESSEQUAL);
+        }
+        else if(m_token == OPERATOR_GREATER)
+        {
+            match(OPERATOR_GREATER);
+            exprBShift();
+            writeln(INSTRUCTION_GREATER);
+        }
+        else if(m_token == OPERATOR_GREATEREQUAL)
+        {
+            match(OPERATOR_GREATEREQUAL);
+            exprBShift();
+            writeln(INSTRUCTION_GREATEREQUAL);
+        }
+    }
 }
-
-void AspelTranslator::sub()
+void AspelTranslator::exprRelEqual()
 {
-    match("-");
-    term();
-    writeln("sub");
+    //printf("releq\n");
+    exprRel();
+    while(m_token == OPERATOR_EQUAL
+       || m_token == OPERATOR_NOT_EQUAL)
+    {
+        if(m_token == OPERATOR_EQUAL)
+        {
+            match(OPERATOR_EQUAL);
+            exprRel();
+            writeln(INSTRUCTION_EQUAL);
+        }
+        else if(m_token == OPERATOR_NOT_EQUAL)
+        {
+            match(OPERATOR_NOT_EQUAL);
+            exprRel();
+            writeln(INSTRUCTION_NOT_EQUAL);
+        }
+    }
 }
-
+/*************************************************/
+void AspelTranslator::exprBAND()
+{
+    //printf("band\n");
+    exprRelEqual();
+    while(m_token == OPERATOR_BITWISE_AND)
+    {
+        match(OPERATOR_BITWISE_AND);
+        exprRelEqual();
+        writeln(INSTRUCTION_BITWISE_AND);
+    }
+}
+void AspelTranslator::exprBXOR()
+{
+    //printf("bxor\n");
+    exprBAND();
+    while(m_token == OPERATOR_BITWISE_XOR)
+    {
+        match(OPERATOR_BITWISE_XOR);
+        exprBAND();
+        writeln(INSTRUCTION_BITWISE_XOR);
+    }
+}
+void AspelTranslator::exprBOR()
+{
+    //printf("bor\n");
+    exprBXOR();
+    while(m_token == OPERATOR_BITWISE_OR)
+    {
+        match(OPERATOR_BITWISE_OR);
+        exprBXOR();
+        writeln(INSTRUCTION_BITWISE_OR);
+    }
+}
+/*************************************************/
+void AspelTranslator::exprLAND()
+{
+    //printf("land\n");
+    exprBOR();
+    while(m_token == OPERATOR_LOGICAL_AND)
+    {
+        match(OPERATOR_LOGICAL_AND);
+        exprBOR();
+        writeln(INSTRUCTION_LOGICAL_AND);
+    }
+}
+void AspelTranslator::exprLOR()
+{
+    //printf("lor\n");
+    exprLAND();
+    while(m_token == OPERATOR_LOGICAL_OR)
+    {
+        match(OPERATOR_LOGICAL_OR);
+        exprLAND();
+        writeln(INSTRUCTION_LOGICAL_OR);
+    }
+}
+/*************************************************/
 void AspelTranslator::expression()
 {
-    term();
-    while(isAddop(m_token))
-    {
-        if(m_token == "+") add();
-        else if(m_token == "-") sub();
-    }
-}
-
-void AspelTranslator::equals()
-{
-    match("=");
-    expression();
-    writeln("eq");
-}
-
-void AspelTranslator::notEqual()
-{
-    match("!=");
-    expression();
-    writeln("ne");
-}
-
-void AspelTranslator::less()
-{
-    match("<");
-    expression();
-    writeln("lt");
-}
-
-void AspelTranslator::greater()
-{
-    match(">");
-    expression();
-    writeln("gt");
-}
-
-void AspelTranslator::relation()
-{
-    expression();
-    if(isRelop(m_token))
-    {
-        if(m_token == "=") equals();
-        else if(m_token == "!=") notEqual();
-        else if(m_token == "<") less();
-        else if(m_token == ">") greater();
-    }
-}
-
-bool AspelTranslator::getBool()
-{
-    if(!isBool(m_token)) expected("boolean literal");
-    bool result = m_token == "true";
-    nextToken();
-    return result;
-}
-
-void AspelTranslator::boolFactor()
-{
-    if(isBool(m_token))
-    {
-        if(getBool()) writeln("push true");
-        else writeln("push false");
-    }
-    else relation();
-}
-
-void AspelTranslator::notFactor()
-{
-    if(m_token == "!")
-    {
-        match("!");
-        boolFactor();
-        writeln("not");
-    }
-    else
-    {
-        boolFactor();
-    }
-}
-
-void AspelTranslator::booland()
-{
-    match("&");
-    notFactor();
-    writeln("and");
-}
-
-void AspelTranslator::boolTerm()
-{
-    notFactor();
-    while(m_token == "&")
-        booland();
-}
-
-void AspelTranslator::boolor()
-{
-    match("|");
-    boolTerm();
-    writeln("or");
-}
-
-void AspelTranslator::boolxor()
-{
-    match("^");
-    boolTerm();
-    writeln("xor");
-}
-
-void AspelTranslator::boolExpression()
-{
-    boolTerm();
-
-    while(isOrop(m_token))
-    {
-        if(m_token == "|") boolor();
-        else if(m_token == "^") boolxor();
-    }
+    exprLOR();
 }

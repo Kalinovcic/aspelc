@@ -23,6 +23,6 @@
 
 #include "translator.h"
 
-void AspelTranslator::error(std::string message) const { std::cout << "n_error: " << message;}
+void AspelTranslator::error(std::string message) const { std::cout << "\nerror: " << message;}
 void AspelTranslator::abort(std::string reason)  const { error(reason); exit(1); };
 void AspelTranslator::expected(std::string item) const { abort(item + " expected"); };
