@@ -73,7 +73,6 @@
 
 void AspelTranslator::exprSuff()
 {
-    //printf("suff\n");
     if(isDigit(m_token[0]))
     {
         std::string number = getNumber();
@@ -108,7 +107,6 @@ void AspelTranslator::exprSuff()
 }
 void AspelTranslator::exprPref()
 {
-    //printf("pref\n");
     if(m_token == OPERATOR_UNARY_PLUS)
     {
         match(OPERATOR_UNARY_PLUS);
@@ -140,7 +138,6 @@ void AspelTranslator::exprPref()
 /*************************************************/
 void AspelTranslator::exprMul()
 {
-    //printf("mul\n");
     exprPref();
     while(m_token == OPERATOR_MULTIPLICATION
        || m_token == OPERATOR_DIVISION)
@@ -161,7 +158,6 @@ void AspelTranslator::exprMul()
 }
 void AspelTranslator::exprAdd()
 {
-    //printf("add\n");
     exprMul();
     while(m_token == OPERATOR_ADDITION
        || m_token == OPERATOR_SUBTRACTION)
@@ -183,7 +179,6 @@ void AspelTranslator::exprAdd()
 /*************************************************/
 void AspelTranslator::exprBShift()
 {
-    //printf("bshift\n");
     exprAdd();
     while(m_token == OPERATOR_SHIFTLEFT
        || m_token == OPERATOR_SHIFTRIGHT)
@@ -205,7 +200,6 @@ void AspelTranslator::exprBShift()
 /*************************************************/
 void AspelTranslator::exprRel()
 {
-    //printf("rel\n");
     exprBShift();
     while(m_token == OPERATOR_LESS
        || m_token == OPERATOR_LESSEQUAL
@@ -240,7 +234,6 @@ void AspelTranslator::exprRel()
 }
 void AspelTranslator::exprRelEqual()
 {
-    //printf("releq\n");
     exprRel();
     while(m_token == OPERATOR_EQUAL
        || m_token == OPERATOR_NOT_EQUAL)
@@ -262,7 +255,6 @@ void AspelTranslator::exprRelEqual()
 /*************************************************/
 void AspelTranslator::exprBAND()
 {
-    //printf("band\n");
     exprRelEqual();
     while(m_token == OPERATOR_BITWISE_AND)
     {
@@ -273,7 +265,6 @@ void AspelTranslator::exprBAND()
 }
 void AspelTranslator::exprBXOR()
 {
-    //printf("bxor\n");
     exprBAND();
     while(m_token == OPERATOR_BITWISE_XOR)
     {
@@ -284,7 +275,6 @@ void AspelTranslator::exprBXOR()
 }
 void AspelTranslator::exprBOR()
 {
-    //printf("bor\n");
     exprBXOR();
     while(m_token == OPERATOR_BITWISE_OR)
     {
@@ -296,7 +286,6 @@ void AspelTranslator::exprBOR()
 /*************************************************/
 void AspelTranslator::exprLAND()
 {
-    //printf("land\n");
     exprBOR();
     while(m_token == OPERATOR_LOGICAL_AND)
     {
@@ -307,7 +296,6 @@ void AspelTranslator::exprLAND()
 }
 void AspelTranslator::exprLOR()
 {
-    //printf("lor\n");
     exprLAND();
     while(m_token == OPERATOR_LOGICAL_OR)
     {
