@@ -30,6 +30,7 @@ void AspelTranslator::write(std::string cont)
 
 void AspelTranslator::writeln(std::string cont)
 {
+    m_out << "\t";
     write(cont);
     m_out << "\n";
 }

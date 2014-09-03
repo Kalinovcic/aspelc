@@ -37,7 +37,7 @@ public:
     AspelTranslator(LexicalScanner& scanner, std::ostream& out);
     ~AspelTranslator();
 
-    inline void testf() { exprLOR(); }
+    inline void testf() { block("-", "-"); }
 private:
     std::string m_token;
     int m_labelCounter;
@@ -91,7 +91,7 @@ private:
     void exprLOR();
     void expression();
 
-    inline void assignValue(std::string name)
+    inline void assignment(std::string name)
     {
         match("=");
         expression();
@@ -103,19 +103,23 @@ private:
         match("{");
         while(m_token != "}")
         {
-            if(m_token == "if") doif(breakLabel, continueLabel);
-            else if(m_token == "while") dowhile();
-            else
+            if(isKeyword(m_token))
             {
-                if(m_token == "break") dobreak(breakLabel);
-                else if(m_token == "continue") docontinue(continueLabel);
+                if(m_token == "if") doif(breakLabel, continueLabel);
+                else if(m_token == "while") dowhile();
                 else
                 {
-                    std::string name = getName();
-                    if(m_token == "=") assignValue(name);
-                    else if(m_token == "(") callFunction(name);
-                    else expected("assignment or call");
+                    if(m_token == "break") dobreak(breakLabel);
+                    else if(m_token == "continue") docontinue(breakLabel);
+                    match(";");
                 }
+            }
+            else
+            {
+                std::string name = getName();
+                if(m_token == "=") assignment(name);
+                else if(m_token == "(") callFunction(name);
+                else expected("statement");
                 match(";");
             }
         }
@@ -125,6 +129,8 @@ private:
     inline void condition()
     {
         match("(");
+        if(m_token == ")")
+            expected("condition");
         expression();
         match(")");
     }

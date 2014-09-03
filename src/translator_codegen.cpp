@@ -30,7 +30,7 @@ std::string AspelTranslator::newLabel()
 
 void AspelTranslator::writeLabel(std::string labelname)
 {
-    writeln(labelname + ":");
+    write("\n" + labelname + ":");
 }
 
 void AspelTranslator::callFunction(std::string name)
@@ -41,7 +41,7 @@ void AspelTranslator::callFunction(std::string name)
     {
         if(paramc) match(",");
         paramc++;
-        exprLOR();
+        expression();
     }
     match(")");
     writeln("call " + name + " " + toString(paramc));
