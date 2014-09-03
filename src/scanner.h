@@ -53,7 +53,10 @@ public:
         skipWhite();
         return result;
     }
+
+    inline int getLine() { return m_line; }
 private:
+    int m_line;
     char m_look;
 
     std::istream& m_in;
@@ -61,7 +64,7 @@ private:
     inline void nextChar() { m_in.read(&m_look, 1); if(m_in.eof()) m_look = -1; }
     inline void error(std::string msg)     const { std::cout << "\nerror: " << msg; }
     inline void abort(std::string reason)  const { error(reason); exit(1); }
-    inline void expected(std::string item) const { abort(item + " expected"); }
+    inline void expected(std::string item) const { abort(item + " expected near line " + toString(m_line)); }
 
     inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
@@ -72,7 +75,11 @@ private:
     inline void skipWhite()
     {
         while(isWhite(m_look))
+        {
+            if(m_look == '\n')
+                m_line++;
             nextChar();
+        }
     }
 
     inline std::string getName()
@@ -113,6 +120,8 @@ private:
         skipWhite();
         return ss.str();
     }
+
+    inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };
 
 #endif /* SCANNER_H_ */
