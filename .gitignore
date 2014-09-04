@@ -30,3 +30,4 @@ Debug/src/*
 # Aspel Files
 *.aml
 *.aspel
+*.aby

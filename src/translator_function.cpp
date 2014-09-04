@@ -95,7 +95,7 @@ void AspelTranslator::function()
         }
 
         block("-", "-");
-        write("\t. " + toString(m_localvars.size()) + "\n\n");
+        write("\t.\n");
         m_localvars.clear();
     }
     else
