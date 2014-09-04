@@ -39,12 +39,12 @@ void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
 {
     funmap_it it = m_functions.find(name);
     if(it == m_functions.end())
-        abort("function " + name + " not found near line " + toString(m_scanner.getLine()));
+        abort("function \"" + name + "\" not found near line " + toString(m_scanner.getLine()));
 
     FunctionData cfun = it->second;
 
     if(nonVoidOnly && cfun.isVoid)
-        abort("void function " + name + " called in expression near line " + toString(m_scanner.getLine()));
+        abort("void function \"" + name + "\" called in expression near line " + toString(m_scanner.getLine()));
 
     match("(");
 
@@ -69,7 +69,7 @@ void AspelTranslator::fetchVariable(std::string name)
         if(globalvar != m_globalvars.end())
             writeln("fetchwide " + name);
         else
-            abort("var " + name + " not declared near line " + toString(m_scanner.getLine()));
+            abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
     }
 }
 

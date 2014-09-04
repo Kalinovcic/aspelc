@@ -30,11 +30,11 @@ void AspelTranslator::checkFunction(std::string funName)
 
     FunctionData previous = (*it).second;
 
-    if(m_cfun.forward) abort("function " + funName + " reforwarding near line " + toString(m_scanner.getLine()));
-    if(!previous.forward) abort("function " + funName + " redeclaration near line " + toString(m_scanner.getLine()));
+    if(m_cfun.forward) abort("function \"" + funName + "\" reforwarding near line " + toString(m_scanner.getLine()));
+    if(!previous.forward) abort("function \"" + funName + "\" redeclaration near line " + toString(m_scanner.getLine()));
 
-    if(m_cfun.isVoid != previous.isVoid) abort("function " + funName + " inconsistency near line " + toString(m_scanner.getLine()));
-    if(m_cfun.argc != previous.argc) abort("function " + funName + " inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.isVoid != previous.isVoid) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.argc != previous.argc) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
 }
 
 void AspelTranslator::function()
@@ -79,7 +79,7 @@ void AspelTranslator::function()
         if(!native)
             m_cfun.forward = true;
         else
-            abort("native function forwarded near line " + toString(m_scanner.getLine()));
+            abort("native function \"" + functionName + "\" forwarded near line " + toString(m_scanner.getLine()));
     }
 
     checkFunction(functionName);

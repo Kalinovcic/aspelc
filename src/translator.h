@@ -124,7 +124,7 @@ private:
         }
         for(funmap_it i = m_functions.begin(); i != m_functions.end(); i++)
             if((i->second).forward)
-                abort("forwarded function " + i->first + " not found");
+                abort("forwarded function \"" + i->first + "\" not found");
     }
 
     inline void block(std::string breakLabel, std::string continueLabel)
