@@ -95,8 +95,18 @@ void AspelTranslator::function()
         }
 
         block("-", "-");
-        write("\t. " + toString(m_localvars.size()) + "\n\n\n");
+        write("\t. " + toString(m_localvars.size()) + "\n\n");
         m_localvars.clear();
     }
-    else match(";");
+    else
+    {
+        if(native)
+        {
+            write("f:n");
+            if(m_cfun.isVoid)
+                write("v");
+            write("\t" + functionName + "\n\n");
+        }
+        match(";");
+    }
 }
