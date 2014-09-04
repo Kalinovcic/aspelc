@@ -97,7 +97,7 @@ void AspelTranslator::docontinue(std::string continueLabel)
 void AspelTranslator::doreturn()
 {
     match("return");
-    if(!m_void)
+    if(!m_cfun.isVoid)
         expression();
     writeln("return");
 }

@@ -23,6 +23,8 @@
 
 #include "translator.h"
 
+#include <algorithm>
+
 std::string AspelTranslator::newLabel()
 {
     return "l" + toString(m_labelCounter++);
@@ -33,8 +35,19 @@ void AspelTranslator::writeLabel(std::string labelname)
     write("\n" + labelname + ":");
 }
 
-void AspelTranslator::callFunction(std::string name)
+void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
 {
+    std::map<std::string, FunctionData>::iterator it = m_functions.find(name);
+    if(it == m_functions.end())
+        abort("function " + name + " not found near line " + toString(m_scanner.getLine()));
+
+    if(nonVoidOnly)
+    {
+        FunctionData cfun = (*it).second;
+        if(cfun.isVoid)
+            abort("void function called in expression");
+    }
+
     match("(");
     int paramc = 0;
     while(m_token != ")")
@@ -45,6 +58,21 @@ void AspelTranslator::callFunction(std::string name)
     }
     match(")");
     writeln("call " + name + " " + toString(paramc));
+}
+
+void AspelTranslator::fetchVariable(std::string name)
+{
+    std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
+    if(localvar != m_localvars.end())
+        writeln("fetch " + name);
+    else
+    {
+        std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
+        if(globalvar != m_globalvars.end())
+            writeln("fetchwide " + name);
+        else
+            abort("var " + name + " not declared near line " + toString(m_scanner.getLine()));
+    }
 }
 
 void AspelTranslator::assignment(std::string name)

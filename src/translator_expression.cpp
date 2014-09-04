@@ -23,8 +23,6 @@
 
 #include "translator.h"
 
-#include <algorithm>
-
 #define OPERATOR_UNARY_PLUS     "+"
 #define OPERATOR_UNARY_MINUS    "-"
 #define OPERATOR_LOGICAL_NOT    "!"
@@ -71,21 +69,6 @@
 #define INSTRUCTION_LOGICAL_AND    "land"
 #define INSTRUCTION_LOGICAL_OR     "lor"
 
-void AspelTranslator::fetchVariable(std::string name)
-{
-    std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
-    if(localvar != m_localvars.end())
-        writeln("fetch " + name);
-    else
-    {
-        std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
-        if(globalvar != m_globalvars.end())
-            writeln("fetchwide " + name);
-        else
-            abort("var " + name + " not declared near line " + toString(m_scanner.getLine()));
-    }
-}
-
 void AspelTranslator::exprSuff()
 {
     if(isDigit(m_token[0]))
@@ -98,7 +81,7 @@ void AspelTranslator::exprSuff()
         std::string name = getName();
         if(m_token == "(")
         {
-            callFunction(name);
+            callFunction(name, true);
         }
         else if(m_token == "[")
         {

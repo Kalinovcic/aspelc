@@ -29,9 +29,18 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+
 #include <vector>
+#include <map>
 
 #include "scanner.h"
+
+struct FunctionData
+{
+    int argc;
+    bool isVoid;
+    bool forward;
+};
 
 class AspelTranslator
 {
@@ -47,7 +56,8 @@ private:
     LexicalScanner& m_scanner;
     std::ostream& m_out;
 
-    bool m_void;
+    FunctionData m_cfun;
+    std::map<std::string, FunctionData> m_functions;
     std::vector<std::string> m_globalvars;
     std::vector<std::string> m_localvars;
 
@@ -80,11 +90,11 @@ private:
     // codegen
     std::string newLabel();
     void writeLabel(std::string labelName);
-    void callFunction(std::string name);
+    void callFunction(std::string name, bool nonVoidOnly);
+    void fetchVariable(std::string name);
     void assignment(std::string name);
 
     // expression
-    void fetchVariable(std::string name);
     void exprSuff();
     void exprPref();
     void exprMul();
@@ -99,57 +109,16 @@ private:
     void exprLOR();
     void expression();
 
+    void checkFunction(std::string funName);
+    void function();
+
     inline void program()
     {
         while(m_token != "")
         {
-            if(m_token == "function")
-            {
-                match("function");
-
-                m_void = false;
-                if(m_token == "void")
-                {
-                    match("void");
-                    m_void = true;
-                }
-
-                std::string functionName = m_token;
-                std::vector<std::string> argvars;
-                nextToken();
-
-                match("(");
-                if(m_token != ")")
-                {
-                    argvars.push_back(getName());
-                    while(m_token == ",")
-                    {
-                        match(",");
-                        argvars.push_back(getName());
-                    }
-                }
-                match(")");
-
-                write(":" + functionName + "\n");
-                for(unsigned int i = argvars.size(); i; i--)
-                {
-                    writeln("load " + argvars[i - 1]);
-                    m_localvars.push_back(argvars[i - 1]);
-                }
-
-                block("-", "-");
-                write("\t. " + toString(m_localvars.size()) + "\n");
-                m_localvars.clear();
-            }
-            else if(m_token == "var")
-            {
-                doglobalvar();
-                match(";");
-            }
-            else
-            {
-                expected("global var or function declaration");
-            }
+            if(m_token == "function") function();
+            else if(m_token == "var") doglobalvar();
+            else expected("global var or function declaration");
         }
     }
 
@@ -175,7 +144,7 @@ private:
             {
                 std::string name = getName();
                 if(m_token == "=") assignment(name);
-                else if(m_token == "(") callFunction(name);
+                else if(m_token == "(") callFunction(name, false);
                 else expected("statement");
                 match(";");
             }
@@ -205,6 +174,9 @@ private:
         match("var");
         std::string name = getName();
         m_globalvars.push_back(name);
+        match(";");
+
+        write("w:\t" + name + "\n");
     }
 
     inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
