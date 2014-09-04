@@ -34,6 +34,7 @@ void AspelTranslator::checkFunction(std::string funName)
     if(!previous.forward) abort("function redeclaration near line " + toString(m_scanner.getLine()));
 
     if(m_cfun.isVoid != previous.isVoid) abort("function inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.argc != previous.argc) abort("function inconsistency near line " + toString(m_scanner.getLine()));
 }
 
 void AspelTranslator::function()
@@ -51,26 +52,24 @@ void AspelTranslator::function()
     std::vector<std::string> argvars;
     nextToken();
 
+    match("(");
+    if(m_token != ")")
+    {
+        argvars.push_back(getName());
+        while(m_token == ",")
+        {
+            match(",");
+            argvars.push_back(getName());
+        }
+    }
+    m_cfun.argc = argvars.size();
+    match(")");
+
     m_cfun.forward = false;
     if(m_token == "forward")
     {
         match("forward");
         m_cfun.forward = true;
-    }
-    else
-    {
-        match("(");
-        if(m_token != ")")
-        {
-            argvars.push_back(getName());
-            while(m_token == ",")
-            {
-                match(",");
-                argvars.push_back(getName());
-            }
-        }
-        m_cfun.argc = argvars.size();
-        match(")");
     }
 
     checkFunction(functionName);
