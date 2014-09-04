@@ -168,10 +168,10 @@ private:
     {
         match("var");
         std::string name = getName();
-        m_localvars.push_back(name);
 
         if(m_token == "=")
             assignment(name);
+        m_localvars.push_back(name);
     }
 
     inline void doglobalvar()

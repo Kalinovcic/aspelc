@@ -68,7 +68,7 @@ private:
 
     inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
-    inline bool isOp(char c) const { return c == '+' || c == '-' || c == '*' || c == '/' || c == '<' || c == '>' || c == '&' || c == '|' || c == '='; }
+    inline bool isOp(char c) const { return c == '+' || c == '-' || c == '*' || c == '/' || c == '<' || c == '>' || c == '&' || c == '|' || c == '=' || c == '!'; }
     inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
     inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
 

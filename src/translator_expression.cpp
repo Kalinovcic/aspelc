@@ -142,7 +142,8 @@ void AspelTranslator::exprMul()
 {
     exprPref();
     while(m_token == OPERATOR_MULTIPLICATION
-       || m_token == OPERATOR_DIVISION)
+       || m_token == OPERATOR_DIVISION
+       || m_token == OPERATOR_REMAINDER)
     {
         if(m_token == OPERATOR_MULTIPLICATION)
         {
@@ -155,6 +156,12 @@ void AspelTranslator::exprMul()
             match(OPERATOR_DIVISION);
             exprPref();
             writeln(INSTRUCTION_DIVISION);
+        }
+        else if(m_token == OPERATOR_REMAINDER)
+        {
+            match(OPERATOR_REMAINDER);
+            exprPref();
+            writeln(INSTRUCTION_REMAINDER);
         }
     }
 }
