@@ -44,7 +44,7 @@ void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
     FunctionData cfun = (*it).second;
 
     if(nonVoidOnly && cfun.isVoid)
-        abort("void function called in expression");
+        abort("void function called in expression near line " + toString(m_scanner.getLine()));
 
     match("(");
 
