@@ -25,21 +25,28 @@
 
 void AspelTranslator::checkFunction(std::string funName)
 {
-    std::map<std::string, FunctionData>::iterator it = m_functions.find(funName);
+    funmap_it it = m_functions.find(funName);
     if(it == m_functions.end()) return;
 
     FunctionData previous = (*it).second;
 
-    if(m_cfun.forward) abort("function reforwarding near line " + toString(m_scanner.getLine()));
-    if(!previous.forward) abort("function redeclaration near line " + toString(m_scanner.getLine()));
+    if(m_cfun.forward) abort("function " + funName + " reforwarding near line " + toString(m_scanner.getLine()));
+    if(!previous.forward) abort("function " + funName + " redeclaration near line " + toString(m_scanner.getLine()));
 
-    if(m_cfun.isVoid != previous.isVoid) abort("function inconsistency near line " + toString(m_scanner.getLine()));
-    if(m_cfun.argc != previous.argc) abort("function inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.isVoid != previous.isVoid) abort("function " + funName + " inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.argc != previous.argc) abort("function " + funName + " inconsistency near line " + toString(m_scanner.getLine()));
 }
 
 void AspelTranslator::function()
 {
     match("function");
+
+    bool native = false;
+    if(m_token == "native")
+    {
+        match("native");
+        native = true;
+    }
 
     m_cfun.isVoid = false;
     if(m_token == "void")
@@ -69,13 +76,16 @@ void AspelTranslator::function()
     if(m_token == "forward")
     {
         match("forward");
-        m_cfun.forward = true;
+        if(!native)
+            m_cfun.forward = true;
+        else
+            abort("native function forwarded near line " + toString(m_scanner.getLine()));
     }
 
     checkFunction(functionName);
     m_functions[functionName] = m_cfun;
 
-    if(!m_cfun.forward)
+    if(!m_cfun.forward && !native)
     {
         write("f:\t" + functionName + "\n");
         for(unsigned int i = argvars.size(); i; i--)

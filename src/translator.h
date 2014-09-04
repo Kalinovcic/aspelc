@@ -42,6 +42,8 @@ struct FunctionData
     bool forward;
 };
 
+typedef std::map<std::string, FunctionData>::iterator funmap_it;
+
 class AspelTranslator
 {
 public:
@@ -120,6 +122,9 @@ private:
             else if(m_token == "var") doglobalvar();
             else expected("global var or function declaration");
         }
+        for(funmap_it i = m_functions.begin(); i != m_functions.end(); i++)
+            if((i->second).forward)
+                abort("forwarded function " + i->first + " not found");
     }
 
     inline void block(std::string breakLabel, std::string continueLabel)

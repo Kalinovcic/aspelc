@@ -37,14 +37,14 @@ void AspelTranslator::writeLabel(std::string labelname)
 
 void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
 {
-    std::map<std::string, FunctionData>::iterator it = m_functions.find(name);
+    funmap_it it = m_functions.find(name);
     if(it == m_functions.end())
         abort("function " + name + " not found near line " + toString(m_scanner.getLine()));
 
-    FunctionData cfun = (*it).second;
+    FunctionData cfun = it->second;
 
     if(nonVoidOnly && cfun.isVoid)
-        abort("void function called in expression near line " + toString(m_scanner.getLine()));
+        abort("void function " + name + " called in expression near line " + toString(m_scanner.getLine()));
 
     match("(");
 
