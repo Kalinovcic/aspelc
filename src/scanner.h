@@ -97,10 +97,16 @@ private:
 
     inline std::string getNumber()
     {
+        bool decimalPoint = false;
         std::stringstream ss;
         if(!isDigit(m_look)) expected("number");
-        while(isDigit(m_look))
+        while(isDigit(m_look) || m_look == '.')
         {
+            if(m_look == '.')
+            {
+                if(decimalPoint) abort("invalid number format near line " + toString(getLine()));
+                decimalPoint = true;
+            }
             ss << m_look;
             nextChar();
         }
