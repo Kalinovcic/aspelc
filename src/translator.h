@@ -94,7 +94,7 @@ private:
     void writeLabel(std::string labelName);
     void callFunction(std::string name, bool nonVoidOnly);
     void fetchVariable(std::string name);
-    void assignment(std::string name);
+    void assignment(std::string name, bool inDeclaration);
 
     // expression
     void exprSuff();
@@ -148,7 +148,7 @@ private:
             else
             {
                 std::string name = getName();
-                if(m_token == "=") assignment(name);
+                if(m_token == "=") assignment(name, false);
                 else if(m_token == "(") callFunction(name, false);
                 else expected("statement");
                 match(";");
@@ -170,7 +170,7 @@ private:
         std::string name = getName();
 
         if(m_token == "=")
-            assignment(name);
+            assignment(name, true);
         m_localvars.push_back(name);
     }
 

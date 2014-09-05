@@ -73,9 +73,19 @@ void AspelTranslator::fetchVariable(std::string name)
     }
 }
 
-void AspelTranslator::assignment(std::string name)
+void AspelTranslator::assignment(std::string name, bool inDeclaration)
 {
     match("=");
     expression();
-    writeln("load " + name);
+    std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
+    if(localvar != m_localvars.end() || inDeclaration)
+        writeln("load " + name);
+    else
+    {
+        std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
+        if(globalvar != m_globalvars.end())
+            writeln("loadwide " + name);
+        else
+            abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
+    }
 }
