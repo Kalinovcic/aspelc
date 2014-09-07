@@ -15,22 +15,40 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: translator_output.cpp
- * Description: Methods from AspelTranslator for writing output.
+ * File: translator_input.cpp
+ * Description: Methods from AspelTranslator for getting input from a LexicalScanner,
+ *              checking a tokens type and matching.
  * Author: Lovro Kalinovcic
  * 
  */
 
 #include "translator.h"
 
-void AspelTranslator::write(std::string cont)
+std::string TranslatorA10::nextToken()
 {
-    m_out << cont;
+    m_token = m_scanner.scan();
+    return m_token;
 }
 
-void AspelTranslator::writeln(std::string cont)
+std::string TranslatorA10::getName()
 {
-    m_out << "\t";
-    write(cont);
-    m_out << "\n";
+    if(!isAlpha(m_token[0])) expected("name");
+    std::string name = m_token;
+    nextToken();
+    return name;
+}
+
+std::string TranslatorA10::getNumber()
+{
+    std::string number = m_token;
+    if(!isDigit(number[0]))
+        expected("number");
+    nextToken();
+    return number;
+}
+
+void TranslatorA10::match(std::string x)
+{
+    if(m_token != x) expected("'" + x + "'");
+    nextToken();
 }

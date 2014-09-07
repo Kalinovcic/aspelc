@@ -26,8 +26,51 @@
 #include <iostream>
 #include <fstream>
 
+#include <vector>
+
 #include "translator.h"
+#include "a10/translator.h"
+#include "a10/scanner.h"
+
 #include "scanner.h"
+
+#define DEFAULT_ASPEL_STANDARD      "a10"
+
+struct CompilerJob
+{
+    std::string source;
+    std::string output;
+
+    std::string standard;
+
+    CompilerJob(std::string source, std::string output, std::string standard)
+    {
+        this->source = source;
+        this->output = output;
+
+        this->standard = standard;
+    }
+
+    std::string toString()
+    {
+        return source + " -> " + output + " [using " + standard + "]";
+    }
+};
+
+std::vector<CompilerJob> jobs;
+
+void abort(std::string reason)
+{
+    std::cerr << "\nerror: fatal: " << reason << "\n";
+    exit(1);
+}
+
+bool startsWith(std::string const& str, std::string const& beginning)
+{
+    if(str.length() >= beginning.length())
+        return str.compare(0, beginning.length(), beginning) == 0;
+    return false;
+}
 
 bool endsWith(std::string const& str, std::string const& ending)
 {
@@ -36,23 +79,104 @@ bool endsWith(std::string const& str, std::string const& ending)
     return false;
 }
 
-int main(int argc, char** argv)
+std::string nextArgument(int* index, int argc, char** argv)
 {
-    if(argc != 2)
-    {
-        std::cerr << "error: no input files\n";
-        exit(1);
-    }
+    (*index)++;
+    if((*index) >= argc)
+        abort("expected argument after " + std::string(argv[*index - 1]));
+    return std::string(argv[*index]);
+}
 
-    std::string sourcePath = argv[1];
+std::string genOutputPath(std::string sourcePath)
+{
+    int extensionSize = 6;
     if(!endsWith(sourcePath, ".aspel"))
     {
-        std::cerr << "error: invalid extension, expected \".aspel\"\n";
-        exit(1);
+        std::cout << "warning: deprecated file extension for \"" << sourcePath << "\"\n";
+        extensionSize = 0;
+        for(int i = sourcePath.length() - 1; i >= 0; i--)
+            if(sourcePath[i] == '.')
+            {
+                extensionSize = sourcePath.length() - i;
+                break;
+            }
     }
 
-    std::string outputPath = sourcePath.substr(0, sourcePath.length() - 6) + ".aml";
+    return sourcePath.substr(0, sourcePath.length() - extensionSize).append(".aml");
+}
 
+int main(int argc, char** argv)
+{
+    bool quiet = false;
+
+    std::string aspelStandard = DEFAULT_ASPEL_STANDARD;
+    std::string outputPath = "";
+
+    for(int argi = 1; argi < argc; argi++)
+    {
+        std::string arg(argv[argi]);
+        if(startsWith(arg, "-"))
+        {
+            arg = arg.substr(1);
+            if(arg == "q") quiet = true;
+            if(arg == "o") outputPath = nextArgument(&argi, argc, argv);
+            if(startsWith(arg, "std"))
+            {
+                aspelStandard = arg.substr(3);
+                if(aspelStandard == "") abort("invalid standard -" + arg);
+                if(aspelStandard == "def") aspelStandard = DEFAULT_ASPEL_STANDARD;
+            }
+        }
+        else
+        {
+            std::string usedOutputPath = outputPath;
+            if(outputPath == "") usedOutputPath = genOutputPath(arg);
+            outputPath = "";
+
+            CompilerJob job(arg, usedOutputPath, aspelStandard);
+            jobs.push_back(job);
+        }
+    }
+
+    for(unsigned int jobi = 0; jobi < jobs.size(); jobi++)
+    {
+        CompilerJob job = jobs[jobi];
+        if(!quiet) std::cout << "job: " << job.toString() << "";
+
+        std::ifstream in(job.source.c_str(), std::ios::in | std::ios::binary);
+        if(!in.good())
+        {
+            std::cout << " - failed\n";
+            abort("file not found \"" + job.source + "\"");
+        }
+
+        std::ofstream out(job.output.c_str(), std::ios::out);
+
+        LexicalScanner* scanner = 0;
+        if(job.standard == "a10") scanner = new LexicalScannerA10(in);
+
+        if(!scanner)
+        {
+            std::cout << " - failed\n";
+            abort("invalid standard \"" + job.standard + "\"");
+        }
+
+        Translator* translator = 0;
+        if(job.standard == "a10") translator = new TranslatorA10(*scanner, out);
+
+        if(!translator)
+        {
+            std::cout << " - failed\n";
+            abort("invalid standard \"" + job.standard + "\"");
+        }
+
+        translator->translate();
+        std::cout << " - done\n";
+    }
+
+
+
+    /*
     std::ifstream in(sourcePath.c_str(), std::ios::in | std::ios::binary);
     std::ofstream out(outputPath.c_str(), std::ios::out);
 
@@ -60,6 +184,7 @@ int main(int argc, char** argv)
 
     AspelTranslator aspTrans(scanner, out);
 	aspTrans.testf();
+	*/
 
 	return EXIT_SUCCESS;
 }

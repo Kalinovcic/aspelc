@@ -15,14 +15,22 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: translator_error.cpp
- * Description: Methods from AspelTranslator for error handling.
+ * File: scanner.cpp
+ * Description: Contains a constructor and destructor for the LexicalScanner class.
  * Author: Lovro Kalinovcic
  * 
  */
 
-#include "translator.h"
+#include "scanner.h"
 
-void AspelTranslator::error(std::string message) const { std::cout << "\nerror: " << message;}
-void AspelTranslator::abort(std::string reason)  const { error(reason); exit(1); };
-void AspelTranslator::expected(std::string item) const { abort(item + " expected near line " + toString(m_scanner.getLine())); };
+LexicalScannerA10::LexicalScannerA10(std::istream& in)
+: LexicalScanner(in)
+{
+    nextChar();
+    m_line = 1;
+}
+
+LexicalScannerA10::~LexicalScannerA10()
+{
+
+}

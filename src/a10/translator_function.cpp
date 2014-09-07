@@ -23,7 +23,7 @@
 
 #include "translator.h"
 
-void AspelTranslator::checkFunction(std::string funName)
+void TranslatorA10::checkFunction(std::string funName)
 {
     funmap_it it = m_functions.find(funName);
     if(it == m_functions.end()) return;
@@ -37,7 +37,7 @@ void AspelTranslator::checkFunction(std::string funName)
     if(m_cfun.argc != previous.argc) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
 }
 
-void AspelTranslator::function()
+void TranslatorA10::function()
 {
     match("function");
 

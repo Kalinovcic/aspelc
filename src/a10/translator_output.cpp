@@ -15,22 +15,22 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: scanner.cpp
- * Description: Contains a constructor and destructor for the LexicalScanner class.
+ * File: translator_output.cpp
+ * Description: Methods from AspelTranslator for writing output.
  * Author: Lovro Kalinovcic
  * 
  */
 
-#include "scanner.h"
+#include "translator.h"
 
-LexicalScanner::LexicalScanner(std::istream& in)
-: m_in(in)
+void TranslatorA10::write(std::string cont)
 {
-    nextChar();
-    m_line = 1;
+    m_out << cont;
 }
 
-LexicalScanner::~LexicalScanner()
+void TranslatorA10::writeln(std::string cont)
 {
-
+    m_out << "\t";
+    write(cont);
+    m_out << "\n";
 }

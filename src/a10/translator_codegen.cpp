@@ -25,17 +25,17 @@
 
 #include <algorithm>
 
-std::string AspelTranslator::newLabel()
+std::string TranslatorA10::newLabel()
 {
     return "l" + toString(m_labelCounter++);
 }
 
-void AspelTranslator::writeLabel(std::string labelname)
+void TranslatorA10::writeLabel(std::string labelname)
 {
     write("\n" + labelname + ":");
 }
 
-void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
+void TranslatorA10::callFunction(std::string name, bool nonVoidOnly)
 {
     funmap_it it = m_functions.find(name);
     if(it == m_functions.end())
@@ -58,7 +58,7 @@ void AspelTranslator::callFunction(std::string name, bool nonVoidOnly)
     writeln("call " + name + " " + toString(cfun.argc));
 }
 
-void AspelTranslator::fetchVariable(std::string name)
+void TranslatorA10::fetchVariable(std::string name)
 {
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end())
@@ -73,7 +73,7 @@ void AspelTranslator::fetchVariable(std::string name)
     }
 }
 
-void AspelTranslator::assignment(std::string name, bool inDeclaration)
+void TranslatorA10::assignment(std::string name, bool inDeclaration)
 {
     match("=");
     expression();

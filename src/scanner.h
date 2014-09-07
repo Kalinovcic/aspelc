@@ -25,109 +25,18 @@
 #define SCANNER_H_
 
 #include <iostream>
-#include <cstdlib>
 #include <string>
-#include <sstream>
-
-#include <stdint.h>
 
 class LexicalScanner
 {
 public:
-    LexicalScanner(std::istream& in);
-    ~LexicalScanner();
+    LexicalScanner(std::istream& in): m_in(in) {}
+    virtual ~LexicalScanner() {}
 
-    inline std::string scan()
-    {
-        if(m_look == -1)
-            return "";
-        if(isAlpha(m_look))
-            return getName();
-        if(isDigit(m_look))
-            return getNumber();
-        if(isOp(m_look))
-            return getOp();
-        char cstr[2] = { m_look, 0 };
-        std::string result = std::string(cstr);
-        nextChar();
-        skipWhite();
-        return result;
-    }
-
-    inline int getLine() { return m_line; }
-private:
-    int m_line;
-    char m_look;
-
+    virtual std::string scan() { return ""; }
+    virtual int getLine() { return 0; }
+protected:
     std::istream& m_in;
-
-    inline void nextChar() { m_in.read(&m_look, 1); if(m_in.eof()) m_look = -1; }
-    inline void error(std::string msg)     const { std::cout << "\nerror: " << msg; }
-    inline void abort(std::string reason)  const { error(reason); exit(1); }
-    inline void expected(std::string item) const { abort(item + " expected near line " + toString(m_line)); }
-
-    inline bool isAlpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
-    inline bool isDigit(char c) const { return c >= '0' && c <= '9'; }
-    inline bool isOp(char c) const { return c == '+' || c == '-' || c == '*' || c == '/' || c == '<' || c == '>' || c == '&' || c == '|' || c == '=' || c == '!'; }
-    inline bool isAlnum(char c) const { return isAlpha(c) || isDigit(c); }
-    inline bool isWhite(char c) const { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
-
-    inline void skipWhite()
-    {
-        while(isWhite(m_look))
-        {
-            if(m_look == '\n')
-                m_line++;
-            nextChar();
-        }
-    }
-
-    inline std::string getName()
-    {
-        std::stringstream ss;
-        if(!isAlpha(m_look)) expected("name");
-        while(isAlnum(m_look))
-        {
-            ss << m_look;
-            nextChar();
-        }
-        skipWhite();
-        return ss.str();
-    }
-
-    inline std::string getNumber()
-    {
-        bool decimalPoint = false;
-        std::stringstream ss;
-        if(!isDigit(m_look)) expected("number");
-        while(isDigit(m_look) || m_look == '.')
-        {
-            if(m_look == '.')
-            {
-                if(decimalPoint) abort("invalid number format near line " + toString(getLine()));
-                decimalPoint = true;
-            }
-            ss << m_look;
-            nextChar();
-        }
-        skipWhite();
-        return ss.str();
-    }
-
-    inline std::string getOp()
-    {
-        std::stringstream ss;
-        if(!isOp(m_look)) expected("operator");
-        while(isOp(m_look))
-        {
-            ss << m_look;
-            nextChar();
-        }
-        skipWhite();
-        return ss.str();
-    }
-
-    inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };
 
 #endif /* SCANNER_H_ */

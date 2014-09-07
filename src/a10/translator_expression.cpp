@@ -69,7 +69,7 @@
 #define INSTRUCTION_LOGICAL_AND    "land"
 #define INSTRUCTION_LOGICAL_OR     "lor"
 
-void AspelTranslator::exprSuff()
+void TranslatorA10::exprSuff()
 {
     if(isDigit(m_token[0]))
     {
@@ -107,7 +107,7 @@ void AspelTranslator::exprSuff()
         expected("literal or identifier");
     }
 }
-void AspelTranslator::exprPref()
+void TranslatorA10::exprPref()
 {
     if(m_token == OPERATOR_UNARY_PLUS)
     {
@@ -138,7 +138,7 @@ void AspelTranslator::exprPref()
     }
 }
 /*************************************************/
-void AspelTranslator::exprMul()
+void TranslatorA10::exprMul()
 {
     exprPref();
     while(m_token == OPERATOR_MULTIPLICATION
@@ -165,7 +165,7 @@ void AspelTranslator::exprMul()
         }
     }
 }
-void AspelTranslator::exprAdd()
+void TranslatorA10::exprAdd()
 {
     exprMul();
     while(m_token == OPERATOR_ADDITION
@@ -186,7 +186,7 @@ void AspelTranslator::exprAdd()
     }
 }
 /*************************************************/
-void AspelTranslator::exprBShift()
+void TranslatorA10::exprBShift()
 {
     exprAdd();
     while(m_token == OPERATOR_SHIFTLEFT
@@ -207,7 +207,7 @@ void AspelTranslator::exprBShift()
     }
 }
 /*************************************************/
-void AspelTranslator::exprRel()
+void TranslatorA10::exprRel()
 {
     exprBShift();
     while(m_token == OPERATOR_LESS
@@ -241,7 +241,7 @@ void AspelTranslator::exprRel()
         }
     }
 }
-void AspelTranslator::exprRelEqual()
+void TranslatorA10::exprRelEqual()
 {
     exprRel();
     while(m_token == OPERATOR_EQUAL
@@ -262,7 +262,7 @@ void AspelTranslator::exprRelEqual()
     }
 }
 /*************************************************/
-void AspelTranslator::exprBAND()
+void TranslatorA10::exprBAND()
 {
     exprRelEqual();
     while(m_token == OPERATOR_BITWISE_AND)
@@ -272,7 +272,7 @@ void AspelTranslator::exprBAND()
         writeln(INSTRUCTION_BITWISE_AND);
     }
 }
-void AspelTranslator::exprBXOR()
+void TranslatorA10::exprBXOR()
 {
     exprBAND();
     while(m_token == OPERATOR_BITWISE_XOR)
@@ -282,7 +282,7 @@ void AspelTranslator::exprBXOR()
         writeln(INSTRUCTION_BITWISE_XOR);
     }
 }
-void AspelTranslator::exprBOR()
+void TranslatorA10::exprBOR()
 {
     exprBXOR();
     while(m_token == OPERATOR_BITWISE_OR)
@@ -293,7 +293,7 @@ void AspelTranslator::exprBOR()
     }
 }
 /*************************************************/
-void AspelTranslator::exprLAND()
+void TranslatorA10::exprLAND()
 {
     exprBOR();
     while(m_token == OPERATOR_LOGICAL_AND)
@@ -303,7 +303,7 @@ void AspelTranslator::exprLAND()
         writeln(INSTRUCTION_LOGICAL_AND);
     }
 }
-void AspelTranslator::exprLOR()
+void TranslatorA10::exprLOR()
 {
     exprLAND();
     while(m_token == OPERATOR_LOGICAL_OR)
@@ -314,7 +314,7 @@ void AspelTranslator::exprLOR()
     }
 }
 /*************************************************/
-void AspelTranslator::expression()
+void TranslatorA10::expression()
 {
     exprLOR();
 }

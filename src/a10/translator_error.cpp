@@ -15,40 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: translator_input.cpp
- * Description: Methods from AspelTranslator for getting input from a LexicalScanner,
- *              checking a tokens type and matching.
+ * File: translator_error.cpp
+ * Description: Methods from AspelTranslator for error handling.
  * Author: Lovro Kalinovcic
  * 
  */
 
 #include "translator.h"
 
-std::string AspelTranslator::nextToken()
-{
-    m_token = m_scanner.scan();
-    return m_token;
-}
-
-std::string AspelTranslator::getName()
-{
-    if(!isAlpha(m_token[0])) expected("name");
-    std::string name = m_token;
-    nextToken();
-    return name;
-}
-
-std::string AspelTranslator::getNumber()
-{
-    std::string number = m_token;
-    if(!isDigit(number[0]))
-        expected("number");
-    nextToken();
-    return number;
-}
-
-void AspelTranslator::match(std::string x)
-{
-    if(m_token != x) expected("'" + x + "'");
-    nextToken();
-}
+void TranslatorA10::error(std::string message) const { std::cout << "\nerror: " << message;}
+void TranslatorA10::abort(std::string reason)  const { error(reason); exit(1); };
+void TranslatorA10::expected(std::string item) const { abort(item + " expected near line " + toString(m_scanner.getLine())); };

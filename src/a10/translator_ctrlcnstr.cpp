@@ -23,7 +23,7 @@
 
 #include "translator.h"
 
-void AspelTranslator::condition()
+void TranslatorA10::condition()
 {
     match("(");
     if(m_token == ")")
@@ -32,7 +32,7 @@ void AspelTranslator::condition()
     match(")");
 }
 
-void AspelTranslator::doif(std::string breakLabel, std::string continueLabel)
+void TranslatorA10::doif(std::string breakLabel, std::string continueLabel)
 {
     match("if");
     condition();
@@ -63,7 +63,7 @@ void AspelTranslator::doif(std::string breakLabel, std::string continueLabel)
     }
 }
 
-void AspelTranslator::dowhile()
+void TranslatorA10::dowhile()
 {
     match("while");
 
@@ -78,7 +78,7 @@ void AspelTranslator::dowhile()
     writeLabel(toEnd);
 }
 
-void AspelTranslator::dobreak(std::string breakLabel)
+void TranslatorA10::dobreak(std::string breakLabel)
 {
     match("break");
     if(breakLabel == "-")
@@ -86,7 +86,7 @@ void AspelTranslator::dobreak(std::string breakLabel)
     writeln("goto " + breakLabel);
 }
 
-void AspelTranslator::docontinue(std::string continueLabel)
+void TranslatorA10::docontinue(std::string continueLabel)
 {
     match("continue");
     if(continueLabel == "-")
@@ -94,7 +94,7 @@ void AspelTranslator::docontinue(std::string continueLabel)
     writeln("goto " + continueLabel);
 }
 
-void AspelTranslator::doreturn()
+void TranslatorA10::doreturn()
 {
     match("return");
     if(!m_cfun.isVoid)
