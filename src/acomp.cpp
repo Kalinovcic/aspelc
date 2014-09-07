@@ -34,7 +34,9 @@
 
 #include "scanner.h"
 
-#define DEFAULT_ASPEL_STANDARD      "a10"
+#define ASPELC_VERSION              "aspelc v1.0"
+#define SUPPORTED_STANDARDS         "a10"
+#define DEFAULT_STANDARD            "a10"
 
 struct CompilerJob
 {
@@ -105,27 +107,48 @@ std::string genOutputPath(std::string sourcePath)
     return sourcePath.substr(0, sourcePath.length() - extensionSize).append(".aml");
 }
 
+void displayHelp()
+{
+    std::cout << "Usage: aspelc [<option> | <file>]+\n";
+    std::cout << "Options:\n";
+    std::cout << "  --help             Display this information\n";
+    std::cout << "  --version          Display compiler version\n";
+    std::cout << "  -std<standard>     Assume that the input sources are for <standard>\n";
+    std::cout << "                     If <standard> is 'def', the default standard will be used.\n";
+    std::cout << "  -q                 Disable compiler output\n";
+    std::cout << "  -o <file>          Manually set the output file for the next job to <file>\n";
+    std::cout << "\n";
+}
+
 int main(int argc, char** argv)
 {
     bool quiet = false;
 
-    std::string aspelStandard = DEFAULT_ASPEL_STANDARD;
+    std::string aspelStandard = DEFAULT_STANDARD;
     std::string outputPath = "";
 
     for(int argi = 1; argi < argc; argi++)
     {
         std::string arg(argv[argi]);
-        if(startsWith(arg, "-"))
+        if(startsWith(arg, "--"))
+        {
+            arg = arg.substr(2);
+            if(arg == "version") std::cout << ASPELC_VERSION << "\n";
+            else if(arg == "help") displayHelp();
+            else abort("invalid argument \"--" + arg + "\"\n");
+        }
+        else if(startsWith(arg, "-"))
         {
             arg = arg.substr(1);
             if(arg == "q") quiet = true;
-            if(arg == "o") outputPath = nextArgument(&argi, argc, argv);
-            if(startsWith(arg, "std"))
+            else if(arg == "o") outputPath = nextArgument(&argi, argc, argv);
+            else if(startsWith(arg, "std"))
             {
                 aspelStandard = arg.substr(3);
-                if(aspelStandard == "") abort("invalid standard -" + arg);
-                if(aspelStandard == "def") aspelStandard = DEFAULT_ASPEL_STANDARD;
+                if(aspelStandard == "") abort("invalid standard \"-" + arg + "\"");
+                if(aspelStandard == "def") aspelStandard = DEFAULT_STANDARD;
             }
+            else abort("invalid argument \"-" + arg + "\"\n");
         }
         else
         {
