@@ -119,6 +119,7 @@ void displayHelp()
     std::cout << "  --help             Display this information\n";
     std::cout << "  --version          Display compiler version\n";
     std::cout << "  --std-support      Display a list of supported standards\n";
+    std::cout << "  --std-default      Display the default standard\n";
     std::cout << "  -std<standard>     Assume that the input sources are for <standard>\n";
     std::cout << "                     If <standard> is 'def', the default standard will be used.\n";
     std::cout << "  -q                 Disable compiler output\n";
@@ -149,12 +150,19 @@ void displaySupportedStandards()
     std::cout << "\n";
 }
 
+void displayDefaultStandard()
+{
+    std::cout << "stddef=" << DEFAULT_STANDARD << "\n";
+}
+
 int main(int argc, char** argv)
 {
     bool quiet = false;
 
     std::string aspelStandard = DEFAULT_STANDARD;
     std::string outputPath = "";
+
+    if(argc == 1) abort("no command options or input files");
 
     for(int argi = 1; argi < argc; argi++)
     {
@@ -165,6 +173,7 @@ int main(int argc, char** argv)
             if(arg == "version") displayVersion();
             else if(arg == "help") displayHelp();
             else if(arg == "std-support") displaySupportedStandards();
+            else if(arg == "std-default") displayDefaultStandard();
             else abort("invalid argument \"--" + arg + "\"\n");
         }
         else if(startsWith(arg, "-"))
