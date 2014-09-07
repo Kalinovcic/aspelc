@@ -208,7 +208,7 @@ int main(int argc, char** argv)
         std::ifstream in(job.source.c_str(), std::ios::in | std::ios::binary);
         if(!in.good())
         {
-            std::cout << " - failed\n";
+            if(!quiet) std::cout << " - failed\n";
             abort("file not found \"" + job.source + "\"");
         }
 
@@ -219,7 +219,7 @@ int main(int argc, char** argv)
 
         if(!scanner)
         {
-            std::cout << " - failed\n";
+            if(!quiet) std::cout << " - failed\n";
             abort("invalid standard \"" + job.standard + "\"");
         }
 
@@ -228,12 +228,12 @@ int main(int argc, char** argv)
 
         if(!translator)
         {
-            std::cout << " - failed\n";
+            if(!quiet) std::cout << " - failed\n";
             abort("invalid standard \"" + job.standard + "\"");
         }
 
         translator->translate();
-        std::cout << " - done\n";
+        if(!quiet) std::cout << " - done\n";
     }
 
 
