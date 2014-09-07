@@ -236,17 +236,5 @@ int main(int argc, char** argv)
         if(!quiet) std::cout << " - done\n";
     }
 
-
-
-    /*
-    std::ifstream in(sourcePath.c_str(), std::ios::in | std::ios::binary);
-    std::ofstream out(outputPath.c_str(), std::ios::out);
-
-    LexicalScanner scanner(in);
-
-    AspelTranslator aspTrans(scanner, out);
-	aspTrans.testf();
-	*/
-
 	return EXIT_SUCCESS;
 }
