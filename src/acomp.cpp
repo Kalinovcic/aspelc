@@ -174,7 +174,7 @@ int main(int argc, char** argv)
             else if(arg == "help") displayHelp();
             else if(arg == "std-support") displaySupportedStandards();
             else if(arg == "std-default") displayDefaultStandard();
-            else abort("invalid argument \"--" + arg + "\"\n");
+            else abort("invalid argument \"--" + arg + "\"");
         }
         else if(startsWith(arg, "-"))
         {
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
                 if(aspelStandard == "") abort("invalid standard \"-" + arg + "\"");
                 if(aspelStandard == "def") aspelStandard = DEFAULT_STANDARD;
             }
-            else abort("invalid argument \"-" + arg + "\"\n");
+            else abort("invalid argument \"-" + arg + "\"");
         }
         else
         {
@@ -205,14 +205,8 @@ int main(int argc, char** argv)
         CompilerJob job = jobs[jobi];
         if(!quiet) std::cout << "job: " << job.toString() << "";
 
-        std::ifstream in(job.source.c_str(), std::ios::in | std::ios::binary);
-        if(!in.good())
-        {
-            if(!quiet) std::cout << " - failed\n";
-            abort("file not found \"" + job.source + "\"");
-        }
-
-        std::ofstream out(job.output.c_str(), std::ios::out);
+        std::ifstream in;
+        std::ofstream out;
 
         LexicalScanner* scanner = 0;
         if(job.standard == "a10") scanner = new LexicalScannerA10(in);
@@ -232,7 +226,19 @@ int main(int argc, char** argv)
             abort("invalid standard \"" + job.standard + "\"");
         }
 
+        in.open(job.source.c_str(), std::ios::in | std::ios::binary);
+        out.open(job.output.c_str(), std::ios::out);
+        if(!in.good())
+        {
+            if(!quiet) std::cout << " - failed\n";
+            abort("file not found \"" + job.source + "\"");
+        }
+
         translator->translate();
+
+        in.close();
+        out.close();
+
         if(!quiet) std::cout << " - done\n";
     }
 
