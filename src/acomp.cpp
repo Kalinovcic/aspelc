@@ -208,6 +208,12 @@ int main(int argc, char** argv)
         CompilerJob job = jobs[jobi];
         if(!quiet) std::cout << "job: " << job.toString() << "";
 
+        if(job.source == job.output)
+        {
+            if(!quiet) std::cout << " - failed\n";
+            abort("source and output paths can not be equal");
+        }
+
         std::ifstream in;
         std::ofstream out;
 
