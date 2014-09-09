@@ -104,7 +104,10 @@ std::string genOutputPath(std::string sourcePath)
             }
     }
 
-    return sourcePath.substr(0, sourcePath.length() - extensionSize).append(".aml");
+    std::string outputPath = sourcePath.substr(0, sourcePath.length() - extensionSize).append(".aml");
+    if(outputPath == sourcePath)
+        abort("couldn't generate output path [paths equal]");
+    return outputPath;
 }
 
 void displayVersion()
