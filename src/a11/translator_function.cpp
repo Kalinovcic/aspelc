@@ -33,24 +33,27 @@ void TranslatorA11::checkFunction(std::string funName)
     if(m_cfun.forward) abort("function \"" + funName + "\" reforwarding near line " + toString(m_scanner.getLine()));
     if(!previous.forward) abort("function \"" + funName + "\" redeclaration near line " + toString(m_scanner.getLine()));
 
-    if(m_cfun.isVoid != previous.isVoid) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
-    if(m_cfun.argc != previous.argc) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.rtype != previous.rtype) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.atype.size() != previous.atype.size())
+        abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+
+    for(unsigned int i = 0; i < m_cfun.atype.size(); i++)
+        if(m_cfun.atype[i] != previous.atype[i])
+            abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
 }
 
 void TranslatorA11::function()
 {
+    match("function");
+
+    m_cfun.rtype = getType(true);
+    m_cfun.atype.clear();
+
     bool native = false;
     if(m_token == "native")
     {
         match("native");
         native = true;
-    }
-
-    m_cfun.isVoid = false;
-    if(m_token == "void")
-    {
-        match("void");
-        m_cfun.isVoid = true;
     }
 
     std::string functionName = m_token;
@@ -61,16 +64,15 @@ void TranslatorA11::function()
     match("(");
     if(m_token != ")")
     {
-        argtypes.push_back(getType());
+        m_cfun.atype.push_back(getType(false));
         argvars.push_back(getName());
         while(m_token == ",")
         {
             match(",");
-            argtypes.push_back(getType());
+            m_cfun.atype.push_back(getType(false));
             argvars.push_back(getName());
         }
     }
-    m_cfun.argc = argvars.size();
     match(")");
 
     m_cfun.forward = false;
@@ -103,9 +105,7 @@ void TranslatorA11::function()
     {
         if(native)
         {
-            write("f:n");
-            if(m_cfun.isVoid)
-                write("v");
+            write("n:");
             write("\t" + functionName + "\n\n");
         }
         match(";");

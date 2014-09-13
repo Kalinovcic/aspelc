@@ -43,19 +43,20 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
 
     FunctionData cfun = it->second;
 
-    if(nonVoidOnly && cfun.isVoid)
+    if(nonVoidOnly && cfun.rtype == VOID)
         abort("void function \"" + name + "\" called in expression near line " + toString(m_scanner.getLine()));
 
     match("(");
 
-    for(int i = 0; i < cfun.argc; i++)
+    for(unsigned int i = 0; i < cfun.atype.size(); i++)
     {
         if(i) match(",");
         expression();
+        convert(cfun.atype[i]);
     }
 
     match(")");
-    writeln("call " + name + " " + toString(cfun.argc));
+    writeln("call " + name + " " + toString(cfun.atype.size()));
 }
 
 void TranslatorA11::fetchVariable(std::string name)
@@ -81,6 +82,7 @@ void TranslatorA11::convert(Type type)
     case FLOAT: writeln("ctf"); break;
     case LONG: writeln("ctl"); break;
     case DOUBLE: writeln("ctd"); break;
+    default: expected("non-void type");
     }
 }
 

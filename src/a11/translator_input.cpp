@@ -47,7 +47,7 @@ std::string TranslatorA11::getNumber()
     return number;
 }
 
-TranslatorA11::Type TranslatorA11::getType()
+TranslatorA11::Type TranslatorA11::getType(bool voidAllowed)
 {
     std::string strtype = m_token;
     Type type;
@@ -55,6 +55,7 @@ TranslatorA11::Type TranslatorA11::getType()
     else if(strtype == "float") type = FLOAT;
     else if(strtype == "long") type = LONG;
     else if(strtype == "double") type = DOUBLE;
+    else if(voidAllowed && strtype == "void") type = VOID;
     else expected("type");
     nextToken();
     return type;

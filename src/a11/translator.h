@@ -49,13 +49,15 @@ private:
         INT,
         FLOAT,
         LONG,
-        DOUBLE
+        DOUBLE,
+        VOID
     };
 
     struct FunctionData
     {
-        int argc;
-        bool isVoid;
+        Type rtype;
+        std::vector<Type> atype;
+
         bool forward;
     };
 
@@ -92,7 +94,7 @@ private:
     std::string nextToken();
     std::string getName();
     std::string getNumber();
-    Type getType();
+    Type getType(bool voidAllowed);
     void match(std::string x);
 
     // output
@@ -182,7 +184,7 @@ private:
 
     inline void declaration()
     {
-        Type type = getType();
+        Type type = getType(false);
         std::string name = getName();
 
         m_lvartype[name] = type;
@@ -193,7 +195,7 @@ private:
 
     inline void globalDeclaration()
     {
-        Type type = getType();
+        Type type = getType(false);
         std::string name = getName();
         match(";");
 

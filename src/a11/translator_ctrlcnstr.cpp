@@ -97,7 +97,10 @@ void TranslatorA11::docontinue(std::string continueLabel)
 void TranslatorA11::doreturn()
 {
     match("return");
-    if(!m_cfun.isVoid)
+    if(!(m_cfun.rtype == VOID))
+    {
         expression();
+        convert(m_cfun.rtype);
+    }
     writeln("return");
 }
