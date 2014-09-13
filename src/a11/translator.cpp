@@ -28,7 +28,7 @@ static const std::string addops[]   = { "+", "-", "" };
 static const std::string mulops[]   = { "*", "/", "" };
 static const std::string orops[]    = { "|", "^", "" };
 static const std::string relops[]   = { "==", "!=", "<", "<=", ">", ">=", ""};
-static const std::string keywords[] = { "if", "while", "break", "continue", "return", "var", "" };
+static const std::string keywords[] = { "if", "while", "break", "continue", "return", "int", "long", "float", "double", "ref", "" };
 
 static inline bool inRange(char c, char begin, char end) { return c >= begin && c <= end; }
 static inline bool inList(std::string c, std::string const* list)

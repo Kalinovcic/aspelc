@@ -44,6 +44,14 @@ public:
 
     void translate() { program(); }
 private:
+    enum Type
+    {
+        INT,
+        FLOAT,
+        LONG,
+        DOUBLE
+    };
+
     struct FunctionData
     {
         int argc;
@@ -58,8 +66,11 @@ private:
 
     FunctionData m_cfun;
     std::map<std::string, FunctionData> m_functions;
+
     std::vector<std::string> m_globalvars;
     std::vector<std::string> m_localvars;
+    std::map<std::string, Type> m_gvartype;
+    std::map<std::string, Type> m_lvartype;
 
     // base
     bool isAlpha(char c) const;
@@ -81,6 +92,7 @@ private:
     std::string nextToken();
     std::string getName();
     std::string getNumber();
+    Type getType();
     void match(std::string x);
 
     // output
@@ -92,6 +104,7 @@ private:
     void writeLabel(std::string labelName);
     void callFunction(std::string name, bool nonVoidOnly);
     void fetchVariable(std::string name);
+    void convert(Type type);
     void assignment(std::string name, bool inDeclaration);
 
     // expression
@@ -116,9 +129,11 @@ private:
     {
         while(m_token != "")
         {
-            if(m_token == "function") function();
-            else if(m_token == "var") doglobalvar();
-            else expected("global var or function declaration");
+            if(m_token == "int"
+            || m_token == "float"
+            || m_token == "long"
+            || m_token == "double") globalDeclaration();
+            else function();
         }
         for(funmap_it i = m_functions.begin(); i != m_functions.end(); i++)
             if((i->second).forward)
@@ -139,7 +154,10 @@ private:
                     if(m_token == "break") dobreak(breakLabel);
                     else if(m_token == "continue") docontinue(breakLabel);
                     else if(m_token == "return") doreturn();
-                    else if(m_token == "var") dovar();
+                    else if(m_token == "int"
+                         || m_token == "float"
+                         || m_token == "long"
+                         || m_token == "double") declaration();
                     match(";");
                 }
             }
@@ -162,24 +180,27 @@ private:
     void docontinue(std::string continueLabel);
     void doreturn();
 
-    inline void dovar()
+    inline void declaration()
     {
-        match("var");
+        Type type = getType();
         std::string name = getName();
 
+        m_lvartype[name] = type;
         if(m_token == "=")
             assignment(name, true);
         m_localvars.push_back(name);
     }
 
-    inline void doglobalvar()
+    inline void globalDeclaration()
     {
-        match("var");
+        Type type = getType();
         std::string name = getName();
-        m_globalvars.push_back(name);
         match(";");
 
         write("w:\t" + name + "\n");
+
+        m_gvartype[name] = type;
+        m_globalvars.push_back(name);
     }
 
     inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }

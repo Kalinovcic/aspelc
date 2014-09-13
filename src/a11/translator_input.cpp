@@ -47,6 +47,19 @@ std::string TranslatorA11::getNumber()
     return number;
 }
 
+TranslatorA11::Type TranslatorA11::getType()
+{
+    std::string strtype = m_token;
+    Type type;
+    if(strtype == "int") type = INT;
+    else if(strtype == "float") type = FLOAT;
+    else if(strtype == "long") type = LONG;
+    else if(strtype == "double") type = DOUBLE;
+    else expected("type");
+    nextToken();
+    return type;
+}
+
 void TranslatorA11::match(std::string x)
 {
     if(m_token != x) expected("'" + x + "'");

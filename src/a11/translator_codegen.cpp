@@ -73,18 +73,35 @@ void TranslatorA11::fetchVariable(std::string name)
     }
 }
 
+void TranslatorA11::convert(Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("cti"); break;
+    case FLOAT: writeln("ctf"); break;
+    case LONG: writeln("ctl"); break;
+    case DOUBLE: writeln("ctd"); break;
+    }
+}
+
 void TranslatorA11::assignment(std::string name, bool inDeclaration)
 {
     match("=");
     expression();
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
+    {
+        convert(m_lvartype[name]);
         writeln("load " + name);
+    }
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
+        {
+            convert(m_gvartype[name]);
             writeln("loadwide " + name);
+        }
         else
             abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
     }

@@ -39,8 +39,6 @@ void TranslatorA11::checkFunction(std::string funName)
 
 void TranslatorA11::function()
 {
-    match("function");
-
     bool native = false;
     if(m_token == "native")
     {
@@ -57,15 +55,18 @@ void TranslatorA11::function()
 
     std::string functionName = m_token;
     std::vector<std::string> argvars;
+    std::vector<Type> argtypes;
     nextToken();
 
     match("(");
     if(m_token != ")")
     {
+        argtypes.push_back(getType());
         argvars.push_back(getName());
         while(m_token == ",")
         {
             match(",");
+            argtypes.push_back(getType());
             argvars.push_back(getName());
         }
     }

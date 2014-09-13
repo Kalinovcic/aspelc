@@ -30,7 +30,6 @@
 
 #include "scanner.h"
 #include "a10/scanner.h"
-#include "a11/scanner.h"
 
 #include "translator.h"
 #include "a10/translator.h"
@@ -219,9 +218,17 @@ int main(int argc, char** argv)
         std::ifstream in;
         std::ofstream out;
 
+        in.open(job.source.c_str(), std::ios::in | std::ios::binary);
+        out.open(job.output.c_str(), std::ios::out);
+        if(!in.good())
+        {
+            if(!quiet) std::cout << " - failed\n";
+            abort("file not found \"" + job.source + "\"");
+        }
+
         LexicalScanner* scanner = 0;
         if(job.standard == "a10") scanner = new LexicalScannerA10(in);
-        if(job.standard == "a11") scanner = new LexicalScannerA11(in);
+        if(job.standard == "a11") scanner = new LexicalScannerA10(in);
 
         if(!scanner)
         {
@@ -237,14 +244,6 @@ int main(int argc, char** argv)
         {
             if(!quiet) std::cout << " - failed\n";
             abort("invalid standard \"" + job.standard + "\"");
-        }
-
-        in.open(job.source.c_str(), std::ios::in | std::ios::binary);
-        out.open(job.output.c_str(), std::ios::out);
-        if(!in.good())
-        {
-            if(!quiet) std::cout << " - failed\n";
-            abort("file not found \"" + job.source + "\"");
         }
 
         translator->translate();
