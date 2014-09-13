@@ -22,8 +22,8 @@
  * 
  */
 
-#ifndef TRANSLATOR_A10_H_
-#define TRANSLATOR_A10_H_
+#ifndef TRANSLATOR_A11_H_
+#define TRANSLATOR_A11_H_
 
 #include <iostream>
 #include <cstdlib>
@@ -36,11 +36,11 @@
 #include "../translator.h"
 #include "../scanner.h"
 
-class TranslatorA10: public Translator
+class TranslatorA11: public Translator
 {
 public:
-    TranslatorA10(LexicalScanner& scanner, std::ostream& out);
-    ~TranslatorA10();
+    TranslatorA11(LexicalScanner& scanner, std::ostream& out);
+    ~TranslatorA11();
 
     void translate() { program(); }
 private:
@@ -185,4 +185,4 @@ private:
     inline std::string toString(int val)   const { std::stringstream ss; ss << val; return ss.str(); }
 };
 
-#endif /* TRANSLATOR_A10_H_ */
+#endif /* TRANSLATOR_A11_H_ */

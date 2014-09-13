@@ -28,15 +28,17 @@
 
 #include <vector>
 
+#include "scanner.h"
+#include "a10/scanner.h"
+#include "a11/scanner.h"
+
 #include "translator.h"
 #include "a10/translator.h"
-#include "a10/scanner.h"
-
-#include "scanner.h"
+#include "a11/translator.h"
 
 #define ASPELC_VERSION              "aspelc v1.0"
-#define SUPPORTED_STANDARDS         { "a10", "" }
-#define DEFAULT_STANDARD            "a10"
+#define SUPPORTED_STANDARDS         { "a10", "a11", "" }
+#define DEFAULT_STANDARD            "a11"
 
 struct CompilerJob
 {
@@ -219,6 +221,7 @@ int main(int argc, char** argv)
 
         LexicalScanner* scanner = 0;
         if(job.standard == "a10") scanner = new LexicalScannerA10(in);
+        if(job.standard == "a11") scanner = new LexicalScannerA11(in);
 
         if(!scanner)
         {
@@ -228,6 +231,7 @@ int main(int argc, char** argv)
 
         Translator* translator = 0;
         if(job.standard == "a10") translator = new TranslatorA10(*scanner, out);
+        if(job.standard == "a11") translator = new TranslatorA11(*scanner, out);
 
         if(!translator)
         {
