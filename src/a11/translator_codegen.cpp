@@ -86,6 +86,38 @@ void TranslatorA11::convert(Type type)
     }
 }
 
+TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2, bool warnings)
+{
+    if(type1 == VOID || type2 == VOID)
+        abort("invalid use of void type near line " + toString(m_scanner.getLine()));
+    if(type1 == DOUBLE || type2 == DOUBLE)
+    {
+        if(warnings && (type1 == FLOAT || type2 == FLOAT))
+            warning("converting float to double without a cast near line " + toString(m_scanner.getLine()));
+        if(warnings && (type1 == LONG || type2 == LONG))
+            warning("converting long to double without a cast near line " + toString(m_scanner.getLine()));
+        if(warnings && (type1 == INT || type2 == INT))
+            warning("converting int to double without a cast near line " + toString(m_scanner.getLine()));
+        return DOUBLE;
+    }
+    if(type1 == FLOAT || type2 == FLOAT)
+    {
+        if(warnings && (type1 == LONG || type2 == LONG))
+            warning("converting long to float without a cast near line " + toString(m_scanner.getLine()));
+        if(warnings && (type1 == INT || type2 == INT))
+            warning("converting int to float without a cast near line " + toString(m_scanner.getLine()));
+        return FLOAT;
+    }
+    if(type1 == LONG || type2 == LONG)
+    {
+        if(warnings && (type1 == INT || type2 == INT))
+            warning("converting int to long without a cast near line " + toString(m_scanner.getLine()));
+        return LONG;
+    }
+    if(type1 == INT || type2 == INT) return INT;
+    abort("invalid type comparison");
+}
+
 void TranslatorA11::assignment(std::string name, bool inDeclaration)
 {
     match("=");

@@ -86,6 +86,7 @@ private:
     bool isKeyword(std::string c) const;
 
     // error
+    void warning(std::string message) const;
     void error(std::string message) const;
     void abort(std::string reason) const;
     void expected(std::string item) const;
@@ -107,6 +108,7 @@ private:
     void callFunction(std::string name, bool nonVoidOnly);
     void fetchVariable(std::string name);
     void convert(Type type);
+    Type greaterType(Type type1, Type type2, bool warnings);
     void assignment(std::string name, bool inDeclaration);
 
     // expression
