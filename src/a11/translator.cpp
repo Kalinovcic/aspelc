@@ -44,8 +44,8 @@ static inline bool inList(std::string c, std::string const* list)
     return false;
 }
 
-TranslatorA11::TranslatorA11(LexicalScanner& scanner, std::ostream& out)
-: Translator(scanner, out)
+TranslatorA11::TranslatorA11(LexicalScanner& scanner, std::ostream& out, bool wcast)
+: Translator(scanner, out), m_wcast(wcast)
 {
     m_labelCounter = 0;
 

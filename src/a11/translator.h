@@ -39,7 +39,7 @@
 class TranslatorA11: public Translator
 {
 public:
-    TranslatorA11(LexicalScanner& scanner, std::ostream& out);
+    TranslatorA11(LexicalScanner& scanner, std::ostream& out, bool wcast);
     ~TranslatorA11();
 
     void translate() { program(); }
@@ -62,6 +62,8 @@ private:
     };
 
     typedef std::map<std::string, FunctionData>::iterator funmap_it;
+
+    bool m_wcast;
 
     std::string m_token;
     int m_labelCounter;

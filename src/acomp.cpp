@@ -128,6 +128,7 @@ void displayHelp()
     std::cout << "                     If <standard> is 'def', the default standard will be used.\n";
     std::cout << "  -q                 Disable compiler output\n";
     std::cout << "  -o <file>          Manually set the output file for the next job to <file>\n";
+    std::cout << "  -Wcast         a11 Enables warnings for conversions without casts\n";
     std::cout << "\n";
 }
 
@@ -162,6 +163,7 @@ void displayDefaultStandard()
 int main(int argc, char** argv)
 {
     bool quiet = false;
+    bool wcast = false;
 
     std::string aspelStandard = DEFAULT_STANDARD;
     std::string outputPath = "";
@@ -184,6 +186,7 @@ int main(int argc, char** argv)
         {
             arg = arg.substr(1);
             if(arg == "q") quiet = true;
+            else if(arg == "Wcast") wcast = true;
             else if(arg == "o") outputPath = nextArgument(&argi, argc, argv);
             else if(startsWith(arg, "std"))
             {
@@ -207,7 +210,7 @@ int main(int argc, char** argv)
     for(unsigned int jobi = 0; jobi < jobs.size(); jobi++)
     {
         CompilerJob job = jobs[jobi];
-        if(!quiet) std::cout << "job: " << job.toString() << "";
+        if(!quiet) std::cout << "job: " << job.toString() << "\n";
 
         if(job.source == job.output)
         {
@@ -221,37 +224,26 @@ int main(int argc, char** argv)
         in.open(job.source.c_str(), std::ios::in | std::ios::binary);
         out.open(job.output.c_str(), std::ios::out);
         if(!in.good())
-        {
-            if(!quiet) std::cout << " - failed\n";
             abort("file not found \"" + job.source + "\"");
-        }
 
         LexicalScanner* scanner = 0;
         if(job.standard == "a10") scanner = new LexicalScannerA10(in);
         if(job.standard == "a11") scanner = new LexicalScannerA10(in);
 
         if(!scanner)
-        {
-            if(!quiet) std::cout << " - failed\n";
             abort("invalid standard \"" + job.standard + "\"");
-        }
 
         Translator* translator = 0;
         if(job.standard == "a10") translator = new TranslatorA10(*scanner, out);
-        if(job.standard == "a11") translator = new TranslatorA11(*scanner, out);
+        if(job.standard == "a11") translator = new TranslatorA11(*scanner, out, wcast);
 
         if(!translator)
-        {
-            if(!quiet) std::cout << " - failed\n";
             abort("invalid standard \"" + job.standard + "\"");
-        }
 
         translator->translate();
 
         in.close();
         out.close();
-
-        if(!quiet) std::cout << " - done\n";
     }
 
 	return EXIT_SUCCESS;

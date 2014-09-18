@@ -143,7 +143,8 @@ std::string TranslatorA11::getTypeName(Type type)
 
 void TranslatorA11::conversionWarning(Type original, Type converted)
 {
-    warning("converting " + getTypeName(original) + " to " + getTypeName(converted) + " without a cast near line " + toString(m_scanner.getLine()));
+    if(m_wcast)
+        warning("converting " + getTypeName(original) + " to " + getTypeName(converted) + " without a cast near line " + toString(m_scanner.getLine()));
 }
 
 TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2)
