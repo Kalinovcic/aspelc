@@ -65,7 +65,7 @@ TranslatorA11::Type TranslatorA11::getNumberType(std::string number)
     if(number[number.length() - 1] == 'f' || number[number.length() - 1] == 'F')
         return FLOAT;
     for(unsigned int i = 1; i < number.length(); i++)
-        if(number[i] == '.') return FLOAT;
+        if(number[i] == '.') return DOUBLE;
     if(number[number.length() - 1] == 'l' || number[number.length() - 1] == 'L')
         return LONG;
     return INT;

@@ -106,26 +106,30 @@ private:
     // codegen
     std::string newLabel();
     void writeLabel(std::string labelName);
+    Type returnType(std::string name);
     void callFunction(std::string name, bool nonVoidOnly);
+    Type getVariableType(std::string name);
     void fetchVariable(std::string name);
+    void swap(Type top, Type next);
     void convert(Type type);
     Type greaterType(Type type1, Type type2, bool warnings);
+    Type stackConvert(Type top, Type next);
     void assignment(std::string name, bool inDeclaration);
 
     // expression
-    void exprSuff();
-    void exprPref();
-    void exprMul();
-    void exprAdd();
-    void exprBShift();
-    void exprRel();
-    void exprRelEqual();
-    void exprBAND();
-    void exprBXOR();
-    void exprBOR();
-    void exprLAND();
-    void exprLOR();
-    void expression();
+    Type exprSuff();
+    Type exprPref();
+    Type exprMul();
+    Type exprAdd();
+    Type exprBShift();
+    Type exprRel();
+    Type exprRelEqual();
+    Type exprBAND();
+    Type exprBXOR();
+    Type exprBOR();
+    Type exprLAND();
+    Type exprLOR();
+    Type expression();
 
     void checkFunction(std::string funName);
     void function();

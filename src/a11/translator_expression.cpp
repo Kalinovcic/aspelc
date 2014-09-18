@@ -69,12 +69,21 @@
 #define INSTRUCTION_LOGICAL_AND    "land"
 #define INSTRUCTION_LOGICAL_OR     "lor"
 
-void TranslatorA11::exprSuff()
+TranslatorA11::Type TranslatorA11::exprSuff()
 {
     if(isDigit(m_token[0]))
     {
         std::string number = getNumber();
-        writeln("push " + number);
+        Type type = getNumberType(number);
+        switch(type)
+        {
+        case INT: writeln("pushi " + number); break;
+        case FLOAT: writeln("pushf " + number); break;
+        case LONG: writeln("pushl " + number); break;
+        case DOUBLE: writeln("pushd " + number); break;
+        default: abort("invalid number type near line " + toString(m_scanner.getLine()));
+        }
+        return type;
     }
     else if(isAlpha(m_token[0]))
     {
@@ -82,65 +91,70 @@ void TranslatorA11::exprSuff()
         if(m_token == "(")
         {
             callFunction(name, true);
+            return returnType(name);
         }
+        /*
         else if(m_token == "[")
         {
             match("[");
-            // get index
             match("]");
-            writeln("<array get>");
         }
+        */
         else
         {
-            if(isBool(name)) writeln("push " + name);
-            else fetchVariable(name);
+            fetchVariable(name);
+            return getVariableType(name);
         }
     }
     else if(m_token == "(")
     {
         match("(");
-        expression();
+        Type type = expression();
         match(")");
+        return type;
     }
     else
     {
         expected("literal or identifier");
     }
+    return VOID;
 }
-void TranslatorA11::exprPref()
+TranslatorA11::Type TranslatorA11::exprPref()
 {
+    Type type;
     if(m_token == OPERATOR_UNARY_PLUS)
     {
         match(OPERATOR_UNARY_PLUS);
-        exprSuff();
+        type = exprSuff();
     }
     else if(m_token == OPERATOR_UNARY_MINUS)
     {
         match(OPERATOR_UNARY_MINUS);
-        exprSuff();
+        type = exprSuff();
         writeln(INSTRUCTION_UNARY_MINUS);
     }
     else if(m_token == OPERATOR_LOGICAL_NOT)
     {
         match(OPERATOR_LOGICAL_NOT);
-        exprSuff();
+        type = exprSuff();
         writeln(INSTRUCTION_LOGICAL_NOT);
     }
     else if(m_token == OPERATOR_BITWISE_NOT)
     {
         match(OPERATOR_BITWISE_NOT);
-        exprSuff();
+        type = exprSuff();
         writeln(INSTRUCTION_BITWISE_NOT);
     }
     else
     {
-        exprSuff();
+        type = exprSuff();
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::exprMul()
+TranslatorA11::Type TranslatorA11::exprMul()
 {
-    exprPref();
+    Type type = exprPref();
     while(m_token == OPERATOR_MULTIPLICATION
        || m_token == OPERATOR_DIVISION
        || m_token == OPERATOR_REMAINDER)
@@ -148,68 +162,71 @@ void TranslatorA11::exprMul()
         if(m_token == OPERATOR_MULTIPLICATION)
         {
             match(OPERATOR_MULTIPLICATION);
-            exprPref();
+            type = stackConvert(exprPref(), type);
             writeln(INSTRUCTION_MULTIPLICATION);
         }
         else if(m_token == OPERATOR_DIVISION)
         {
             match(OPERATOR_DIVISION);
-            exprPref();
+            type = stackConvert(exprPref(), type);
             writeln(INSTRUCTION_DIVISION);
         }
         else if(m_token == OPERATOR_REMAINDER)
         {
             match(OPERATOR_REMAINDER);
-            exprPref();
+            type = stackConvert(exprPref(), type);
             writeln(INSTRUCTION_REMAINDER);
         }
     }
+    return type;
 }
-void TranslatorA11::exprAdd()
+TranslatorA11::Type TranslatorA11::exprAdd()
 {
-    exprMul();
+    Type type = exprMul();
     while(m_token == OPERATOR_ADDITION
        || m_token == OPERATOR_SUBTRACTION)
     {
         if(m_token == OPERATOR_ADDITION)
         {
             match(OPERATOR_ADDITION);
-            exprMul();
+            type = stackConvert(exprMul(), type);
             writeln(INSTRUCTION_ADDITION);
         }
         else if(m_token == OPERATOR_SUBTRACTION)
         {
             match(OPERATOR_SUBTRACTION);
-            exprMul();
+            type = stackConvert(exprMul(), type);
             writeln(INSTRUCTION_SUBTRACTION);
         }
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::exprBShift()
+TranslatorA11::Type TranslatorA11::exprBShift()
 {
-    exprAdd();
+    Type type = exprAdd();
     while(m_token == OPERATOR_SHIFTLEFT
        || m_token == OPERATOR_SHIFTRIGHT)
     {
         if(m_token == OPERATOR_SHIFTLEFT)
         {
             match(OPERATOR_SHIFTLEFT);
-            exprAdd();
+            type = stackConvert(exprAdd(), type);
             writeln(INSTRUCTION_SHIFTLEFT);
         }
         else if(m_token == OPERATOR_SHIFTRIGHT)
         {
             match(OPERATOR_SHIFTRIGHT);
-            exprAdd();
+            type = stackConvert(exprAdd(), type);
             writeln(INSTRUCTION_SHIFTRIGHT);
         }
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::exprRel()
+TranslatorA11::Type TranslatorA11::exprRel()
 {
-    exprBShift();
+    Type type = exprBShift();
     while(m_token == OPERATOR_LESS
        || m_token == OPERATOR_LESSEQUAL
        || m_token == OPERATOR_GREATER
@@ -218,103 +235,110 @@ void TranslatorA11::exprRel()
         if(m_token == OPERATOR_LESS)
         {
             match(OPERATOR_LESS);
-            exprBShift();
+            type = stackConvert(exprBShift(), type);
             writeln(INSTRUCTION_LESS);
         }
         else if(m_token == OPERATOR_LESSEQUAL)
         {
             match(OPERATOR_LESSEQUAL);
-            exprBShift();
+            type = stackConvert(exprBShift(), type);
             writeln(INSTRUCTION_LESSEQUAL);
         }
         else if(m_token == OPERATOR_GREATER)
         {
             match(OPERATOR_GREATER);
-            exprBShift();
+            type = stackConvert(exprBShift(), type);
             writeln(INSTRUCTION_GREATER);
         }
         else if(m_token == OPERATOR_GREATEREQUAL)
         {
             match(OPERATOR_GREATEREQUAL);
-            exprBShift();
+            type = stackConvert(exprBShift(), type);
             writeln(INSTRUCTION_GREATEREQUAL);
         }
     }
+    return type;
 }
-void TranslatorA11::exprRelEqual()
+TranslatorA11::Type TranslatorA11::exprRelEqual()
 {
-    exprRel();
+    Type type = exprRel();
     while(m_token == OPERATOR_EQUAL
        || m_token == OPERATOR_NOT_EQUAL)
     {
         if(m_token == OPERATOR_EQUAL)
         {
             match(OPERATOR_EQUAL);
-            exprRel();
+            type = stackConvert(exprRel(), type);
             writeln(INSTRUCTION_EQUAL);
         }
         else if(m_token == OPERATOR_NOT_EQUAL)
         {
             match(OPERATOR_NOT_EQUAL);
-            exprRel();
+            type = stackConvert(exprRel(), type);
             writeln(INSTRUCTION_NOT_EQUAL);
         }
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::exprBAND()
+TranslatorA11::Type TranslatorA11::exprBAND()
 {
-    exprRelEqual();
+    Type type = exprRelEqual();
     while(m_token == OPERATOR_BITWISE_AND)
     {
         match(OPERATOR_BITWISE_AND);
-        exprRelEqual();
+        type = stackConvert(exprRelEqual(), type);
         writeln(INSTRUCTION_BITWISE_AND);
     }
+    return type;
 }
-void TranslatorA11::exprBXOR()
+TranslatorA11::Type TranslatorA11::exprBXOR()
 {
-    exprBAND();
+    Type type = exprBAND();
     while(m_token == OPERATOR_BITWISE_XOR)
     {
         match(OPERATOR_BITWISE_XOR);
-        exprBAND();
+        type = stackConvert(exprBAND(), type);
         writeln(INSTRUCTION_BITWISE_XOR);
     }
+    return type;
 }
-void TranslatorA11::exprBOR()
+TranslatorA11::Type TranslatorA11::exprBOR()
 {
-    exprBXOR();
+    Type type = exprBXOR();
     while(m_token == OPERATOR_BITWISE_OR)
     {
         match(OPERATOR_BITWISE_OR);
-        exprBXOR();
+        type = stackConvert(exprBXOR(), type);
         writeln(INSTRUCTION_BITWISE_OR);
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::exprLAND()
+TranslatorA11::Type TranslatorA11::exprLAND()
 {
-    exprBOR();
+    Type type = exprBOR();
     while(m_token == OPERATOR_LOGICAL_AND)
     {
         match(OPERATOR_LOGICAL_AND);
-        exprBOR();
+        type = stackConvert(exprBOR(), type);
         writeln(INSTRUCTION_LOGICAL_AND);
     }
+    return type;
 }
-void TranslatorA11::exprLOR()
+TranslatorA11::Type TranslatorA11::exprLOR()
 {
-    exprLAND();
+    Type type = exprLAND();
     while(m_token == OPERATOR_LOGICAL_OR)
     {
         match(OPERATOR_LOGICAL_OR);
-        exprLAND();
+        type = stackConvert(exprLAND(), type);
         writeln(INSTRUCTION_LOGICAL_OR);
     }
+    return type;
 }
 /*************************************************/
-void TranslatorA11::expression()
+TranslatorA11::Type TranslatorA11::expression()
 {
-    exprLOR();
+    return exprLOR();
 }

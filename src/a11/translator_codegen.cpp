@@ -35,6 +35,14 @@ void TranslatorA11::writeLabel(std::string labelname)
     write("\n" + labelname + ":");
 }
 
+TranslatorA11::Type TranslatorA11::returnType(std::string name)
+{
+    funmap_it it = m_functions.find(name);
+    if(it == m_functions.end())
+        abort("function \"" + name + "\" not found near line " + toString(m_scanner.getLine()));
+    return it->second.rtype;
+}
+
 void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
 {
     funmap_it it = m_functions.find(name);
@@ -59,6 +67,21 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
     writeln("call " + name + " " + toString(cfun.atype.size()));
 }
 
+TranslatorA11::Type TranslatorA11::getVariableType(std::string name)
+{
+    std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
+    if(localvar != m_localvars.end())
+        return m_lvartype[name];
+    else
+    {
+        std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
+        if(globalvar != m_globalvars.end())
+            return m_gvartype[name];
+    }
+    abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
+    return VOID;
+}
+
 void TranslatorA11::fetchVariable(std::string name)
 {
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
@@ -72,6 +95,25 @@ void TranslatorA11::fetchVariable(std::string name)
         else
             abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
     }
+}
+
+void TranslatorA11::swap(Type top, Type next)
+{
+    if(top == VOID || next == VOID)
+        abort("invalid use of void type near line " + toString(m_scanner.getLine()));
+    if(top == LONG || top == DOUBLE)
+    {
+        if(next == LONG || next == DOUBLE) writeln("swap8");
+        else if(next == INT || next == FLOAT) writeln("swap84");
+        else abort("invalid swap types");
+    }
+    else if(top == INT || top == FLOAT)
+    {
+        if(next == LONG || next == DOUBLE) writeln("swap48");
+        else if(next == INT || next == FLOAT) writeln("swap4");
+        else abort("invalid swap types");
+    }
+    else abort("invalid swap types");
 }
 
 void TranslatorA11::convert(Type type)
@@ -116,6 +158,26 @@ TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2, bool warn
     }
     if(type1 == INT || type2 == INT) return INT;
     abort("invalid type comparison");
+    return VOID;
+}
+
+TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
+{
+    Type greater = greaterType(top, next, true);
+    if(top == greater)
+    {
+        if(next != greater)
+        {
+            swap(top, next);
+            convert(greater);
+            swap(greater, greater);
+        }
+    }
+    else
+    {
+        convert(greater);
+    }
+    return greater;
 }
 
 void TranslatorA11::assignment(std::string name, bool inDeclaration)
