@@ -69,14 +69,14 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
 
 TranslatorA11::Type TranslatorA11::getVariableType(std::string name)
 {
-    std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
-    if(localvar != m_localvars.end())
-        return m_lvartype[name];
+    std::map<std::string, Type>::iterator localvar = m_lvartype.find(name);
+    if(localvar != m_lvartype.end())
+        return localvar->second;
     else
     {
-        std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
-        if(globalvar != m_globalvars.end())
-            return m_gvartype[name];
+        std::map<std::string, Type>::iterator globalvar = m_gvartype.find(name);
+        if(globalvar != m_gvartype.end())
+            return globalvar->second;
     }
     abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
     return VOID;
@@ -128,34 +128,31 @@ void TranslatorA11::convert(Type type)
     }
 }
 
-TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2, bool warnings)
+std::string TranslatorA11::getTypeName(Type type)
+{
+    switch(type)
+    {
+    case INT: return "int";
+    case FLOAT: return "float";
+    case LONG: return "long";
+    case DOUBLE: return "double";
+    case VOID: return "void";
+    }
+    return "";
+}
+
+void TranslatorA11::conversionWarning(Type original, Type converted)
+{
+    warning("converting " + getTypeName(original) + " to " + getTypeName(converted) + " without a cast near line " + toString(m_scanner.getLine()));
+}
+
+TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2)
 {
     if(type1 == VOID || type2 == VOID)
         abort("invalid use of void type near line " + toString(m_scanner.getLine()));
-    if(type1 == DOUBLE || type2 == DOUBLE)
-    {
-        if(warnings && (type1 == FLOAT || type2 == FLOAT))
-            warning("converting float to double without a cast near line " + toString(m_scanner.getLine()));
-        if(warnings && (type1 == LONG || type2 == LONG))
-            warning("converting long to double without a cast near line " + toString(m_scanner.getLine()));
-        if(warnings && (type1 == INT || type2 == INT))
-            warning("converting int to double without a cast near line " + toString(m_scanner.getLine()));
-        return DOUBLE;
-    }
-    if(type1 == FLOAT || type2 == FLOAT)
-    {
-        if(warnings && (type1 == LONG || type2 == LONG))
-            warning("converting long to float without a cast near line " + toString(m_scanner.getLine()));
-        if(warnings && (type1 == INT || type2 == INT))
-            warning("converting int to float without a cast near line " + toString(m_scanner.getLine()));
-        return FLOAT;
-    }
-    if(type1 == LONG || type2 == LONG)
-    {
-        if(warnings && (type1 == INT || type2 == INT))
-            warning("converting int to long without a cast near line " + toString(m_scanner.getLine()));
-        return LONG;
-    }
+    if(type1 == DOUBLE || type2 == DOUBLE) return DOUBLE;
+    if(type1 == FLOAT || type2 == FLOAT) return FLOAT;
+    if(type1 == LONG || type2 == LONG) return LONG;
     if(type1 == INT || type2 == INT) return INT;
     abort("invalid type comparison");
     return VOID;
@@ -163,11 +160,12 @@ TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2, bool warn
 
 TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
 {
-    Type greater = greaterType(top, next, true);
+    Type greater = greaterType(top, next);
     if(top == greater)
     {
         if(next != greater)
         {
+            conversionWarning(next, top);
             swap(top, next);
             convert(greater);
             swap(greater, greater);
@@ -175,6 +173,7 @@ TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
     }
     else
     {
+        conversionWarning(top, next);
         convert(greater);
     }
     return greater;
@@ -183,21 +182,22 @@ TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
 void TranslatorA11::assignment(std::string name, bool inDeclaration)
 {
     match("=");
-    expression();
+    Type type = expression();
+    Type vartype = getVariableType(name);
+    if(type != vartype)
+    {
+        conversionWarning(type, vartype);
+        convert(vartype);
+    }
+
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
-    {
-        convert(m_lvartype[name]);
         writeln("load " + name);
-    }
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
-        {
-            convert(m_gvartype[name]);
             writeln("loadwide " + name);
-        }
         else
             abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
     }

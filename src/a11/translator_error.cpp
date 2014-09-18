@@ -23,7 +23,7 @@
 
 #include "translator.h"
 
-void TranslatorA11::warning(std::string message) const { std::cout << "\warning: " << message << "\n";}
+void TranslatorA11::warning(std::string message) const { std::cout << "warning: " << message << "\n";}
 void TranslatorA11::error(std::string message) const { std::cout << "\nerror: " << message;}
 void TranslatorA11::abort(std::string reason)  const { error(reason); exit(1); };
 void TranslatorA11::expected(std::string item) const { abort(item + " expected near line " + toString(m_scanner.getLine())); };

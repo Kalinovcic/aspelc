@@ -58,7 +58,6 @@ void TranslatorA11::function()
 
     std::string functionName = m_token;
     std::vector<std::string> argvars;
-    std::vector<Type> argtypes;
     nextToken();
 
     match("(");
@@ -95,11 +94,13 @@ void TranslatorA11::function()
         {
             writeln("load " + argvars[i - 1]);
             m_localvars.push_back(argvars[i - 1]);
+            m_lvartype[argvars[i - 1]] = m_cfun.atype[i - 1];
         }
 
         block("-", "-");
         write("\t.\n");
         m_localvars.clear();
+        m_lvartype.clear();
     }
     else
     {

@@ -112,7 +112,9 @@ private:
     void fetchVariable(std::string name);
     void swap(Type top, Type next);
     void convert(Type type);
-    Type greaterType(Type type1, Type type2, bool warnings);
+    std::string getTypeName(Type type);
+    void conversionWarning(Type original, Type converted);
+    Type greaterType(Type type1, Type type2);
     Type stackConvert(Type top, Type next);
     void assignment(std::string name, bool inDeclaration);
 
