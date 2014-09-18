@@ -44,12 +44,31 @@ std::string TranslatorA11::getNumber()
     if(!isDigit(number[0]))
         expected("number");
     bool decimalp = false;
-    for(int i = 1; i < number.length(); i++)
+    for(unsigned int i = 1; i < number.length(); i++)
         if(!isDigit(number[i]))
-            if(!decimalp) decimalp = true;
+        {
+            if(!decimalp && number[i] == '.') decimalp = true;
+            else if(i == number.length() - 1)
+            {
+                if(decimalp && (number[i] == 'f' || number[i] == 'F')) continue;
+                else if(!decimalp && (number[i] == 'l' || number[i] == 'L')) continue;
+                else expected("number");
+            }
             else expected("number");
+        }
     nextToken();
     return number;
+}
+
+TranslatorA11::Type TranslatorA11::getNumberType(std::string number)
+{
+    if(number[number.length() - 1] == 'f' || number[number.length() - 1] == 'F')
+        return FLOAT;
+    for(unsigned int i = 1; i < number.length(); i++)
+        if(number[i] == '.') return FLOAT;
+    if(number[number.length() - 1] == 'l' || number[number.length() - 1] == 'L')
+        return LONG;
+    return INT;
 }
 
 TranslatorA11::Type TranslatorA11::getType(bool voidAllowed)

@@ -95,6 +95,7 @@ private:
     std::string nextToken();
     std::string getName();
     std::string getNumber();
+    Type getNumberType(std::string number);
     Type getType(bool voidAllowed);
     void match(std::string x);
 
