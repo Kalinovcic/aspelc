@@ -121,6 +121,7 @@ private:
     // expression
     Type exprSuff();
     Type exprPref();
+    Type exprCast();
     Type exprMul();
     Type exprAdd();
     Type exprBShift();

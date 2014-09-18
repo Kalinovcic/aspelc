@@ -151,10 +151,31 @@ TranslatorA11::Type TranslatorA11::exprPref()
     }
     return type;
 }
+TranslatorA11::Type TranslatorA11::exprCast()
+{
+    Type ctype = VOID;
+    if(m_token == "int") { match("int"); ctype = INT; }
+    if(m_token == "float") { match("float"); ctype = FLOAT; }
+    if(m_token == "long") { match("long"); ctype = LONG; }
+    if(m_token == "double") { match("double"); ctype = DOUBLE; }
+
+    Type type = exprPref();
+    if(ctype != VOID)
+    {
+        if(type == ctype)
+            warning("unnecessary " + getTypeName(ctype) + " cast near line " + toString(m_scanner.getLine()));
+        else
+        {
+            convert(ctype);
+        }
+        return ctype;
+    }
+    return type;
+}
 /*************************************************/
 TranslatorA11::Type TranslatorA11::exprMul()
 {
-    Type type = exprPref();
+    Type type = exprCast();
     while(m_token == OPERATOR_MULTIPLICATION
        || m_token == OPERATOR_DIVISION
        || m_token == OPERATOR_REMAINDER)
@@ -162,19 +183,19 @@ TranslatorA11::Type TranslatorA11::exprMul()
         if(m_token == OPERATOR_MULTIPLICATION)
         {
             match(OPERATOR_MULTIPLICATION);
-            type = stackConvert(exprPref(), type);
+            type = stackConvert(exprCast(), type);
             writeln(INSTRUCTION_MULTIPLICATION);
         }
         else if(m_token == OPERATOR_DIVISION)
         {
             match(OPERATOR_DIVISION);
-            type = stackConvert(exprPref(), type);
+            type = stackConvert(exprCast(), type);
             writeln(INSTRUCTION_DIVISION);
         }
         else if(m_token == OPERATOR_REMAINDER)
         {
             match(OPERATOR_REMAINDER);
-            type = stackConvert(exprPref(), type);
+            type = stackConvert(exprCast(), type);
             writeln(INSTRUCTION_REMAINDER);
         }
     }
