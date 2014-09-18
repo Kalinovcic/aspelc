@@ -43,6 +43,11 @@ std::string TranslatorA11::getNumber()
     std::string number = m_token;
     if(!isDigit(number[0]))
         expected("number");
+    bool decimalp = false;
+    for(int i = 1; i < number.length(); i++)
+        if(!isDigit(number[i]))
+            if(!decimalp) decimalp = true;
+            else expected("number");
     nextToken();
     return number;
 }
