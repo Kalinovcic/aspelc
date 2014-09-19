@@ -92,10 +92,10 @@ TranslatorA11::Type TranslatorA11::exprSuff()
         Type type = getNumberType(number);
         switch(type)
         {
-        case INT: writeln("pushi " + number); break;
-        case FLOAT: writeln("pushf " + number); break;
-        case LONG: writeln("pushl " + number); break;
-        case DOUBLE: writeln("pushd " + number); break;
+        case INT: writeln("pushi4 " + number); break;
+        case FLOAT: writeln("pushf4 " + number); break;
+        case LONG: writeln("pushi8 " + number); break;
+        case DOUBLE: writeln("pushf8 " + number); break;
         default: abortnl("invalid number type '" + number + "'");
         }
         return type;
