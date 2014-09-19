@@ -50,13 +50,28 @@
 #define INSTRUCTION_UNARY_MINUS    "neg"
 #define INSTRUCTION_LOGICAL_NOT    "lnot"
 #define INSTRUCTION_BITWISE_NOT    "not"
-#define INSTRUCTION_MULTIPLICATION "mul"
-#define INSTRUCTION_DIVISION       "div"
-#define INSTRUCTION_REMAINDER      "rem"
-#define INSTRUCTION_ADDITION       "add"
-#define INSTRUCTION_SUBTRACTION    "sub"
-#define INSTRUCTION_SHIFTLEFT      "shr"
-#define INSTRUCTION_SHIFTRIGHT     "shl"
+#define INSTRUCTION_MULTIPLICATION_INT          "muli4"
+#define INSTRUCTION_MULTIPLICATION_FLOAT        "mulf4"
+#define INSTRUCTION_MULTIPLICATION_LONG         "muli8"
+#define INSTRUCTION_MULTIPLICATION_DOUBLE       "mulf8"
+#define INSTRUCTION_DIVISION_INT                "divi4"
+#define INSTRUCTION_DIVISION_FLOAT              "divf4"
+#define INSTRUCTION_DIVISION_LONG               "divi8"
+#define INSTRUCTION_DIVISION_DOUBLE             "divf8"
+#define INSTRUCTION_REMAINDER_INT               "remi4"
+#define INSTRUCTION_REMAINDER_LONG              "remi8"
+#define INSTRUCTION_ADDITION_INT                "addi4"
+#define INSTRUCTION_ADDITION_FLOAT              "addf4"
+#define INSTRUCTION_ADDITION_LONG               "addi8"
+#define INSTRUCTION_ADDITION_DOUBLE             "addf8"
+#define INSTRUCTION_SUBTRACTION_INT             "subi4"
+#define INSTRUCTION_SUBTRACTION_FLOAT           "subf4"
+#define INSTRUCTION_SUBTRACTION_LONG            "subi8"
+#define INSTRUCTION_SUBTRACTION_DOUBLE          "subf8"
+#define INSTRUCTION_SHIFTLEFT_INT               "shri4"
+#define INSTRUCTION_SHIFTLEFT_LONG              "shri8"
+#define INSTRUCTION_SHIFTRIGHT_INT              "shli4"
+#define INSTRUCTION_SHIFTRIGHT_LONG             "shli8"
 #define INSTRUCTION_LESS           "lt"
 #define INSTRUCTION_LESSEQUAL      "le"
 #define INSTRUCTION_GREATER        "gt"
@@ -184,13 +199,27 @@ TranslatorA11::Type TranslatorA11::exprMul()
         {
             match(OPERATOR_MULTIPLICATION);
             type = stackConvert(exprCast(), type);
-            writeln(INSTRUCTION_MULTIPLICATION);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_MULTIPLICATION_INT); break;
+            case FLOAT: writeln(INSTRUCTION_MULTIPLICATION_FLOAT); break;
+            case LONG: writeln(INSTRUCTION_MULTIPLICATION_LONG); break;
+            case DOUBLE: writeln(INSTRUCTION_MULTIPLICATION_DOUBLE); break;
+            default: abortnl("invalid use of types");
+            }
         }
         else if(m_token == OPERATOR_DIVISION)
         {
             match(OPERATOR_DIVISION);
             type = stackConvert(exprCast(), type);
-            writeln(INSTRUCTION_DIVISION);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_DIVISION_INT); break;
+            case FLOAT: writeln(INSTRUCTION_DIVISION_FLOAT); break;
+            case LONG: writeln(INSTRUCTION_DIVISION_LONG); break;
+            case DOUBLE: writeln(INSTRUCTION_DIVISION_DOUBLE); break;
+            default: abortnl("invalid use of types");
+            }
         }
         else if(m_token == OPERATOR_REMAINDER)
         {
@@ -203,7 +232,12 @@ TranslatorA11::Type TranslatorA11::exprMul()
                 abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '%'");
             }
             type = stackConvert(type2, type);
-            writeln(INSTRUCTION_REMAINDER);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_REMAINDER_INT); break;
+            case LONG: writeln(INSTRUCTION_REMAINDER_LONG); break;
+            default: abortnl("invalid use of types");
+            }
         }
     }
     return type;
@@ -218,13 +252,27 @@ TranslatorA11::Type TranslatorA11::exprAdd()
         {
             match(OPERATOR_ADDITION);
             type = stackConvert(exprMul(), type);
-            writeln(INSTRUCTION_ADDITION);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_ADDITION_INT); break;
+            case FLOAT: writeln(INSTRUCTION_ADDITION_FLOAT); break;
+            case LONG: writeln(INSTRUCTION_ADDITION_LONG); break;
+            case DOUBLE: writeln(INSTRUCTION_ADDITION_DOUBLE); break;
+            default: abortnl("invalid use of types");
+            }
         }
         else if(m_token == OPERATOR_SUBTRACTION)
         {
             match(OPERATOR_SUBTRACTION);
             type = stackConvert(exprMul(), type);
-            writeln(INSTRUCTION_SUBTRACTION);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_SUBTRACTION_INT); break;
+            case FLOAT: writeln(INSTRUCTION_SUBTRACTION_FLOAT); break;
+            case LONG: writeln(INSTRUCTION_SUBTRACTION_LONG); break;
+            case DOUBLE: writeln(INSTRUCTION_SUBTRACTION_DOUBLE); break;
+            default: abortnl("invalid use of types");
+            }
         }
     }
     return type;
@@ -239,14 +287,38 @@ TranslatorA11::Type TranslatorA11::exprBShift()
         if(m_token == OPERATOR_SHIFTLEFT)
         {
             match(OPERATOR_SHIFTLEFT);
-            type = stackConvert(exprAdd(), type);
-            writeln(INSTRUCTION_SHIFTLEFT);
+            Type type2 = exprAdd();
+            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
+            {
+                std::string name1 = getTypeName(type);
+                std::string name2 = getTypeName(type2);
+                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '<<'");
+            }
+            type = stackConvert(type2, type);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_SHIFTLEFT_INT); break;
+            case LONG: writeln(INSTRUCTION_SHIFTLEFT_LONG); break;
+            default: abortnl("invalid use of types");
+            }
         }
         else if(m_token == OPERATOR_SHIFTRIGHT)
         {
             match(OPERATOR_SHIFTRIGHT);
-            type = stackConvert(exprAdd(), type);
-            writeln(INSTRUCTION_SHIFTRIGHT);
+            Type type2 = exprAdd();
+            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
+            {
+                std::string name1 = getTypeName(type);
+                std::string name2 = getTypeName(type2);
+                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '>>'");
+            }
+            type = stackConvert(type2, type);
+            switch(type)
+            {
+            case INT: writeln(INSTRUCTION_SHIFTRIGHT_INT); break;
+            case LONG: writeln(INSTRUCTION_SHIFTRIGHT_LONG); break;
+            default: abortnl("invalid use of types");
+            }
         }
     }
     return type;
