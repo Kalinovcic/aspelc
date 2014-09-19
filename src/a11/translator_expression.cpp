@@ -81,7 +81,7 @@ TranslatorA11::Type TranslatorA11::exprSuff()
         case FLOAT: writeln("pushf " + number); break;
         case LONG: writeln("pushl " + number); break;
         case DOUBLE: writeln("pushd " + number); break;
-        default: abort("invalid number type near line " + toString(m_scanner.getLine()));
+        default: abortnl("invalid number type '" + number + "'");
         }
         return type;
     }
@@ -163,7 +163,7 @@ TranslatorA11::Type TranslatorA11::exprCast()
     if(ctype != VOID)
     {
         if(type == ctype)
-            warning("unnecessary " + getTypeName(ctype) + " cast near line " + toString(m_scanner.getLine()));
+            warningnl("unnecessary " + getTypeName(ctype) + " cast");
         else
         {
             convert(ctype);
@@ -195,7 +195,14 @@ TranslatorA11::Type TranslatorA11::exprMul()
         else if(m_token == OPERATOR_REMAINDER)
         {
             match(OPERATOR_REMAINDER);
-            type = stackConvert(exprCast(), type);
+            Type type2 = exprCast();
+            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
+            {
+                std::string name1 = getTypeName(type);
+                std::string name2 = getTypeName(type2);
+                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '%'");
+            }
+            type = stackConvert(type2, type);
             writeln(INSTRUCTION_REMAINDER);
         }
     }

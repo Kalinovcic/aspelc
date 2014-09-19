@@ -30,16 +30,16 @@ void TranslatorA11::checkFunction(std::string funName)
 
     FunctionData previous = (*it).second;
 
-    if(m_cfun.forward) abort("function \"" + funName + "\" reforwarding near line " + toString(m_scanner.getLine()));
-    if(!previous.forward) abort("function \"" + funName + "\" redeclaration near line " + toString(m_scanner.getLine()));
+    if(m_cfun.forward) abortnl("function \"" + funName + "\" reforwarding");
+    if(!previous.forward) abortnl("function \"" + funName + "\" redeclaration");
 
-    if(m_cfun.rtype != previous.rtype) abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+    if(m_cfun.rtype != previous.rtype) abortnl("function \"" + funName + "\" inconsistency");
     if(m_cfun.atype.size() != previous.atype.size())
-        abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+        abortnl("function \"" + funName + "\" inconsistency");
 
     for(unsigned int i = 0; i < m_cfun.atype.size(); i++)
         if(m_cfun.atype[i] != previous.atype[i])
-            abort("function \"" + funName + "\" inconsistency near line " + toString(m_scanner.getLine()));
+            abortnl("function \"" + funName + "\" inconsistency");
 }
 
 void TranslatorA11::function()
@@ -81,7 +81,7 @@ void TranslatorA11::function()
         if(!native)
             m_cfun.forward = true;
         else
-            abort("native function \"" + functionName + "\" forwarded near line " + toString(m_scanner.getLine()));
+            abortnl("native function \"" + functionName + "\" forwarded");
     }
 
     checkFunction(functionName);

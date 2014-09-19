@@ -39,7 +39,7 @@ TranslatorA11::Type TranslatorA11::returnType(std::string name)
 {
     funmap_it it = m_functions.find(name);
     if(it == m_functions.end())
-        abort("function \"" + name + "\" not found near line " + toString(m_scanner.getLine()));
+        abortnl("function \"" + name + "\" not found");
     return it->second.rtype;
 }
 
@@ -47,12 +47,12 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
 {
     funmap_it it = m_functions.find(name);
     if(it == m_functions.end())
-        abort("function \"" + name + "\" not found near line " + toString(m_scanner.getLine()));
+        abortnl("function \"" + name + "\" not found");
 
     FunctionData cfun = it->second;
 
     if(nonVoidOnly && cfun.rtype == VOID)
-        abort("void function \"" + name + "\" called in expression near line " + toString(m_scanner.getLine()));
+        abortnl("void function \"" + name + "\" called in expression");
 
     match("(");
 
@@ -78,7 +78,7 @@ TranslatorA11::Type TranslatorA11::getVariableType(std::string name)
         if(globalvar != m_gvartype.end())
             return globalvar->second;
     }
-    abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
+    abortnl("var \"" + name + "\" not declared");
     return VOID;
 }
 
@@ -93,14 +93,14 @@ void TranslatorA11::fetchVariable(std::string name)
         if(globalvar != m_globalvars.end())
             writeln("fetchwide " + name);
         else
-            abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
+            abortnl("var \"" + name + "\" not declared");
     }
 }
 
 void TranslatorA11::swap(Type top, Type next)
 {
     if(top == VOID || next == VOID)
-        abort("invalid use of void type near line " + toString(m_scanner.getLine()));
+        abortnl("invalid use of void type");
     if(top == LONG || top == DOUBLE)
     {
         if(next == LONG || next == DOUBLE) writeln("swap8");
@@ -144,13 +144,13 @@ std::string TranslatorA11::getTypeName(Type type)
 void TranslatorA11::conversionWarning(Type original, Type converted)
 {
     if(m_wcast)
-        warning("converting " + getTypeName(original) + " to " + getTypeName(converted) + " without a cast near line " + toString(m_scanner.getLine()));
+        warningnl("converting " + getTypeName(original) + " to " + getTypeName(converted) + " without a cast");
 }
 
 TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2)
 {
     if(type1 == VOID || type2 == VOID)
-        abort("invalid use of void type near line " + toString(m_scanner.getLine()));
+        abortnl("invalid use of void type");
     if(type1 == DOUBLE || type2 == DOUBLE) return DOUBLE;
     if(type1 == FLOAT || type2 == FLOAT) return FLOAT;
     if(type1 == LONG || type2 == LONG) return LONG;
@@ -200,6 +200,6 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
         if(globalvar != m_globalvars.end())
             writeln("loadwide " + name);
         else
-            abort("var \"" + name + "\" not declared near line " + toString(m_scanner.getLine()));
+            abortnl("var \"" + name + "\" not declared");
     }
 }

@@ -89,8 +89,11 @@ private:
 
     // error
     void warning(std::string message) const;
+    void warningnl(std::string message) const;
     void error(std::string message) const;
+    void errornl(std::string message) const;
     void abort(std::string reason) const;
+    void abortnl(std::string reason) const;
     void expected(std::string item) const;
 
     // input
