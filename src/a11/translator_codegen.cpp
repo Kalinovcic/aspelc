@@ -59,8 +59,9 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
     for(unsigned int i = 0; i < cfun.atype.size(); i++)
     {
         if(i) match(",");
-        expression();
-        convert(cfun.atype[i]);
+        Type type = expression();
+        if(type != cfun.atype[i])
+            convert(type, cfun.atype[i]);
     }
 
     match(")");
@@ -116,14 +117,50 @@ void TranslatorA11::swap(Type top, Type next)
     else abort("invalid swap types");
 }
 
-void TranslatorA11::convert(Type type)
+void TranslatorA11::convert(Type from, Type to)
 {
-    switch(type)
+    switch(from)
     {
-    case INT: writeln("cti"); break;
-    case FLOAT: writeln("ctf"); break;
-    case LONG: writeln("ctl"); break;
-    case DOUBLE: writeln("ctd"); break;
+    case INT:
+        switch(to)
+        {
+        case INT: abortnl("invalid conversion - int to int"); break;
+        case FLOAT: writeln("i4cf4"); break;
+        case LONG: writeln("i4ci8"); break;
+        case DOUBLE: writeln("i4cf8"); break;
+        default: expected("non-void type");
+        }
+        break;
+    case FLOAT:
+        switch(to)
+        {
+        case INT: writeln("f4ci4"); break;
+        case FLOAT: abortnl("invalid conversion - float to float"); break;
+        case LONG: writeln("f4ci8"); break;
+        case DOUBLE: writeln("f4cf8"); break;
+        default: expected("non-void type");
+        }
+        break;
+    case LONG:
+        switch(to)
+        {
+        case INT: writeln("i8ci4"); break;
+        case FLOAT: writeln("i8cf4"); break;
+        case LONG: abortnl("invalid conversion - long to long"); break;
+        case DOUBLE: writeln("i8cf8"); break;
+        default: expected("non-void type");
+        }
+        break;
+    case DOUBLE:
+        switch(to)
+        {
+        case INT: writeln("f8ci4"); break;
+        case FLOAT: writeln("f8cf4"); break;
+        case LONG: writeln("f8ci8"); break;
+        case DOUBLE: abortnl("invalid conversion - double to double"); break;
+        default: expected("non-void type");
+        }
+        break;
     default: expected("non-void type");
     }
 }
@@ -168,14 +205,14 @@ TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
         {
             conversionWarning(next, top);
             swap(top, next);
-            convert(greater);
-            swap(greater, greater);
+            convert(next, top);
+            swap(top, top);
         }
     }
     else
     {
         conversionWarning(top, next);
-        convert(greater);
+        convert(top, next);
     }
     return greater;
 }
@@ -188,7 +225,7 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
     if(type != vartype)
     {
         conversionWarning(type, vartype);
-        convert(vartype);
+        convert(type, vartype);
     }
 
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);

@@ -116,7 +116,7 @@ private:
     Type getVariableType(std::string name);
     void fetchVariable(std::string name);
     void swap(Type top, Type next);
-    void convert(Type type);
+    void convert(Type from, Type to);
     std::string getTypeName(Type type);
     void conversionWarning(Type original, Type converted);
     Type greaterType(Type type1, Type type2);

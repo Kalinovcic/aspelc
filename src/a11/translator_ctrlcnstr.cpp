@@ -99,8 +99,9 @@ void TranslatorA11::doreturn()
     match("return");
     if(!(m_cfun.rtype == VOID))
     {
-        expression();
-        convert(m_cfun.rtype);
+        Type type = expression();
+        if(type != m_cfun.rtype)
+            convert(type, m_cfun.rtype);
     }
     writeln("return");
 }

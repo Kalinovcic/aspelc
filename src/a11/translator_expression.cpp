@@ -181,7 +181,7 @@ TranslatorA11::Type TranslatorA11::exprCast()
             warningnl("unnecessary " + getTypeName(ctype) + " cast");
         else
         {
-            convert(ctype);
+            convert(type, ctype);
         }
         return ctype;
     }
@@ -294,7 +294,11 @@ TranslatorA11::Type TranslatorA11::exprBShift()
                 std::string name2 = getTypeName(type2);
                 abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '<<'");
             }
-            type = stackConvert(type2, type);
+            if(type2 == LONG)
+            {
+                warningnl("deprecated second operand type 'long' to operator '<<'");
+                convert(LONG, INT);
+            }
             switch(type)
             {
             case INT: writeln(INSTRUCTION_SHIFTLEFT_INT); break;
@@ -306,13 +310,17 @@ TranslatorA11::Type TranslatorA11::exprBShift()
         {
             match(OPERATOR_SHIFTRIGHT);
             Type type2 = exprAdd();
-            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
+            if((type != INT && type2 != LONG) || (type2 != INT && type2 != LONG))
             {
                 std::string name1 = getTypeName(type);
                 std::string name2 = getTypeName(type2);
                 abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '>>'");
             }
-            type = stackConvert(type2, type);
+            if(type2 == LONG)
+            {
+                warningnl("deprecated second operand type 'long' to operator '>>'");
+                convert(LONG, INT);
+            }
             switch(type)
             {
             case INT: writeln(INSTRUCTION_SHIFTRIGHT_INT); break;
