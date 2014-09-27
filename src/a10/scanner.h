@@ -41,6 +41,7 @@ public:
 
     std::string scan()
     {
+        m_line = m_nextline;
         if(m_look == -1)
             return "";
         if(isAlpha(m_look))
@@ -59,6 +60,7 @@ public:
     int getLine() { return m_line; }
 private:
     int m_line;
+    int m_nextline;
     char m_look;
 
     inline void nextChar() { m_in.read(&m_look, 1); if(m_in.eof()) m_look = -1; }
@@ -77,7 +79,7 @@ private:
         while(isWhite(m_look))
         {
             if(m_look == '\n')
-                m_line++;
+                m_nextline++;
             nextChar();
         }
     }

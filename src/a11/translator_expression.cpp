@@ -58,6 +58,15 @@ TranslatorA11::Type TranslatorA11::exprSuff()
             return getVariableType(name);
         }
     }
+    else if(m_token == "@")
+    {
+        match("@");
+        std::string name = getName();
+        if(!variableExists(name))
+            abortnl("variable '" + name + "' not declared");
+        instrPush("@" + name, LONG);
+        return LONG;
+    }
     else if(m_token == "(")
     {
         match("(");
