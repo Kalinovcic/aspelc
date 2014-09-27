@@ -110,6 +110,12 @@ private:
             ss << m_look;
             nextChar();
         }
+        if(m_look == 'f' || m_look == 'F'
+        || m_look == 'l' || m_look == 'L')
+        {
+            ss << m_look;
+            nextChar();
+        }
         skipWhite();
         return ss.str();
     }
