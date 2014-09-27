@@ -23,67 +23,6 @@
 
 #include "translator.h"
 
-#define OPERATOR_UNARY_PLUS     "+"
-#define OPERATOR_UNARY_MINUS    "-"
-#define OPERATOR_LOGICAL_NOT    "!"
-#define OPERATOR_BITWISE_NOT    "~"
-#define OPERATOR_MULTIPLICATION "*"
-#define OPERATOR_DIVISION       "/"
-#define OPERATOR_REMAINDER      "%"
-#define OPERATOR_ADDITION       "+"
-#define OPERATOR_SUBTRACTION    "-"
-#define OPERATOR_SHIFTLEFT      "<<"
-#define OPERATOR_SHIFTRIGHT     ">>"
-#define OPERATOR_LESS           "<"
-#define OPERATOR_LESSEQUAL      "<="
-#define OPERATOR_GREATER        ">"
-#define OPERATOR_GREATEREQUAL   ">="
-#define OPERATOR_EQUAL          "=="
-#define OPERATOR_NOT_EQUAL      "!="
-#define OPERATOR_BITWISE_AND    "&"
-#define OPERATOR_BITWISE_XOR    "^"
-#define OPERATOR_BITWISE_OR     "|"
-#define OPERATOR_LOGICAL_AND    "&&"
-#define OPERATOR_LOGICAL_OR     "||"
-
-#define INSTRUCTION_UNARY_PLUS     ""
-#define INSTRUCTION_UNARY_MINUS    "neg"
-#define INSTRUCTION_LOGICAL_NOT    "lnot"
-#define INSTRUCTION_BITWISE_NOT    "not"
-#define INSTRUCTION_MULTIPLICATION_INT          "muli4"
-#define INSTRUCTION_MULTIPLICATION_FLOAT        "mulf4"
-#define INSTRUCTION_MULTIPLICATION_LONG         "muli8"
-#define INSTRUCTION_MULTIPLICATION_DOUBLE       "mulf8"
-#define INSTRUCTION_DIVISION_INT                "divi4"
-#define INSTRUCTION_DIVISION_FLOAT              "divf4"
-#define INSTRUCTION_DIVISION_LONG               "divi8"
-#define INSTRUCTION_DIVISION_DOUBLE             "divf8"
-#define INSTRUCTION_REMAINDER_INT               "remi4"
-#define INSTRUCTION_REMAINDER_LONG              "remi8"
-#define INSTRUCTION_ADDITION_INT                "addi4"
-#define INSTRUCTION_ADDITION_FLOAT              "addf4"
-#define INSTRUCTION_ADDITION_LONG               "addi8"
-#define INSTRUCTION_ADDITION_DOUBLE             "addf8"
-#define INSTRUCTION_SUBTRACTION_INT             "subi4"
-#define INSTRUCTION_SUBTRACTION_FLOAT           "subf4"
-#define INSTRUCTION_SUBTRACTION_LONG            "subi8"
-#define INSTRUCTION_SUBTRACTION_DOUBLE          "subf8"
-#define INSTRUCTION_SHIFTLEFT_INT               "shri4"
-#define INSTRUCTION_SHIFTLEFT_LONG              "shri8"
-#define INSTRUCTION_SHIFTRIGHT_INT              "shli4"
-#define INSTRUCTION_SHIFTRIGHT_LONG             "shli8"
-#define INSTRUCTION_LESS           "lt"
-#define INSTRUCTION_LESSEQUAL      "le"
-#define INSTRUCTION_GREATER        "gt"
-#define INSTRUCTION_GREATEREQUAL   "ge"
-#define INSTRUCTION_EQUAL          "eq"
-#define INSTRUCTION_NOT_EQUAL      "ne"
-#define INSTRUCTION_BITWISE_AND    "and"
-#define INSTRUCTION_BITWISE_XOR    "xor"
-#define INSTRUCTION_BITWISE_OR     "or"
-#define INSTRUCTION_LOGICAL_AND    "land"
-#define INSTRUCTION_LOGICAL_OR     "lor"
-
 TranslatorA11::Type TranslatorA11::exprSuff()
 {
     if(isDigit(m_token[0]))
@@ -130,29 +69,29 @@ TranslatorA11::Type TranslatorA11::exprSuff()
 TranslatorA11::Type TranslatorA11::exprPref()
 {
     Type type;
-    if(m_token == OPERATOR_UNARY_MINUS)
+    if(m_token == "-")
     {
-        match(OPERATOR_UNARY_MINUS);
+        match("-");
         type = exprSuff();
         instrNeg(type);
     }
-    else if(m_token == OPERATOR_LOGICAL_NOT)
+    else if(m_token == "!")
     {
-        match(OPERATOR_LOGICAL_NOT);
+        match("!");
         type = exprSuff();
         checkInteger(type, "!");
         instrLNOT(type);
     }
-    else if(m_token == OPERATOR_BITWISE_NOT)
+    else if(m_token == "~")
     {
-        match(OPERATOR_BITWISE_NOT);
+        match("~");
         type = exprSuff();
         checkInteger(type, "~");
         instrBNOT(type);
     }
     else
     {
-        if(m_token == OPERATOR_UNARY_PLUS)
+        if(m_token == "+")
             match(m_token);
         type = exprSuff();
     }
@@ -183,25 +122,25 @@ TranslatorA11::Type TranslatorA11::exprCast()
 TranslatorA11::Type TranslatorA11::exprMul()
 {
     Type type = exprCast();
-    while(m_token == OPERATOR_MULTIPLICATION
-       || m_token == OPERATOR_DIVISION
-       || m_token == OPERATOR_REMAINDER)
+    while(m_token == "*"
+       || m_token == "/"
+       || m_token == "%")
     {
-        if(m_token == OPERATOR_MULTIPLICATION)
+        if(m_token == "*")
         {
-            match(OPERATOR_MULTIPLICATION);
+            match("*");
             type = stackConvert(exprCast(), type);
             instrMul(type);
         }
-        else if(m_token == OPERATOR_DIVISION)
+        else if(m_token == "/")
         {
-            match(OPERATOR_DIVISION);
+            match("/");
             type = stackConvert(exprCast(), type);
             instrDiv(type);
         }
-        else if(m_token == OPERATOR_REMAINDER)
+        else if(m_token == "%")
         {
-            match(OPERATOR_REMAINDER);
+            match("%");
             Type type2 = exprCast();
             checkInteger2(type, type2, "%");
             type = stackConvert(type2, type);
@@ -213,18 +152,18 @@ TranslatorA11::Type TranslatorA11::exprMul()
 TranslatorA11::Type TranslatorA11::exprAdd()
 {
     Type type = exprMul();
-    while(m_token == OPERATOR_ADDITION
-       || m_token == OPERATOR_SUBTRACTION)
+    while(m_token == "+"
+       || m_token == "-")
     {
-        if(m_token == OPERATOR_ADDITION)
+        if(m_token == "+")
         {
-            match(OPERATOR_ADDITION);
+            match("+");
             type = stackConvert(exprMul(), type);
             instrAdd(type);
         }
-        else if(m_token == OPERATOR_SUBTRACTION)
+        else if(m_token == "-")
         {
-            match(OPERATOR_SUBTRACTION);
+            match("-");
             type = stackConvert(exprMul(), type);
             instrSub(type);
         }
@@ -235,12 +174,12 @@ TranslatorA11::Type TranslatorA11::exprAdd()
 TranslatorA11::Type TranslatorA11::exprBShift()
 {
     Type type = exprAdd();
-    while(m_token == OPERATOR_SHIFTLEFT
-       || m_token == OPERATOR_SHIFTRIGHT)
+    while(m_token == "<<"
+       || m_token == ">>")
     {
-        if(m_token == OPERATOR_SHIFTLEFT)
+        if(m_token == "<<")
         {
-            match(OPERATOR_SHIFTLEFT);
+            match("<<");
             Type type2 = exprAdd();
             checkInteger2(type, type2, "<<");
             if(type2 == LONG)
@@ -250,9 +189,9 @@ TranslatorA11::Type TranslatorA11::exprBShift()
             }
             instrShl(type);
         }
-        else if(m_token == OPERATOR_SHIFTRIGHT)
+        else if(m_token == ">>")
         {
-            match(OPERATOR_SHIFTRIGHT);
+            match(">>");
             Type type2 = exprAdd();
             checkInteger2(type, type2, ">>");
             if(type2 == LONG)
@@ -269,35 +208,35 @@ TranslatorA11::Type TranslatorA11::exprBShift()
 TranslatorA11::Type TranslatorA11::exprRel()
 {
     Type type = exprBShift();
-    while(m_token == OPERATOR_LESS
-       || m_token == OPERATOR_LESSEQUAL
-       || m_token == OPERATOR_GREATER
-       || m_token == OPERATOR_GREATEREQUAL)
+    while(m_token == "<"
+       || m_token == "<="
+       || m_token == ">"
+       || m_token == ">=")
     {
-        if(m_token == OPERATOR_LESS)
+        if(m_token == "<")
         {
-            match(OPERATOR_LESS);
+            match("<");
             Type type2 = exprBShift();
             instrLt(type2, type);
             type = INT;
         }
-        else if(m_token == OPERATOR_LESSEQUAL)
+        else if(m_token == "<=")
         {
-            match(OPERATOR_LESSEQUAL);
+            match("<=");
             Type type2 = exprBShift();
             instrLe(type2, type);
             type = INT;
         }
-        else if(m_token == OPERATOR_GREATER)
+        else if(m_token == ">")
         {
-            match(OPERATOR_GREATER);
+            match(">");
             Type type2 = exprBShift();
             instrGt(type2, type);
             type = INT;
         }
-        else if(m_token == OPERATOR_GREATEREQUAL)
+        else if(m_token == ">=")
         {
-            match(OPERATOR_GREATEREQUAL);
+            match(">=");
             Type type2 = exprBShift();
             instrGe(type2, type);
             type = INT;
@@ -308,19 +247,19 @@ TranslatorA11::Type TranslatorA11::exprRel()
 TranslatorA11::Type TranslatorA11::exprRelEqual()
 {
     Type type = exprRel();
-    while(m_token == OPERATOR_EQUAL
-       || m_token == OPERATOR_NOT_EQUAL)
+    while(m_token == "=="
+       || m_token == "!=")
     {
-        if(m_token == OPERATOR_EQUAL)
+        if(m_token == "==")
         {
-            match(OPERATOR_EQUAL);
+            match("==");
             Type type2 = exprRel();
             instrEq(type2, type);
             type = INT;
         }
-        else if(m_token == OPERATOR_NOT_EQUAL)
+        else if(m_token == "!=")
         {
-            match(OPERATOR_NOT_EQUAL);
+            match("!=");
             Type type2 = exprRel();
             instrNe(type2, type);
             type = INT;
@@ -332,9 +271,9 @@ TranslatorA11::Type TranslatorA11::exprRelEqual()
 TranslatorA11::Type TranslatorA11::exprBAND()
 {
     Type type = exprRelEqual();
-    while(m_token == OPERATOR_BITWISE_AND)
+    while(m_token == "&")
     {
-        match(OPERATOR_BITWISE_AND);
+        match("&");
         Type type2 = exprRelEqual();
         checkInteger2(type, type2, "&");
         type = stackConvert(type2, type);
@@ -345,9 +284,9 @@ TranslatorA11::Type TranslatorA11::exprBAND()
 TranslatorA11::Type TranslatorA11::exprBXOR()
 {
     Type type = exprBAND();
-    while(m_token == OPERATOR_BITWISE_XOR)
+    while(m_token == "^")
     {
-        match(OPERATOR_BITWISE_XOR);
+        match("^");
         Type type2 = exprBAND();
         checkInteger2(type, type2, "^");
         type = stackConvert(type2, type);
@@ -358,9 +297,9 @@ TranslatorA11::Type TranslatorA11::exprBXOR()
 TranslatorA11::Type TranslatorA11::exprBOR()
 {
     Type type = exprBXOR();
-    while(m_token == OPERATOR_BITWISE_OR)
+    while(m_token == "|")
     {
-        match(OPERATOR_BITWISE_OR);
+        match("|");
         Type type2 = exprBXOR();
         checkInteger2(type, type2, "|");
         type = stackConvert(type2, type);
@@ -372,9 +311,9 @@ TranslatorA11::Type TranslatorA11::exprBOR()
 TranslatorA11::Type TranslatorA11::exprLAND()
 {
     Type type = exprBOR();
-    while(m_token == OPERATOR_LOGICAL_AND)
+    while(m_token == "&&")
     {
-        match(OPERATOR_LOGICAL_AND);
+        match("&&");
         Type type2 = exprBOR();
         checkInteger2(type, type2, "&&");
         type = stackConvert(type2, type);
@@ -385,9 +324,9 @@ TranslatorA11::Type TranslatorA11::exprLAND()
 TranslatorA11::Type TranslatorA11::exprLOR()
 {
     Type type = exprLAND();
-    while(m_token == OPERATOR_LOGICAL_OR)
+    while(m_token == "||")
     {
-        match(OPERATOR_LOGICAL_OR);
+        match("||");
         Type type2 = exprLAND();
         checkInteger2(type, type2, "||");
         type = stackConvert(type2, type);
