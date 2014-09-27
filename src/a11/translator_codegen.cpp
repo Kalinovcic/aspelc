@@ -68,6 +68,20 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
     writeln("call " + name + " " + toString(cfun.atype.size()));
 }
 
+bool TranslatorA11::variableExists(std::string name)
+{
+    std::map<std::string, Type>::iterator localvar = m_lvartype.find(name);
+    if(localvar != m_lvartype.end())
+        return true;
+    else
+    {
+        std::map<std::string, Type>::iterator globalvar = m_gvartype.find(name);
+        if(globalvar != m_gvartype.end())
+            return true;
+    }
+    return false;
+}
+
 TranslatorA11::Type TranslatorA11::getVariableType(std::string name)
 {
     std::map<std::string, Type>::iterator localvar = m_lvartype.find(name);
@@ -219,10 +233,19 @@ TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
 
 void TranslatorA11::assignment(std::string name, bool inDeclaration)
 {
-    match("=");
+    bool ptr = false;
+    if(m_token == "=")
+        match("=");
+    else if(m_token == "->")
+    {
+        ptr = true;
+        match("->");
+    }
+    else expected("= or ->");
+
     Type type = expression();
     Type vartype = getVariableType(name);
-    if(type != vartype)
+    if(!ptr && (type != vartype))
     {
         conversionWarning(type, vartype);
         convert(type, vartype);
@@ -230,13 +253,37 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
 
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
-        instrLoad(name, m_lvartype[name]);
+    {
+        if(ptr) instrLoadPtr(name, type);
+        else instrLoad(name, m_lvartype[name]);
+    }
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
-            instrLoadWide(name, m_gvartype[name]);
+        {
+            if(ptr) instrLoadPtrWide(name, type);
+            else instrLoadWide(name, m_gvartype[name]);
+        }
         else
             abortnl("var \"" + name + "\" not declared");
     }
+}
+
+void TranslatorA11::donew()
+{
+    match("new");
+    match("[");
+    std::string size = getNumber();
+    match("]");
+
+    writeln("alloc " + size);
+}
+
+void TranslatorA11::dodelete()
+{
+    match("delete");
+    std::string name = getName();
+    fetchVariable(name);
+    writeln("free");
 }

@@ -113,6 +113,7 @@ private:
     void writeLabel(std::string labelName);
     Type returnType(std::string name);
     void callFunction(std::string name, bool nonVoidOnly);
+    bool variableExists(std::string name);
     Type getVariableType(std::string name);
     void fetchVariable(std::string name);
     void swap(Type top, Type next);
@@ -122,6 +123,8 @@ private:
     Type greaterType(Type type1, Type type2);
     Type stackConvert(Type top, Type next);
     void assignment(std::string name, bool inDeclaration);
+    void donew();
+    void dodelete();
 
     // type check
     bool isInteger(Type type);
@@ -150,9 +153,12 @@ private:
     void instrLNOT(Type type);
     void instrLAND(Type type);
     void instrLOR(Type type);
+    void instrExtr(Type type);
     void instrPush(std::string number, Type type);
     void instrLoad(std::string name, Type type);
     void instrLoadWide(std::string name, Type type);
+    void instrLoadPtr(std::string name, Type type);
+    void instrLoadPtrWide(std::string name, Type type);
     void instrFetch(std::string name, Type type);
     void instrFetchWide(std::string name, Type type);
 
@@ -160,6 +166,7 @@ private:
     Type exprSuff();
     Type exprPref();
     Type exprCast();
+    Type exprExtr();
     Type exprMul();
     Type exprAdd();
     Type exprBShift();
@@ -182,7 +189,8 @@ private:
             if(m_token == "int"
             || m_token == "float"
             || m_token == "long"
-            || m_token == "double") globalDeclaration();
+            || m_token == "double"
+            || m_token == "ref") globalDeclaration();
             else function();
         }
         for(funmap_it i = m_functions.begin(); i != m_functions.end(); i++)
@@ -204,17 +212,19 @@ private:
                     if(m_token == "break") dobreak(breakLabel);
                     else if(m_token == "continue") docontinue(breakLabel);
                     else if(m_token == "return") doreturn();
+                    else if(m_token == "delete") dodelete();
                     else if(m_token == "int"
                          || m_token == "float"
                          || m_token == "long"
-                         || m_token == "double") declaration();
+                         || m_token == "double"
+                         || m_token == "ref") declaration();
                     match(";");
                 }
             }
             else
             {
                 std::string name = getName();
-                if(m_token == "=") assignment(name, false);
+                if(m_token == "=" || m_token == "->") assignment(name, false);
                 else if(m_token == "(") callFunction(name, false);
                 else expected("statement");
                 match(";");
@@ -234,6 +244,9 @@ private:
     {
         Type type = getType(false);
         std::string name = getName();
+
+        if(variableExists(name))
+            abortnl("redeclaration of '" + name + "'");
 
         m_lvartype[name] = type;
         if(m_token == "=")

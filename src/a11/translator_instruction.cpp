@@ -450,6 +450,15 @@ void TranslatorA11::instrLOR(Type type)
     default: abortnl("invalid use of types");
     }
 }
+void TranslatorA11::instrExtr(Type type)
+{
+    switch(type)
+    {
+    case INT: case FLOAT: writeln("extr4"); break;
+    case LONG: case DOUBLE: writeln("extr8"); break;
+    default: abortnl("invalid use of types");
+    }
+}
 void TranslatorA11::instrPush(std::string number, Type type)
 {
     switch(type)
@@ -476,6 +485,24 @@ void TranslatorA11::instrLoadWide(std::string name, Type type)
     {
     case INT: case FLOAT: writeln("loadwide4 " + name); break;
     case LONG: case DOUBLE: writeln("loadwide8 " + name); break;
+    default: abortnl("invalid use of types");
+    }
+}
+void TranslatorA11::instrLoadPtr(std::string name, Type type)
+{
+    switch(type)
+    {
+    case INT: case FLOAT: writeln("refl4 " + name); break;
+    case LONG: case DOUBLE: writeln("refl8 " + name); break;
+    default: abortnl("invalid use of types");
+    }
+}
+void TranslatorA11::instrLoadPtrWide(std::string name, Type type)
+{
+    switch(type)
+    {
+    case INT: case FLOAT: writeln("reflwide4 " + name); break;
+    case LONG: case DOUBLE: writeln("reflwide8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }

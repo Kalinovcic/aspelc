@@ -32,6 +32,11 @@ TranslatorA11::Type TranslatorA11::exprSuff()
         instrPush(number, type);
         return type;
     }
+    else if(m_token == "new")
+    {
+        donew();
+        return LONG;
+    }
     else if(isAlpha(m_token[0]))
     {
         std::string name = getName();
@@ -118,10 +123,34 @@ TranslatorA11::Type TranslatorA11::exprCast()
     }
     return type;
 }
+TranslatorA11::Type TranslatorA11::exprExtr()
+{
+    Type ctype = VOID;
+    if(m_token == "<-")
+    {
+        match("<-");
+        if(m_token == "int") { match("int"); ctype = INT; }
+        else if(m_token == "float") { match("float"); ctype = FLOAT; }
+        else if(m_token == "long") { match("long"); ctype = LONG; }
+        else if(m_token == "double") { match("double"); ctype = DOUBLE; }
+        else expected("type");
+    }
+
+    Type type = exprCast();
+    if(ctype != VOID)
+    {
+        if(type != LONG)
+            abortnl("invalid operand of type '" + getTypeName(type) + "' "
+                    "to operator '<-" + getTypeName(ctype) + "'");
+        instrExtr(ctype);
+        return ctype;
+    }
+    return type;
+}
 /*************************************************/
 TranslatorA11::Type TranslatorA11::exprMul()
 {
-    Type type = exprCast();
+    Type type = exprExtr();
     while(m_token == "*"
        || m_token == "/"
        || m_token == "%")
@@ -129,19 +158,19 @@ TranslatorA11::Type TranslatorA11::exprMul()
         if(m_token == "*")
         {
             match("*");
-            type = stackConvert(exprCast(), type);
+            type = stackConvert(exprExtr(), type);
             instrMul(type);
         }
         else if(m_token == "/")
         {
             match("/");
-            type = stackConvert(exprCast(), type);
+            type = stackConvert(exprExtr(), type);
             instrDiv(type);
         }
         else if(m_token == "%")
         {
             match("%");
-            Type type2 = exprCast();
+            Type type2 = exprExtr();
             checkInteger2(type, type2, "%");
             type = stackConvert(type2, type);
             instrRem(type);
