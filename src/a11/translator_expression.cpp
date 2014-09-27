@@ -45,10 +45,6 @@ TranslatorA11::Type TranslatorA11::exprSuff()
             callFunction(name, true);
             return returnType(name);
         }
-        else if(m_token == "[")
-        {
-            return doindex(name);
-        }
         else
         {
             fetchVariable(name);
@@ -77,26 +73,37 @@ TranslatorA11::Type TranslatorA11::exprSuff()
     }
     return VOID;
 }
+TranslatorA11::Type TranslatorA11::exprArr()
+{
+    Type type = exprSuff();
+    while(m_token == "[")
+    {
+        if(type != LONG)
+            abortnl("invalid operand of type '" + getTypeName(type) + "' to operator '[]'");
+        type = doindex();
+    }
+    return type;
+}
 TranslatorA11::Type TranslatorA11::exprPref()
 {
     Type type;
     if(m_token == "-")
     {
         match("-");
-        type = exprSuff();
+        type = exprArr();
         instrNeg(type);
     }
     else if(m_token == "!")
     {
         match("!");
-        type = exprSuff();
+        type = exprArr();
         checkInteger(type, "!");
         instrLNOT(type);
     }
     else if(m_token == "~")
     {
         match("~");
-        type = exprSuff();
+        type = exprArr();
         checkInteger(type, "~");
         instrBNOT(type);
     }
@@ -104,7 +111,7 @@ TranslatorA11::Type TranslatorA11::exprPref()
     {
         if(m_token == "+")
             match(m_token);
-        type = exprSuff();
+        type = exprArr();
     }
     return type;
 }

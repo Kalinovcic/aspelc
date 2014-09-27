@@ -32,7 +32,7 @@ std::string TranslatorA11::newLabel()
 
 void TranslatorA11::writeLabel(std::string labelname)
 {
-    write("\n" + labelname + ":");
+    write(labelname + ":");
 }
 
 TranslatorA11::Type TranslatorA11::returnType(std::string name)
@@ -275,6 +275,9 @@ void TranslatorA11::donew()
     match("new");
     match("[");
     std::string size = getNumber();
+    Type numtype = getNumberType(size);
+    if(numtype != INT && numtype != LONG)
+        abortnl("invalid operand of type '" + getTypeName(numtype) + "' to operator 'new'");
     match("]");
 
     writeln("alloc " + size);
@@ -288,19 +291,14 @@ void TranslatorA11::dodelete()
     writeln("free");
 }
 
-TranslatorA11::Type TranslatorA11::doindex(std::string name)
+TranslatorA11::Type TranslatorA11::doindex()
 {
-    fetchVariable(name);
-    Type vartype = getVariableType(name);
-    if(vartype != LONG)
-        abortnl("invalid operand of type '" + getTypeName(vartype) + "' to operator '[]'");
-
     match("[");
     Type type = getType(false);
     match(":");
     std::string number = getNumber();
     Type numtype = getNumberType(number);
-    if(numtype != INT)
+    if(numtype != INT && numtype != LONG)
         abortnl("invalid index of type '" + getTypeName(numtype) + "'");
     match("]");
 
