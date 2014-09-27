@@ -26,8 +26,9 @@
 LexicalScannerA10::LexicalScannerA10(std::istream& in)
 : LexicalScanner(in)
 {
-    nextChar();
     m_line = 1;
+    nextChar();
+    skipWhite();
 }
 
 LexicalScannerA10::~LexicalScannerA10()

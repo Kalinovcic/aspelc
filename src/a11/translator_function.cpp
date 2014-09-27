@@ -49,13 +49,6 @@ void TranslatorA11::function()
     m_cfun.rtype = getType(true);
     m_cfun.atype.clear();
 
-    bool native = false;
-    if(m_token == "native")
-    {
-        match("native");
-        native = true;
-    }
-
     std::string functionName = m_token;
     std::vector<std::string> argvars;
     nextToken();
@@ -73,6 +66,13 @@ void TranslatorA11::function()
         }
     }
     match(")");
+
+    bool native = false;
+    if(m_token == "native")
+    {
+        match("native");
+        native = true;
+    }
 
     m_cfun.forward = false;
     if(m_token == "forward")

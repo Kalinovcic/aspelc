@@ -25,11 +25,9 @@
 
 void TranslatorA11::condition()
 {
-    match("(");
-    if(m_token == ")")
+    if(m_token == "{")
         expected("condition");
     expression();
-    match(")");
 }
 
 void TranslatorA11::doif(std::string breakLabel, std::string continueLabel)
