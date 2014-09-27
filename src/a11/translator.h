@@ -123,6 +123,35 @@ private:
     Type stackConvert(Type top, Type next);
     void assignment(std::string name, bool inDeclaration);
 
+    // type check
+    bool isInteger(Type type);
+    void checkInteger(Type type, std::string op);
+    void checkInteger2(Type type1, Type type2, std::string op);
+
+    // instruction
+    void instrAdd(Type type);
+    void instrSub(Type type);
+    void instrMul(Type type);
+    void instrDiv(Type type);
+    void instrRem(Type type);
+    void instrShl(Type type);
+    void instrShr(Type type);
+    void instrLt(Type type1, Type type2);
+    void instrLe(Type type1, Type type2);
+    void instrGt(Type type1, Type type2);
+    void instrGe(Type type1, Type type2);
+    void instrEq(Type type1, Type type2);
+    void instrNe(Type type1, Type type2);
+    void instrBAND(Type type);
+    void instrBXOR(Type type);
+    void instrBOR(Type type);
+    void instrLAND(Type type);
+    void instrLOR(Type type);
+    void instrLoad(std::string name, Type type);
+    void instrLoadWide(std::string name, Type type);
+    void instrFetch(std::string name, Type type);
+    void instrFetchWide(std::string name, Type type);
+
     // expression
     Type exprSuff();
     Type exprPref();

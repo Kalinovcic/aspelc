@@ -199,45 +199,21 @@ TranslatorA11::Type TranslatorA11::exprMul()
         {
             match(OPERATOR_MULTIPLICATION);
             type = stackConvert(exprCast(), type);
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_MULTIPLICATION_INT); break;
-            case FLOAT: writeln(INSTRUCTION_MULTIPLICATION_FLOAT); break;
-            case LONG: writeln(INSTRUCTION_MULTIPLICATION_LONG); break;
-            case DOUBLE: writeln(INSTRUCTION_MULTIPLICATION_DOUBLE); break;
-            default: abortnl("invalid use of types");
-            }
+            instrMul(type);
         }
         else if(m_token == OPERATOR_DIVISION)
         {
             match(OPERATOR_DIVISION);
             type = stackConvert(exprCast(), type);
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_DIVISION_INT); break;
-            case FLOAT: writeln(INSTRUCTION_DIVISION_FLOAT); break;
-            case LONG: writeln(INSTRUCTION_DIVISION_LONG); break;
-            case DOUBLE: writeln(INSTRUCTION_DIVISION_DOUBLE); break;
-            default: abortnl("invalid use of types");
-            }
+            instrDiv(type);
         }
         else if(m_token == OPERATOR_REMAINDER)
         {
             match(OPERATOR_REMAINDER);
             Type type2 = exprCast();
-            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
-            {
-                std::string name1 = getTypeName(type);
-                std::string name2 = getTypeName(type2);
-                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '%'");
-            }
+            checkInteger2(type, type2, "%");
             type = stackConvert(type2, type);
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_REMAINDER_INT); break;
-            case LONG: writeln(INSTRUCTION_REMAINDER_LONG); break;
-            default: abortnl("invalid use of types");
-            }
+            instrRem(type);
         }
     }
     return type;
@@ -252,27 +228,13 @@ TranslatorA11::Type TranslatorA11::exprAdd()
         {
             match(OPERATOR_ADDITION);
             type = stackConvert(exprMul(), type);
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_ADDITION_INT); break;
-            case FLOAT: writeln(INSTRUCTION_ADDITION_FLOAT); break;
-            case LONG: writeln(INSTRUCTION_ADDITION_LONG); break;
-            case DOUBLE: writeln(INSTRUCTION_ADDITION_DOUBLE); break;
-            default: abortnl("invalid use of types");
-            }
+            instrAdd(type);
         }
         else if(m_token == OPERATOR_SUBTRACTION)
         {
             match(OPERATOR_SUBTRACTION);
             type = stackConvert(exprMul(), type);
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_SUBTRACTION_INT); break;
-            case FLOAT: writeln(INSTRUCTION_SUBTRACTION_FLOAT); break;
-            case LONG: writeln(INSTRUCTION_SUBTRACTION_LONG); break;
-            case DOUBLE: writeln(INSTRUCTION_SUBTRACTION_DOUBLE); break;
-            default: abortnl("invalid use of types");
-            }
+            instrSub(type);
         }
     }
     return type;
@@ -288,45 +250,25 @@ TranslatorA11::Type TranslatorA11::exprBShift()
         {
             match(OPERATOR_SHIFTLEFT);
             Type type2 = exprAdd();
-            if((type != INT && type != LONG) || (type2 != INT && type2 != LONG))
-            {
-                std::string name1 = getTypeName(type);
-                std::string name2 = getTypeName(type2);
-                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '<<'");
-            }
+            checkInteger2(type, type2, "<<");
             if(type2 == LONG)
             {
-                warningnl("deprecated second operand type 'long' to operator '<<'");
+                warningnl("deprecated second operand of type 'long' to operator '<<'");
                 convert(LONG, INT);
             }
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_SHIFTLEFT_INT); break;
-            case LONG: writeln(INSTRUCTION_SHIFTLEFT_LONG); break;
-            default: abortnl("invalid use of types");
-            }
+            instrShl(type);
         }
         else if(m_token == OPERATOR_SHIFTRIGHT)
         {
             match(OPERATOR_SHIFTRIGHT);
             Type type2 = exprAdd();
-            if((type != INT && type2 != LONG) || (type2 != INT && type2 != LONG))
-            {
-                std::string name1 = getTypeName(type);
-                std::string name2 = getTypeName(type2);
-                abortnl("invalid operands of types '" + name1 + "' and '" + name2 + "' to operator '>>'");
-            }
+            checkInteger2(type, type2, ">>");
             if(type2 == LONG)
             {
-                warningnl("deprecated second operand type 'long' to operator '>>'");
+                warningnl("deprecated second of operand type 'long' to operator '>>'");
                 convert(LONG, INT);
             }
-            switch(type)
-            {
-            case INT: writeln(INSTRUCTION_SHIFTRIGHT_INT); break;
-            case LONG: writeln(INSTRUCTION_SHIFTRIGHT_LONG); break;
-            default: abortnl("invalid use of types");
-            }
+            instrShr(type);
         }
     }
     return type;
@@ -343,26 +285,30 @@ TranslatorA11::Type TranslatorA11::exprRel()
         if(m_token == OPERATOR_LESS)
         {
             match(OPERATOR_LESS);
-            type = stackConvert(exprBShift(), type);
-            writeln(INSTRUCTION_LESS);
+            Type type2 = exprBShift();
+            instrLt(type2, type);
+            type = INT;
         }
         else if(m_token == OPERATOR_LESSEQUAL)
         {
             match(OPERATOR_LESSEQUAL);
-            type = stackConvert(exprBShift(), type);
-            writeln(INSTRUCTION_LESSEQUAL);
+            Type type2 = exprBShift();
+            instrLe(type2, type);
+            type = INT;
         }
         else if(m_token == OPERATOR_GREATER)
         {
             match(OPERATOR_GREATER);
-            type = stackConvert(exprBShift(), type);
-            writeln(INSTRUCTION_GREATER);
+            Type type2 = exprBShift();
+            instrGt(type2, type);
+            type = INT;
         }
         else if(m_token == OPERATOR_GREATEREQUAL)
         {
             match(OPERATOR_GREATEREQUAL);
-            type = stackConvert(exprBShift(), type);
-            writeln(INSTRUCTION_GREATEREQUAL);
+            Type type2 = exprBShift();
+            instrGe(type2, type);
+            type = INT;
         }
     }
     return type;
@@ -376,14 +322,16 @@ TranslatorA11::Type TranslatorA11::exprRelEqual()
         if(m_token == OPERATOR_EQUAL)
         {
             match(OPERATOR_EQUAL);
-            type = stackConvert(exprRel(), type);
-            writeln(INSTRUCTION_EQUAL);
+            Type type2 = exprRel();
+            instrEq(type2, type);
+            type = INT;
         }
         else if(m_token == OPERATOR_NOT_EQUAL)
         {
             match(OPERATOR_NOT_EQUAL);
-            type = stackConvert(exprRel(), type);
-            writeln(INSTRUCTION_NOT_EQUAL);
+            Type type2 = exprRel();
+            instrNe(type2, type);
+            type = INT;
         }
     }
     return type;
@@ -395,8 +343,10 @@ TranslatorA11::Type TranslatorA11::exprBAND()
     while(m_token == OPERATOR_BITWISE_AND)
     {
         match(OPERATOR_BITWISE_AND);
-        type = stackConvert(exprRelEqual(), type);
-        writeln(INSTRUCTION_BITWISE_AND);
+        Type type2 = exprRelEqual();
+        checkInteger2(type, type2, "&");
+        type = stackConvert(type2, type);
+        instrBAND(type);
     }
     return type;
 }
@@ -406,8 +356,10 @@ TranslatorA11::Type TranslatorA11::exprBXOR()
     while(m_token == OPERATOR_BITWISE_XOR)
     {
         match(OPERATOR_BITWISE_XOR);
-        type = stackConvert(exprBAND(), type);
-        writeln(INSTRUCTION_BITWISE_XOR);
+        Type type2 = exprBAND();
+        checkInteger2(type, type2, "^");
+        type = stackConvert(type2, type);
+        instrBXOR(type);
     }
     return type;
 }
@@ -417,8 +369,10 @@ TranslatorA11::Type TranslatorA11::exprBOR()
     while(m_token == OPERATOR_BITWISE_OR)
     {
         match(OPERATOR_BITWISE_OR);
-        type = stackConvert(exprBXOR(), type);
-        writeln(INSTRUCTION_BITWISE_OR);
+        Type type2 = exprBXOR();
+        checkInteger2(type, type2, "|");
+        type = stackConvert(type2, type);
+        instrBOR(type);
     }
     return type;
 }
@@ -429,8 +383,10 @@ TranslatorA11::Type TranslatorA11::exprLAND()
     while(m_token == OPERATOR_LOGICAL_AND)
     {
         match(OPERATOR_LOGICAL_AND);
-        type = stackConvert(exprBOR(), type);
-        writeln(INSTRUCTION_LOGICAL_AND);
+        Type type2 = exprBOR();
+        checkInteger2(type, type2, "&&");
+        type = stackConvert(type2, type);
+        instrLAND(type);
     }
     return type;
 }
@@ -440,8 +396,10 @@ TranslatorA11::Type TranslatorA11::exprLOR()
     while(m_token == OPERATOR_LOGICAL_OR)
     {
         match(OPERATOR_LOGICAL_OR);
-        type = stackConvert(exprLAND(), type);
-        writeln(INSTRUCTION_LOGICAL_OR);
+        Type type2 = exprLAND();
+        checkInteger2(type, type2, "||");
+        type = stackConvert(type2, type);
+        instrLOR(type);
     }
     return type;
 }

@@ -87,12 +87,12 @@ void TranslatorA11::fetchVariable(std::string name)
 {
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end())
-        writeln("fetch " + name);
+        instrFetch(name, m_lvartype[name]);
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
-            writeln("fetchwide " + name);
+            instrFetchWide(name, m_gvartype[name]);
         else
             abortnl("var \"" + name + "\" not declared");
     }
@@ -230,12 +230,12 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
 
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
-        writeln("load " + name);
+        instrLoad(name, m_lvartype[name]);
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
-            writeln("loadwide " + name);
+            instrLoadWide(name, m_gvartype[name]);
         else
             abortnl("var \"" + name + "\" not declared");
     }
