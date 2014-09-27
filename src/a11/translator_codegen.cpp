@@ -287,3 +287,33 @@ void TranslatorA11::dodelete()
     fetchVariable(name);
     writeln("free");
 }
+
+TranslatorA11::Type TranslatorA11::doindex(std::string name)
+{
+    fetchVariable(name);
+    Type vartype = getVariableType(name);
+    if(vartype != LONG)
+        abortnl("invalid operand of type '" + getTypeName(vartype) + "' to operator '[]'");
+
+    match("[");
+    Type type = getType(false);
+    match(":");
+    std::string number = getNumber();
+    Type numtype = getNumberType(number);
+    if(numtype != INT)
+        abortnl("invalid index of type '" + getTypeName(numtype) + "'");
+    match("]");
+
+    instrPush(number, LONG);
+    switch(type)
+    {
+    case INT: case FLOAT: instrPush("4", LONG); break;
+    case LONG: case DOUBLE: instrPush("8", LONG); break;
+    default: abortnl("invalid use of types");
+    }
+    instrMul(LONG);
+    instrAdd(LONG);
+
+    instrExtr(type);
+    return type;
+}

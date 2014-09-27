@@ -125,6 +125,7 @@ private:
     void assignment(std::string name, bool inDeclaration);
     void donew();
     void dodelete();
+    Type doindex(std::string name);
 
     // type check
     bool isInteger(Type type);

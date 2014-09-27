@@ -45,13 +45,10 @@ TranslatorA11::Type TranslatorA11::exprSuff()
             callFunction(name, true);
             return returnType(name);
         }
-        /*
         else if(m_token == "[")
         {
-            match("[");
-            match("]");
+            return doindex(name);
         }
-        */
         else
         {
             fetchVariable(name);
@@ -145,9 +142,11 @@ TranslatorA11::Type TranslatorA11::exprExtr()
         else expected("type");
     }
 
-    Type type = exprCast();
-    if(ctype != VOID)
+    Type type;
+    if(ctype == VOID) type = exprCast();
+    else
     {
+        type = exprExtr();
         if(type != LONG)
             abortnl("invalid operand of type '" + getTypeName(type) + "' "
                     "to operator '<-" + getTypeName(ctype) + "'");
