@@ -76,6 +76,17 @@ void TranslatorA11::instrRem(Type type)
     default: abortnl("invalid use of types");
     }
 }
+void TranslatorA11::instrNeg(Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("negi4"); break;
+    case FLOAT: writeln("negf4"); break;
+    case LONG: writeln("negi8"); break;
+    case DOUBLE: writeln("negf8"); break;
+    default: abortnl("invalid use of types");
+    }
+}
 void TranslatorA11::instrShl(Type type)
 {
     switch(type)
@@ -385,6 +396,15 @@ void TranslatorA11::instrBAND(Type type)
     default: abortnl("invalid use of types");
     }
 }
+void TranslatorA11::instrBNOT(Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("bnot4"); break;
+    case LONG: writeln("bnot8"); break;
+    default: abortnl("invalid use of types");
+    }
+}
 void TranslatorA11::instrBXOR(Type type)
 {
     switch(type)
@@ -400,6 +420,15 @@ void TranslatorA11::instrBOR(Type type)
     {
     case INT: writeln("bor4"); break;
     case LONG: writeln("bor8"); break;
+    default: abortnl("invalid use of types");
+    }
+}
+void TranslatorA11::instrLNOT(Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("lnot4"); break;
+    case LONG: writeln("lnot8"); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -419,6 +448,17 @@ void TranslatorA11::instrLOR(Type type)
     case INT: writeln("lor4"); break;
     case LONG: writeln("lor8"); break;
     default: abortnl("invalid use of types");
+    }
+}
+void TranslatorA11::instrPush(std::string number, Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("pushi4 " + number); break;
+    case FLOAT: writeln("pushf4 " + number); break;
+    case LONG: writeln("pushi8 " + number); break;
+    case DOUBLE: writeln("pushf8 " + number); break;
+    default: abortnl("invalid number type '" + number + "'");
     }
 }
 void TranslatorA11::instrLoad(std::string name, Type type)

@@ -134,6 +134,7 @@ private:
     void instrMul(Type type);
     void instrDiv(Type type);
     void instrRem(Type type);
+    void instrNeg(Type type);
     void instrShl(Type type);
     void instrShr(Type type);
     void instrLt(Type type1, Type type2);
@@ -142,11 +143,14 @@ private:
     void instrGe(Type type1, Type type2);
     void instrEq(Type type1, Type type2);
     void instrNe(Type type1, Type type2);
+    void instrBNOT(Type type);
     void instrBAND(Type type);
     void instrBXOR(Type type);
     void instrBOR(Type type);
+    void instrLNOT(Type type);
     void instrLAND(Type type);
     void instrLOR(Type type);
+    void instrPush(std::string number, Type type);
     void instrLoad(std::string name, Type type);
     void instrLoadWide(std::string name, Type type);
     void instrFetch(std::string name, Type type);

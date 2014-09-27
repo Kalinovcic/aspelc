@@ -90,14 +90,7 @@ TranslatorA11::Type TranslatorA11::exprSuff()
     {
         std::string number = getNumber();
         Type type = getNumberType(number);
-        switch(type)
-        {
-        case INT: writeln("pushi4 " + number); break;
-        case FLOAT: writeln("pushf4 " + number); break;
-        case LONG: writeln("pushi8 " + number); break;
-        case DOUBLE: writeln("pushf8 " + number); break;
-        default: abortnl("invalid number type '" + number + "'");
-        }
+        instrPush(number, type);
         return type;
     }
     else if(isAlpha(m_token[0]))
@@ -137,31 +130,30 @@ TranslatorA11::Type TranslatorA11::exprSuff()
 TranslatorA11::Type TranslatorA11::exprPref()
 {
     Type type;
-    if(m_token == OPERATOR_UNARY_PLUS)
-    {
-        match(OPERATOR_UNARY_PLUS);
-        type = exprSuff();
-    }
-    else if(m_token == OPERATOR_UNARY_MINUS)
+    if(m_token == OPERATOR_UNARY_MINUS)
     {
         match(OPERATOR_UNARY_MINUS);
         type = exprSuff();
-        writeln(INSTRUCTION_UNARY_MINUS);
+        instrNeg(type);
     }
     else if(m_token == OPERATOR_LOGICAL_NOT)
     {
         match(OPERATOR_LOGICAL_NOT);
         type = exprSuff();
-        writeln(INSTRUCTION_LOGICAL_NOT);
+        checkInteger(type, "!");
+        instrLNOT(type);
     }
     else if(m_token == OPERATOR_BITWISE_NOT)
     {
         match(OPERATOR_BITWISE_NOT);
         type = exprSuff();
-        writeln(INSTRUCTION_BITWISE_NOT);
+        checkInteger(type, "~");
+        instrBNOT(type);
     }
     else
     {
+        if(m_token == OPERATOR_UNARY_PLUS)
+            match(m_token);
         type = exprSuff();
     }
     return type;
