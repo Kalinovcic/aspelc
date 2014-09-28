@@ -308,13 +308,12 @@ void TranslatorA11::donew()
 {
     match("new");
     match("[");
-    std::string size = getNumber();
-    Type numtype = getNumberType(size);
-    if(numtype != INT && numtype != LONG)
-        abortnl("invalid operand of type '" + getTypeName(numtype) + "' to operator 'new'");
+    Type type = expression();
+    if(type != INT && type != LONG)
+        abortnl("invalid operand of type '" + getTypeName(type) + "' to operator 'new'");
     match("]");
 
-    writeln("alloc " + size);
+    writeln("alloc");
 }
 
 void TranslatorA11::dodelete()
