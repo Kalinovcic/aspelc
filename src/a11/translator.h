@@ -141,6 +141,7 @@ private:
     void instrNeg(Type type);
     void instrShl(Type type);
     void instrShr(Type type);
+    void instrCmp(Type type1, Type type2);
     void instrLt(Type type1, Type type2);
     void instrLe(Type type1, Type type2);
     void instrGt(Type type1, Type type2);
