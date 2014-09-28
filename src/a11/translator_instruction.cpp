@@ -289,7 +289,9 @@ void TranslatorA11::instrRefLoad(std::string name, Type type)
 {
     switch(type)
     {
-    case BYTE: case SHORT: case INT: case FLOAT: writeln("refl4 " + name); break;
+    case BYTE: writeln("refl1 " + name); break;
+    case SHORT: writeln("refl2 " + name); break;
+    case INT: case FLOAT: writeln("refl4 " + name); break;
     case LONG: case DOUBLE: writeln("refl8 " + name); break;
     default: abortnl("invalid use of types");
     }
@@ -298,7 +300,9 @@ void TranslatorA11::instrRefLoadWide(std::string name, Type type)
 {
     switch(type)
     {
-    case BYTE: case SHORT: case INT: case FLOAT: writeln("reflwide4 " + name); break;
+    case BYTE: writeln("reflwide1 " + name); break;
+    case SHORT: writeln("reflwide2 " + name); break;
+    case INT: case FLOAT: writeln("reflwide4 " + name); break;
     case LONG: case DOUBLE: writeln("reflwide8 " + name); break;
     default: abortnl("invalid use of types");
     }
