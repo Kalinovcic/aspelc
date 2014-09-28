@@ -130,7 +130,7 @@ private:
     void assignmentComplex();
     void donew();
     void dodelete();
-    Type doindex();
+//  Type doindex();
 
     // type check
     bool isInteger(Type type);

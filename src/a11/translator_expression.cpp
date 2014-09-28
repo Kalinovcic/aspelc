@@ -76,12 +76,14 @@ TranslatorA11::Type TranslatorA11::exprSuff()
 TranslatorA11::Type TranslatorA11::exprArr()
 {
     Type type = exprSuff();
+    /*
     while(m_token == "[")
     {
         if(type != LONG)
             abortnl("invalid operand of type '" + getTypeName(type) + "' to operator '[]'");
         type = doindex();
     }
+    */
     return type;
 }
 TranslatorA11::Type TranslatorA11::exprPref()

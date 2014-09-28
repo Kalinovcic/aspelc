@@ -325,6 +325,7 @@ void TranslatorA11::dodelete()
     writeln("free");
 }
 
+/*
 TranslatorA11::Type TranslatorA11::doindex()
 {
     match("[");
@@ -351,3 +352,4 @@ TranslatorA11::Type TranslatorA11::doindex()
     instrExtr(type);
     return type;
 }
+*/
