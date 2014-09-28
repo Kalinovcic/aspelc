@@ -247,21 +247,12 @@ TranslatorA11::Type TranslatorA11::stackConvert(Type top, Type next)
     return greater;
 }
 
-void TranslatorA11::assignment(std::string name, bool inDeclaration)
+void TranslatorA11::normalAssignment(std::string name, bool inDeclaration)
 {
-    bool ptr = false;
-    if(m_token == "=")
-        match("=");
-    else if(m_token == "->")
-    {
-        ptr = true;
-        match("->");
-    }
-    else expected("= or ->");
-
+    match("=");
     Type type = expression();
     Type vartype = getVariableType(name);
-    if(!ptr && (type != vartype))
+    if(type != vartype)
     {
         conversionWarning(type, vartype);
         convert(type, vartype);
@@ -269,21 +260,48 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
 
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
-    {
-        if(ptr) instrRefLoad(name, type);
-        else instrLoad(name, m_lvartype[name]);
-    }
+        instrLoad(name, m_lvartype[name]);
     else
     {
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
-        {
-            if(ptr) instrRefLoadWide(name, type);
-            else instrLoadWide(name, m_gvartype[name]);
-        }
+            instrLoadWide(name, m_gvartype[name]);
         else
             abortnl("var \"" + name + "\" not declared");
     }
+}
+void TranslatorA11::valueAssignment()
+{
+    match("->");
+    Type type = expression();
+    instrRefLoad(type);
+}
+
+void TranslatorA11::assignment(std::string name, bool inDeclaration)
+{
+    if(m_token == "=")
+        normalAssignment(name, inDeclaration);
+    else if(m_token == "->")
+    {
+        Type vartype = getVariableType(name);
+        if(vartype != LONG)
+            abortnl("using type '" + getTypeName(vartype) + "' as reference");
+        fetchVariable(name);
+        valueAssignment();
+    }
+    else expected("= or ->");
+}
+
+void TranslatorA11::assignmentComplex()
+{
+    match("(");
+    Type exprtype = expression();
+    if(exprtype != LONG)
+        abortnl("invalid expression of type '" + getTypeName(exprtype) + "' used in expression assignment");
+    match(")");
+    if(m_token == "=")
+        abortnl("assignment operator '=' used in expression assignment");
+    valueAssignment();
 }
 
 void TranslatorA11::donew()

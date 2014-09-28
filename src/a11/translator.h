@@ -124,7 +124,10 @@ private:
     void conversionWarning(Type original, Type converted);
     Type greaterType(Type type1, Type type2);
     Type stackConvert(Type top, Type next);
+    void normalAssignment(std::string name, bool inDeclaration);
+    void valueAssignment();
     void assignment(std::string name, bool inDeclaration);
+    void assignmentComplex();
     void donew();
     void dodelete();
     Type doindex();
@@ -157,12 +160,11 @@ private:
     void instrLNOT(Type type);
     void instrLAND(Type type);
     void instrLOR(Type type);
+    void instrRefLoad(Type type);
     void instrExtr(Type type);
     void instrPush(std::string number, Type type);
     void instrLoad(std::string name, Type type);
     void instrLoadWide(std::string name, Type type);
-    void instrRefLoad(std::string name, Type type);
-    void instrRefLoadWide(std::string name, Type type);
     void instrFetch(std::string name, Type type);
     void instrFetchWide(std::string name, Type type);
 
@@ -227,6 +229,11 @@ private:
                          || m_token == "double") declaration();
                     match(";");
                 }
+            }
+            else if(m_token == "(")
+            {
+                assignmentComplex();
+                match(";");
             }
             else
             {
