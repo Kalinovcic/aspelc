@@ -283,7 +283,7 @@ void TranslatorA11::instrLoadWide(std::string name, Type type)
     default: abortnl("invalid use of types");
     }
 }
-void TranslatorA11::instrLoadPtr(std::string name, Type type)
+void TranslatorA11::instrRefLoad(std::string name, Type type)
 {
     switch(type)
     {
@@ -292,7 +292,7 @@ void TranslatorA11::instrLoadPtr(std::string name, Type type)
     default: abortnl("invalid use of types");
     }
 }
-void TranslatorA11::instrLoadPtrWide(std::string name, Type type)
+void TranslatorA11::instrRefLoadWide(std::string name, Type type)
 {
     switch(type)
     {

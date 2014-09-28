@@ -254,7 +254,7 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
     std::vector<std::string>::iterator localvar = std::find(m_localvars.begin(), m_localvars.end(), name);
     if(localvar != m_localvars.end() || inDeclaration)
     {
-        if(ptr) instrLoadPtr(name, type);
+        if(ptr) instrRefLoad(name, type);
         else instrLoad(name, m_lvartype[name]);
     }
     else
@@ -262,7 +262,7 @@ void TranslatorA11::assignment(std::string name, bool inDeclaration)
         std::vector<std::string>::iterator globalvar = std::find(m_globalvars.begin(), m_globalvars.end(), name);
         if(globalvar != m_globalvars.end())
         {
-            if(ptr) instrLoadPtrWide(name, type);
+            if(ptr) instrRefLoadWide(name, type);
             else instrLoadWide(name, m_gvartype[name]);
         }
         else

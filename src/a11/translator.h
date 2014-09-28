@@ -159,8 +159,8 @@ private:
     void instrPush(std::string number, Type type);
     void instrLoad(std::string name, Type type);
     void instrLoadWide(std::string name, Type type);
-    void instrLoadPtr(std::string name, Type type);
-    void instrLoadPtrWide(std::string name, Type type);
+    void instrRefLoad(std::string name, Type type);
+    void instrRefLoadWide(std::string name, Type type);
     void instrFetch(std::string name, Type type);
     void instrFetchWide(std::string name, Type type);
 
