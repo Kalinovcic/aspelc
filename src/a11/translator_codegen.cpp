@@ -207,6 +207,21 @@ std::string TranslatorA11::getTypeName(Type type)
     return "";
 }
 
+std::string TranslatorA11::getTypeAMLName(Type type)
+{
+    switch(type)
+    {
+    case BYTE: return "i1";
+    case SHORT: return "i2";
+    case INT: return "i4";
+    case FLOAT: return "f4";
+    case LONG: return "i8";
+    case DOUBLE: return "f8";
+    case VOID: return "?";
+    }
+    return "";
+}
+
 void TranslatorA11::conversionWarning(Type original, Type converted)
 {
     if(m_wcast)

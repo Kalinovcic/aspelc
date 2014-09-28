@@ -121,6 +121,7 @@ private:
     void swap(Type top, Type next);
     void convert(Type from, Type to);
     std::string getTypeName(Type type);
+    std::string getTypeAMLName(Type type);
     void conversionWarning(Type original, Type converted);
     Type greaterType(Type type1, Type type2);
     Type stackConvert(Type top, Type next);
@@ -273,7 +274,7 @@ private:
         std::string name = getName();
         match(";");
 
-        write("w:\t" + name + "\n");
+        write("w:\t" + getTypeAMLName(type) + "\t" + name + "\n");
 
         m_gvartype[name] = type;
         m_globalvars.push_back(name);
