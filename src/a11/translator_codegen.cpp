@@ -65,7 +65,7 @@ void TranslatorA11::callFunction(std::string name, bool nonVoidOnly)
     }
 
     match(")");
-    writeln("call " + name + " " + toString(cfun.atype.size()));
+    writeln("call " + name);
 }
 
 bool TranslatorA11::variableExists(std::string name)
