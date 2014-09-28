@@ -211,9 +211,7 @@ std::string TranslatorA11::getTypeAMLName(Type type)
 {
     switch(type)
     {
-    case BYTE: return "i1";
-    case SHORT: return "i2";
-    case INT: return "i4";
+    case BYTE: case SHORT: case INT: return "i4";
     case FLOAT: return "f4";
     case LONG: return "i8";
     case DOUBLE: return "f8";
