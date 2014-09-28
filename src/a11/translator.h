@@ -191,8 +191,7 @@ private:
             if(m_token == "int"
             || m_token == "float"
             || m_token == "long"
-            || m_token == "double"
-            || m_token == "ref") globalDeclaration();
+            || m_token == "double") globalDeclaration();
             else function();
         }
         for(funmap_it i = m_functions.begin(); i != m_functions.end(); i++)
@@ -218,8 +217,7 @@ private:
                     else if(m_token == "int"
                          || m_token == "float"
                          || m_token == "long"
-                         || m_token == "double"
-                         || m_token == "ref") declaration();
+                         || m_token == "double") declaration();
                     match(";");
                 }
             }
