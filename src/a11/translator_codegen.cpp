@@ -325,31 +325,21 @@ void TranslatorA11::dodelete()
     writeln("free");
 }
 
-/*
-TranslatorA11::Type TranslatorA11::doindex()
+void TranslatorA11::dosize()
 {
-    match("[");
+    match("size");
+    match("(");
     Type type = getType(false);
-    match(":");
-    std::string number = getNumber();
-    Type numtype = getNumberType(number);
-    if(numtype != INT && numtype != LONG)
-        abortnl("invalid index of type '" + getTypeName(numtype) + "'");
-    match("]");
-
-    instrPush(number, LONG);
     switch(type)
     {
-    case BYTE: instrPush("1", LONG);
-    case SHORT: instrPush("2", LONG);
-    case INT: case FLOAT: instrPush("4", LONG); break;
-    case LONG: case DOUBLE: instrPush("8", LONG); break;
+    case BYTE: instrPush("1", LONG); break;
+    case SHORT: instrPush("2", LONG); break;
+    case INT: instrPush("4", LONG); break;
+    case FLOAT: instrPush("4", LONG); break;
+    case LONG: instrPush("8", LONG); break;
+    case DOUBLE: instrPush("8", LONG); break;
     default: abortnl("invalid use of types");
     }
-    instrMul(LONG);
-    instrAdd(LONG);
-
-    instrExtr(type);
-    return type;
+    match(")");
 }
-*/
+

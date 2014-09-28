@@ -130,7 +130,7 @@ private:
     void assignmentComplex();
     void donew();
     void dodelete();
-//  Type doindex();
+    void dosize();
 
     // type check
     bool isInteger(Type type);
@@ -170,7 +170,6 @@ private:
 
     // expression
     Type exprSuff();
-    Type exprArr();
     Type exprPref();
     Type exprCast();
     Type exprExtr();

@@ -32,6 +32,11 @@ TranslatorA11::Type TranslatorA11::exprSuff()
         instrPush(number, type);
         return type;
     }
+    else if(m_token == "size")
+    {
+        dosize();
+        return LONG;
+    }
     else if(m_token == "new")
     {
         donew();
@@ -73,39 +78,26 @@ TranslatorA11::Type TranslatorA11::exprSuff()
     }
     return VOID;
 }
-TranslatorA11::Type TranslatorA11::exprArr()
-{
-    Type type = exprSuff();
-    /*
-    while(m_token == "[")
-    {
-        if(type != LONG)
-            abortnl("invalid operand of type '" + getTypeName(type) + "' to operator '[]'");
-        type = doindex();
-    }
-    */
-    return type;
-}
 TranslatorA11::Type TranslatorA11::exprPref()
 {
     Type type;
     if(m_token == "-")
     {
         match("-");
-        type = exprArr();
+        type = exprSuff();
         instrNeg(type);
     }
     else if(m_token == "!")
     {
         match("!");
-        type = exprArr();
+        type = exprSuff();
         checkInteger(type, "!");
         instrLNOT(type);
     }
     else if(m_token == "~")
     {
         match("~");
-        type = exprArr();
+        type = exprSuff();
         checkInteger(type, "~");
         instrBNOT(type);
     }
@@ -113,7 +105,7 @@ TranslatorA11::Type TranslatorA11::exprPref()
     {
         if(m_token == "+")
             match(m_token);
-        type = exprArr();
+        type = exprSuff();
     }
     return type;
 }
