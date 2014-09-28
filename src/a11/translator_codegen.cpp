@@ -321,8 +321,8 @@ TranslatorA11::Type TranslatorA11::doindex()
     instrPush(number, LONG);
     switch(type)
     {
-    case BYTE: instrPush("2", LONG);
-    case SHORT: instrPush("4", LONG);
+    case BYTE: instrPush("1", LONG);
+    case SHORT: instrPush("2", LONG);
     case INT: case FLOAT: instrPush("4", LONG); break;
     case LONG: case DOUBLE: instrPush("8", LONG); break;
     default: abortnl("invalid use of types");
