@@ -119,13 +119,13 @@ void TranslatorA11::swap(Type top, Type next)
     if(top == LONG || top == DOUBLE)
     {
         if(next == LONG || next == DOUBLE) writeln("swap8");
-        else if(next == INT || next == FLOAT) writeln("swap84");
+        else if(next == BYTE || next == SHORT || next == INT || next == FLOAT) writeln("swap84");
         else abort("invalid swap types");
     }
-    else if(top == INT || top == FLOAT)
+    else if(top == BYTE || top == SHORT || top == INT || top == FLOAT)
     {
         if(next == LONG || next == DOUBLE) writeln("swap48");
-        else if(next == INT || next == FLOAT) writeln("swap4");
+        else if(next == BYTE || next == SHORT || next == INT || next == FLOAT) writeln("swap4");
         else abort("invalid swap types");
     }
     else abort("invalid swap types");
@@ -133,6 +133,19 @@ void TranslatorA11::swap(Type top, Type next)
 
 void TranslatorA11::convert(Type from, Type to)
 {
+    if(from == BYTE || from == SHORT)
+    {
+        if(to != INT) convert(INT, to);
+        return;
+    }
+    if(to == BYTE || to == SHORT)
+    {
+        if(from != INT) convert(from, INT);
+        if(to == BYTE) writeln("ci41");
+        else if(to == SHORT) writeln("ci42");
+        return;
+    }
+
     switch(from)
     {
     case INT:
@@ -183,6 +196,8 @@ std::string TranslatorA11::getTypeName(Type type)
 {
     switch(type)
     {
+    case BYTE: return "byte";
+    case SHORT: return "short";
     case INT: return "int";
     case FLOAT: return "float";
     case LONG: return "long";
@@ -205,7 +220,8 @@ TranslatorA11::Type TranslatorA11::greaterType(Type type1, Type type2)
     if(type1 == DOUBLE || type2 == DOUBLE) return DOUBLE;
     if(type1 == FLOAT || type2 == FLOAT) return FLOAT;
     if(type1 == LONG || type2 == LONG) return LONG;
-    if(type1 == INT || type2 == INT) return INT;
+    if(type1 == BYTE || type1 == SHORT || type1 == INT
+    || type2 == BYTE || type2 == SHORT || type2 == INT) return INT;
     abort("invalid type comparison");
     return VOID;
 }
@@ -305,6 +321,8 @@ TranslatorA11::Type TranslatorA11::doindex()
     instrPush(number, LONG);
     switch(type)
     {
+    case BYTE: instrPush("2", LONG);
+    case SHORT: instrPush("4", LONG);
     case INT: case FLOAT: instrPush("4", LONG); break;
     case LONG: case DOUBLE: instrPush("8", LONG); break;
     default: abortnl("invalid use of types");

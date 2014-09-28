@@ -27,7 +27,7 @@ void TranslatorA11::instrAdd(Type type)
 {
     switch(type)
     {
-    case INT: writeln("addi4"); break;
+    case BYTE: case SHORT: case INT: writeln("addi4"); break;
     case FLOAT: writeln("addf4"); break;
     case LONG: writeln("addi8"); break;
     case DOUBLE: writeln("addf8"); break;
@@ -38,7 +38,7 @@ void TranslatorA11::instrSub(Type type)
 {
     switch(type)
     {
-    case INT: writeln("subi4"); break;
+    case BYTE: case SHORT: case INT: writeln("subi4"); break;
     case FLOAT: writeln("subf4"); break;
     case LONG: writeln("subi8"); break;
     case DOUBLE: writeln("subf8"); break;
@@ -49,7 +49,7 @@ void TranslatorA11::instrMul(Type type)
 {
     switch(type)
     {
-    case INT: writeln("muli4"); break;
+    case BYTE: case SHORT: case INT: writeln("muli4"); break;
     case FLOAT: writeln("mulf4"); break;
     case LONG: writeln("muli8"); break;
     case DOUBLE: writeln("mulf8"); break;
@@ -60,7 +60,7 @@ void TranslatorA11::instrDiv(Type type)
 {
     switch(type)
     {
-    case INT: writeln("divi4"); break;
+    case BYTE: case SHORT: case INT: writeln("divi4"); break;
     case FLOAT: writeln("divf4"); break;
     case LONG: writeln("divi8"); break;
     case DOUBLE: writeln("divf8"); break;
@@ -71,7 +71,7 @@ void TranslatorA11::instrRem(Type type)
 {
     switch(type)
     {
-    case INT: writeln("remi4"); break;
+    case BYTE: case SHORT: case INT: writeln("remi4"); break;
     case LONG: writeln("remi8"); break;
     default: abortnl("invalid use of types");
     }
@@ -80,7 +80,7 @@ void TranslatorA11::instrNeg(Type type)
 {
     switch(type)
     {
-    case INT: writeln("negi4"); break;
+    case BYTE: case SHORT: case INT: writeln("negi4"); break;
     case FLOAT: writeln("negf4"); break;
     case LONG: writeln("negi8"); break;
     case DOUBLE: writeln("negf8"); break;
@@ -91,7 +91,7 @@ void TranslatorA11::instrShl(Type type)
 {
     switch(type)
     {
-    case INT: writeln("shl4"); break;
+    case BYTE: case SHORT: case INT: writeln("shl4"); break;
     case LONG: writeln("shl8"); break;
     default: abortnl("invalid use of types");
     }
@@ -100,7 +100,7 @@ void TranslatorA11::instrShr(Type type)
 {
     switch(type)
     {
-    case INT: writeln("shr4"); break;
+    case BYTE: case SHORT: case INT: writeln("shr4"); break;
     case LONG: writeln("shr8"); break;
     default: abortnl("invalid use of types");
     }
@@ -186,7 +186,7 @@ void TranslatorA11::instrBNOT(Type type)
 {
     switch(type)
     {
-    case INT: writeln("bnot4"); break;
+    case BYTE: case SHORT: case INT: writeln("bnot4"); break;
     case LONG: writeln("bnot8"); break;
     default: abortnl("invalid use of types");
     }
@@ -195,7 +195,7 @@ void TranslatorA11::instrBAND(Type type)
 {
     switch(type)
     {
-    case INT: writeln("band4"); break;
+    case BYTE: case SHORT: case INT: writeln("band4"); break;
     case LONG: writeln("band8"); break;
     default: abortnl("invalid use of types");
     }
@@ -204,7 +204,7 @@ void TranslatorA11::instrBXOR(Type type)
 {
     switch(type)
     {
-    case INT: writeln("bxor4"); break;
+    case BYTE: case SHORT: case INT: writeln("bxor4"); break;
     case LONG: writeln("bxor8"); break;
     default: abortnl("invalid use of types");
     }
@@ -213,7 +213,7 @@ void TranslatorA11::instrBOR(Type type)
 {
     switch(type)
     {
-    case INT: writeln("bor4"); break;
+    case BYTE: case SHORT: case INT: writeln("bor4"); break;
     case LONG: writeln("bor8"); break;
     default: abortnl("invalid use of types");
     }
@@ -222,7 +222,7 @@ void TranslatorA11::instrLNOT(Type type)
 {
     switch(type)
     {
-    case INT: writeln("lnot4"); break;
+    case BYTE: case SHORT: case INT: writeln("lnot4"); break;
     case LONG: writeln("lnot8"); break;
     default: abortnl("invalid use of types");
     }
@@ -231,7 +231,7 @@ void TranslatorA11::instrLAND(Type type)
 {
     switch(type)
     {
-    case INT: writeln("land4"); break;
+    case BYTE: case SHORT: case INT: writeln("land4"); break;
     case LONG: writeln("land8"); break;
     default: abortnl("invalid use of types");
     }
@@ -240,7 +240,7 @@ void TranslatorA11::instrLOR(Type type)
 {
     switch(type)
     {
-    case INT: writeln("lor4"); break;
+    case BYTE: case SHORT: case INT: writeln("lor4"); break;
     case LONG: writeln("lor8"); break;
     default: abortnl("invalid use of types");
     }
@@ -249,8 +249,10 @@ void TranslatorA11::instrExtr(Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("extr 4"); break;
-    case LONG: case DOUBLE: writeln("extr 8"); break;
+    case BYTE: writeln("extr1"); break;
+    case SHORT: writeln("extr2"); break;
+    case INT: case FLOAT: writeln("extr4"); break;
+    case LONG: case DOUBLE: writeln("extr8"); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -258,7 +260,7 @@ void TranslatorA11::instrPush(std::string number, Type type)
 {
     switch(type)
     {
-    case INT: writeln("pushi4 " + number); break;
+    case BYTE: case SHORT: case INT: writeln("pushi4 " + number); break;
     case FLOAT: writeln("pushf4 " + number); break;
     case LONG: writeln("pushi8 " + number); break;
     case DOUBLE: writeln("pushf8 " + number); break;
@@ -269,8 +271,8 @@ void TranslatorA11::instrLoad(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("load 4 " + name); break;
-    case LONG: case DOUBLE: writeln("load 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("load4 " + name); break;
+    case LONG: case DOUBLE: writeln("load8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -278,8 +280,8 @@ void TranslatorA11::instrLoadWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("loadwide 4 " + name); break;
-    case LONG: case DOUBLE: writeln("loadwide 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("loadwide4 " + name); break;
+    case LONG: case DOUBLE: writeln("loadwide8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -287,8 +289,8 @@ void TranslatorA11::instrRefLoad(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("refl 4 " + name); break;
-    case LONG: case DOUBLE: writeln("refl 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("refl4 " + name); break;
+    case LONG: case DOUBLE: writeln("refl8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -296,8 +298,8 @@ void TranslatorA11::instrRefLoadWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("reflwide 4 " + name); break;
-    case LONG: case DOUBLE: writeln("reflwide 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("reflwide4 " + name); break;
+    case LONG: case DOUBLE: writeln("reflwide8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -305,8 +307,8 @@ void TranslatorA11::instrFetch(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("fetch 4 " + name); break;
-    case LONG: case DOUBLE: writeln("fetch 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("fetch4 " + name); break;
+    case LONG: case DOUBLE: writeln("fetch8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -314,8 +316,8 @@ void TranslatorA11::instrFetchWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("fetchwide 4 " + name); break;
-    case LONG: case DOUBLE: writeln("fetchwide 8 " + name); break;
+    case BYTE: case SHORT: case INT: case FLOAT: writeln("fetchwide4 " + name); break;
+    case LONG: case DOUBLE: writeln("fetchwide8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }

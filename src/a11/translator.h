@@ -46,6 +46,8 @@ public:
 private:
     enum Type
     {
+        BYTE,
+        SHORT,
         INT,
         FLOAT,
         LONG,
@@ -189,7 +191,9 @@ private:
     {
         while(m_token != "")
         {
-            if(m_token == "int"
+            if(m_token == "byte"
+            || m_token == "short"
+            || m_token == "int"
             || m_token == "float"
             || m_token == "long"
             || m_token == "double") globalDeclaration();
@@ -215,7 +219,9 @@ private:
                     else if(m_token == "continue") docontinue(breakLabel);
                     else if(m_token == "return") doreturn();
                     else if(m_token == "delete") dodelete();
-                    else if(m_token == "int"
+                    else if(m_token == "byte"
+                         || m_token == "short"
+                         || m_token == "int"
                          || m_token == "float"
                          || m_token == "long"
                          || m_token == "double") declaration();

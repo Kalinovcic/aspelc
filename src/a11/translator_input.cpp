@@ -75,7 +75,9 @@ TranslatorA11::Type TranslatorA11::getType(bool voidAllowed)
 {
     std::string strtype = m_token;
     Type type;
-    if(strtype == "int") type = INT;
+    if(strtype == "byte") type = BYTE;
+    else if(strtype == "short") type = SHORT;
+    else if(strtype == "int") type = INT;
     else if(strtype == "float") type = FLOAT;
     else if(strtype == "long") type = LONG;
     else if(strtype == "double") type = DOUBLE;
