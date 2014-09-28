@@ -118,6 +118,8 @@ TranslatorA11::Type TranslatorA11::exprPref()
 TranslatorA11::Type TranslatorA11::exprCast()
 {
     Type ctype = VOID;
+    if(m_token == "byte") { match("byte"); ctype = BYTE; }
+    if(m_token == "short") { match("short"); ctype = SHORT; }
     if(m_token == "int") { match("int"); ctype = INT; }
     if(m_token == "float") { match("float"); ctype = FLOAT; }
     if(m_token == "long") { match("long"); ctype = LONG; }
@@ -142,7 +144,9 @@ TranslatorA11::Type TranslatorA11::exprExtr()
     if(m_token == "<-")
     {
         match("<-");
-        if(m_token == "int") { match("int"); ctype = INT; }
+        if(m_token == "byte") { match("byte"); ctype = BYTE; }
+        else if(m_token == "short") { match("short"); ctype = SHORT; }
+        else if(m_token == "int") { match("int"); ctype = INT; }
         else if(m_token == "float") { match("float"); ctype = FLOAT; }
         else if(m_token == "long") { match("long"); ctype = LONG; }
         else if(m_token == "double") { match("double"); ctype = DOUBLE; }
