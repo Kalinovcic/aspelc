@@ -139,38 +139,38 @@ void TranslatorA11::convert(Type from, Type to)
         switch(to)
         {
         case INT: abortnl("invalid conversion - int to int"); break;
-        case FLOAT: writeln("i4cf4"); break;
-        case LONG: writeln("i4ci8"); break;
-        case DOUBLE: writeln("i4cf8"); break;
+        case FLOAT: writeln("cif4"); break;
+        case LONG: writeln("cili"); break;
+        case DOUBLE: writeln("cili"); writeln("cif8"); break;
         default: expected("non-void type");
         }
         break;
     case FLOAT:
         switch(to)
         {
-        case INT: writeln("f4ci4"); break;
+        case INT: writeln("cfi4"); break;
         case FLOAT: abortnl("invalid conversion - float to float"); break;
-        case LONG: writeln("f4ci8"); break;
-        case DOUBLE: writeln("f4cf8"); break;
+        case LONG: writeln("cf48"); writeln("cfi8"); break;
+        case DOUBLE: writeln("cf48"); break;
         default: expected("non-void type");
         }
         break;
     case LONG:
         switch(to)
         {
-        case INT: writeln("i8ci4"); break;
-        case FLOAT: writeln("i8cf4"); break;
+        case INT: writeln("ci84"); break;
+        case FLOAT: writeln("ci84"); writeln("cif4"); break;
         case LONG: abortnl("invalid conversion - long to long"); break;
-        case DOUBLE: writeln("i8cf8"); break;
+        case DOUBLE: writeln("cif8"); break;
         default: expected("non-void type");
         }
         break;
     case DOUBLE:
         switch(to)
         {
-        case INT: writeln("f8ci4"); break;
-        case FLOAT: writeln("f8cf4"); break;
-        case LONG: writeln("f8ci8"); break;
+        case INT: writeln("cf84"); writeln("cfi4"); break;
+        case FLOAT: writeln("cf84"); break;
+        case LONG: writeln("cfi8"); break;
         case DOUBLE: abortnl("invalid conversion - double to double"); break;
         default: expected("non-void type");
         }

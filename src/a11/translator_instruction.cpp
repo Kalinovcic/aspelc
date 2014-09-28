@@ -182,21 +182,21 @@ void TranslatorA11::instrNe(Type type1, Type type2)
     instrCmp(type1, type2);
     writeln("nenl");
 }
-void TranslatorA11::instrBAND(Type type)
-{
-    switch(type)
-    {
-    case INT: writeln("band4"); break;
-    case LONG: writeln("band8"); break;
-    default: abortnl("invalid use of types");
-    }
-}
 void TranslatorA11::instrBNOT(Type type)
 {
     switch(type)
     {
     case INT: writeln("bnot4"); break;
     case LONG: writeln("bnot8"); break;
+    default: abortnl("invalid use of types");
+    }
+}
+void TranslatorA11::instrBAND(Type type)
+{
+    switch(type)
+    {
+    case INT: writeln("band4"); break;
+    case LONG: writeln("band8"); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -249,8 +249,8 @@ void TranslatorA11::instrExtr(Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("extr4"); break;
-    case LONG: case DOUBLE: writeln("extr8"); break;
+    case INT: case FLOAT: writeln("extr 4"); break;
+    case LONG: case DOUBLE: writeln("extr 8"); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -269,8 +269,8 @@ void TranslatorA11::instrLoad(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("load4 " + name); break;
-    case LONG: case DOUBLE: writeln("load8 " + name); break;
+    case INT: case FLOAT: writeln("load 4 " + name); break;
+    case LONG: case DOUBLE: writeln("load 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -278,8 +278,8 @@ void TranslatorA11::instrLoadWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("loadwide4 " + name); break;
-    case LONG: case DOUBLE: writeln("loadwide8 " + name); break;
+    case INT: case FLOAT: writeln("loadwide 4 " + name); break;
+    case LONG: case DOUBLE: writeln("loadwide 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -287,8 +287,8 @@ void TranslatorA11::instrRefLoad(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("refl4 " + name); break;
-    case LONG: case DOUBLE: writeln("refl8 " + name); break;
+    case INT: case FLOAT: writeln("refl 4 " + name); break;
+    case LONG: case DOUBLE: writeln("refl 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -296,8 +296,8 @@ void TranslatorA11::instrRefLoadWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("reflwide4 " + name); break;
-    case LONG: case DOUBLE: writeln("reflwide8 " + name); break;
+    case INT: case FLOAT: writeln("reflwide 4 " + name); break;
+    case LONG: case DOUBLE: writeln("reflwide 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -305,8 +305,8 @@ void TranslatorA11::instrFetch(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("fetch4 " + name); break;
-    case LONG: case DOUBLE: writeln("fetch8 " + name); break;
+    case INT: case FLOAT: writeln("fetch 4 " + name); break;
+    case LONG: case DOUBLE: writeln("fetch 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
@@ -314,8 +314,8 @@ void TranslatorA11::instrFetchWide(std::string name, Type type)
 {
     switch(type)
     {
-    case INT: case FLOAT: writeln("fetchwide4 " + name); break;
-    case LONG: case DOUBLE: writeln("fetchwide8 " + name); break;
+    case INT: case FLOAT: writeln("fetchwide 4 " + name); break;
+    case LONG: case DOUBLE: writeln("fetchwide 8 " + name); break;
     default: abortnl("invalid use of types");
     }
 }
