@@ -153,8 +153,8 @@ void TranslatorA11::convert(Type from, Type to)
         {
         case INT: abortnl("invalid conversion - int to int"); break;
         case FLOAT: writeln("cif4"); break;
-        case LONG: writeln("cili"); break;
-        case DOUBLE: writeln("cili"); writeln("cif8"); break;
+        case LONG: writeln("ci48"); break;
+        case DOUBLE: writeln("ci48"); writeln("cif8"); break;
         default: expected("non-void type");
         }
         break;
@@ -324,6 +324,7 @@ void TranslatorA11::donew()
     Type type = expression();
     if(type != INT && type != LONG)
         abortnl("invalid operand of type '" + getTypeName(type) + "' to operator 'new'");
+    if(type == INT) convert(INT, LONG);
     match("]");
 
     writeln("alloc");
