@@ -67,18 +67,18 @@ void TranslatorA11::function()
     }
     match(")");
 
-    bool native = false;
+    m_cfun.native = false;
     if(m_token == "native")
     {
         match("native");
-        native = true;
+        m_cfun.native = true;
     }
 
     m_cfun.forward = false;
     if(m_token == "forward")
     {
         match("forward");
-        if(!native)
+        if(!m_cfun.native)
             m_cfun.forward = true;
         else
             abortnl("native function \"" + functionName + "\" forwarded");
@@ -87,7 +87,7 @@ void TranslatorA11::function()
     checkFunction(functionName);
     m_functions[functionName] = m_cfun;
 
-    if(!m_cfun.forward && !native)
+    if(!m_cfun.forward && !m_cfun.native)
     {
         write("f:\t" + functionName + "\n");
         for(unsigned int i = argvars.size(); i; i--)
@@ -104,7 +104,7 @@ void TranslatorA11::function()
     }
     else
     {
-        if(native)
+        if(m_cfun.native)
         {
             write("n:");
             write("\t" + functionName + "\n\n");

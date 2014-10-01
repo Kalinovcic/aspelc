@@ -61,6 +61,7 @@ private:
         std::vector<Type> atype;
 
         bool forward;
+        bool native;
     };
 
     typedef std::map<std::string, FunctionData>::iterator funmap_it;
