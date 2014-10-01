@@ -60,9 +60,17 @@ TranslatorA11::Type TranslatorA11::exprSuff()
     {
         match("@");
         std::string name = getName();
-        if(!variableExists(name))
-            abortnl("variable '" + name + "' not declared");
-        instrPush("@" + name, LONG);
+        std::map<std::string, Type>::iterator localvar = m_lvartype.find(name);
+        if(localvar != m_lvartype.end())
+            instrVarptr(name);
+        else
+        {
+            std::map<std::string, Type>::iterator globalvar = m_gvartype.find(name);
+            if(globalvar != m_gvartype.end())
+                instrVarptrWide(name);
+            else
+                abortnl("variable '" + name + "' not declared");
+        }
         return LONG;
     }
     else if(m_token == "(")

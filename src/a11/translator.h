@@ -165,6 +165,8 @@ private:
     void instrRefLoad(Type type);
     void instrExtr(Type type);
     void instrPush(std::string number, Type type);
+    void instrVarptr(std::string name);
+    void instrVarptrWide(std::string name);
     void instrLoad(std::string name, Type type);
     void instrLoadWide(std::string name, Type type);
     void instrFetch(std::string name, Type type);

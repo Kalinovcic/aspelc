@@ -278,6 +278,14 @@ void TranslatorA11::instrPush(std::string number, Type type)
     default: abortnl("invalid number type '" + number + "'");
     }
 }
+void TranslatorA11::instrVarptr(std::string name)
+{
+    writeln("varptr " + name);
+}
+void TranslatorA11::instrVarptrWide(std::string name)
+{
+    writeln("varptrwide " + name);
+}
 void TranslatorA11::instrLoad(std::string name, Type type)
 {
     switch(type)
