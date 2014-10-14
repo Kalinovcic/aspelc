@@ -57,9 +57,9 @@ void AC_identifier_load(struct AC_identifier* object, struct AC_scanner* scanner
     struct AC_token name = AC_scanner_getword(scanner, 0);
     AC_scanner_next(scanner);
     object->name = name;
-    if(AC_token_compare_raw(AC_scanner_get(scanner, 0), ":") == AC_TRUE)
+    if(AC_token_compare_raw(AC_scanner_get(scanner, 0), ".") == AC_TRUE)
     {
-        AC_scanner_match(scanner, ":");
+        AC_scanner_match(scanner, ".");
         struct AC_identifier* sub = AC_identifier_make();
         AC_identifier_load(sub, scanner);
         object->sub = sub;
