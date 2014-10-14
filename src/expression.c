@@ -30,14 +30,32 @@ void AC_expr_level1_make(struct AC_expr_level1* object, struct AC_scanner* scann
 
 void AC_expr_level2_make(struct AC_expr_level2* object, struct AC_scanner* scanner)
 {
-    AC_expr_level1_make(&object->value, scanner);
     object->type = AC_EXPR_LEVEL2_NOP;
+    AC_bool ispos = AC_token_compare_raw(AC_scanner_get(scanner, 0), "+");
     AC_bool isneg = AC_token_compare_raw(AC_scanner_get(scanner, 0), "-");
     AC_bool islnot = AC_token_compare_raw(AC_scanner_get(scanner, 0), "!");
     AC_bool isbnot = AC_token_compare_raw(AC_scanner_get(scanner, 0), "~");
-    if(isneg == AC_TRUE) object->type = AC_EXPR_LEVEL2_NEGATE;
-    if(islnot == AC_TRUE) object->type = AC_EXPR_LEVEL2_LNOT;
-    if(isbnot == AC_TRUE) object->type = AC_EXPR_LEVEL2_BNOT;
+    if(ispos == AC_TRUE)
+    {
+        AC_scanner_match(scanner, "+");
+    }
+    else if(isneg == AC_TRUE)
+    {
+        AC_scanner_match(scanner, "-");
+        object->type = AC_EXPR_LEVEL2_NEGATE;
+    }
+    else if(islnot == AC_TRUE)
+    {
+        AC_scanner_match(scanner, "!");
+        object->type = AC_EXPR_LEVEL2_LNOT;
+    }
+    else if(isbnot == AC_TRUE)
+    {
+        AC_scanner_match(scanner, "~");
+        object->type = AC_EXPR_LEVEL2_BNOT;
+    }
+
+    AC_expr_level1_make(&object->value, scanner);
 }
 
 void AC_expr_level3_make(struct AC_expr_level3* object, struct AC_scanner* scanner)
@@ -69,18 +87,18 @@ void AC_expr_level5_make(struct AC_expr_level5* object, struct AC_scanner* scann
     {
         if(ismul)
         {
+            AC_scanner_match(scanner, "*");
             object->type = AC_EXPR_LEVEL5_MULTIPLY;
-            AC_scanner_match(scanner, "+");
         }
-        if(isdiv)
+        else if(isdiv)
         {
+            AC_scanner_match(scanner, "/");
             object->type = AC_EXPR_LEVEL5_DIVIDE;
-            AC_scanner_match(scanner, "-");
         }
-        if(isrem)
+        else if(isrem)
         {
-            object->type = AC_EXPR_LEVEL5_REMAINDER;
             AC_scanner_match(scanner, "%");
+            object->type = AC_EXPR_LEVEL5_REMAINDER;
         }
         object->next = malloc(sizeof(struct AC_expr_level5));
         AC_expr_level5_make(object->next, scanner);
@@ -98,13 +116,13 @@ void AC_expr_level6_make(struct AC_expr_level6* object, struct AC_scanner* scann
     {
         if(isadd)
         {
-            object->type = AC_EXPR_LEVEL6_ADD;
             AC_scanner_match(scanner, "+");
+            object->type = AC_EXPR_LEVEL6_ADD;
         }
-        if(issub)
+        else if(issub)
         {
-            object->type = AC_EXPR_LEVEL6_SUBTRACT;
             AC_scanner_match(scanner, "-");
+            object->type = AC_EXPR_LEVEL6_SUBTRACT;
         }
         object->next = malloc(sizeof(struct AC_expr_level6));
         AC_expr_level6_make(object->next, scanner);
@@ -125,7 +143,7 @@ void AC_expr_level7_make(struct AC_expr_level7* object, struct AC_scanner* scann
             object->type = AC_EXPR_LEVEL7_SHIFTLEFT;
             AC_scanner_match(scanner, "<<");
         }
-        if(isrsft)
+        else if(isrsft)
         {
             object->type = AC_EXPR_LEVEL7_SHIFTRIGHT;
             AC_scanner_match(scanner, ">>");
@@ -151,17 +169,17 @@ void AC_expr_level8_make(struct AC_expr_level8* object, struct AC_scanner* scann
             object->type = AC_EXPR_LEVEL8_LESS;
             AC_scanner_match(scanner, "<");
         }
-        if(isle)
+        else if(isle)
         {
             object->type = AC_EXPR_LEVEL8_LESSEQUAL;
             AC_scanner_match(scanner, "<=");
         }
-        if(isgt)
+        else if(isgt)
         {
             object->type = AC_EXPR_LEVEL8_GREATER;
             AC_scanner_match(scanner, ">");
         }
-        if(isge)
+        else if(isge)
         {
             object->type = AC_EXPR_LEVEL8_GREATEREQUAL;
             AC_scanner_match(scanner, ">=");
@@ -185,7 +203,7 @@ void AC_expr_level9_make(struct AC_expr_level9* object, struct AC_scanner* scann
             object->type = AC_EXPR_LEVEL9_EQUAL;
             AC_scanner_match(scanner, "==");
         }
-        if(isneql)
+        else if(isneql)
         {
             object->type = AC_EXPR_LEVEL9_NOTEQUAL;
             AC_scanner_match(scanner, "!=");
