@@ -25,6 +25,7 @@
 
 static struct AC_scanner* scanner;
 static AC_byte currbyte;
+static AC_uint currline;
 
 inline AC_bool isAlpha(AC_byte c)
 {
@@ -65,7 +66,12 @@ static void nextbyte()
 
 static void skipwhite()
 {
-    while(isWhite(currbyte)) nextbyte();
+    while(isWhite(currbyte))
+    {
+        if(currbyte == '\n')
+            currline++;
+        nextbyte();
+    }
 }
 
 static struct AC_token readnumber()
@@ -74,6 +80,7 @@ static struct AC_token readnumber()
     token.token = scanner->datav - 1;
     while(isDigit(currbyte)) nextbyte();
     token.tokenl = scanner->datav - token.token - 1;
+    token.line = currline;
     skipwhite();
     return token;
 }
@@ -84,6 +91,7 @@ static struct AC_token readword()
     token.token = scanner->datav - 1;
     while(isAlnum(currbyte)) nextbyte();
     token.tokenl = scanner->datav - token.token - 1;
+    token.line = currline;
     skipwhite();
     return token;
 }
@@ -94,6 +102,7 @@ static struct AC_token readop()
     token.token = scanner->datav - 1;
     while(isOp(currbyte)) nextbyte();
     token.tokenl = scanner->datav - token.token - 1;
+    token.line = currline;
     skipwhite();
     return token;
 }
@@ -106,6 +115,7 @@ static struct AC_token readnext()
     struct AC_token token;
     token.token = scanner->datav - 1;
     token.tokenl = 1;
+    token.line = currline;
     nextbyte();
     skipwhite();
     return token;
@@ -172,6 +182,21 @@ struct AC_token AC_scanner_getop(struct AC_scanner* object, AC_int off)
     struct AC_token token = AC_scanner_get(object, off);
     assert(isOp(*token.token));
     return token;
+}
+
+AC_bool AC_scanner_isword(struct AC_scanner* object, AC_int off)
+{
+    return isAlpha(*AC_scanner_get(object, off).token);
+}
+
+AC_bool AC_scanner_isnumber(struct AC_scanner* object, AC_int off)
+{
+    return isDigit(*AC_scanner_get(object, off).token);
+}
+
+AC_bool AC_scanner_isop(struct AC_scanner* object, AC_int off)
+{
+    return isOp(*AC_scanner_get(object, off).token);
 }
 
 void AC_scanner_prev(struct AC_scanner* object)

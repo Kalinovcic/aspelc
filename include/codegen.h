@@ -15,27 +15,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  * 
- * File: token.h
+ * File: codegen.h
  * Description: 
  * Author: Lovro Kalinovcic
  * 
  */
 
-#ifndef TOKEN_H_
-#define TOKEN_H_
-
-#include <string.h>
+#ifndef CODEGEN_H_
+#define CODEGEN_H_
 
 #include "acdef.h"
+#include "output.h"
 
-struct AC_token
-{
-    AC_byte* token;
-    AC_uint tokenl;
-    AC_uint line;
-};
+void AC_codegen_swap(AC_uint top, AC_uint bottom, struct AC_output* output);
 
-AC_bool AC_token_compare_raw(struct AC_token token, const char* cstr);
-AC_bool AC_token_compare(struct AC_token token, struct AC_token token2);
-
-#endif /* TOKEN_H_ */
+#endif /* CODEGEN_H_ */

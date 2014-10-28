@@ -142,7 +142,7 @@ void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct A
             newfunc->ns = object;
             AC_function_load(newfunc, scanner);
         }
-        else if(AC_token_compare_raw(token, "type") == AC_TRUE)
+        else if(AC_token_compare_raw(token, "struct") == AC_TRUE)
         {
             struct AC_type* newtype = AC_namespace_push(object, (void***) tv_tdef, tc_tdef, (AC_make) &AC_type_make);
             AC_type_load(newtype, scanner);

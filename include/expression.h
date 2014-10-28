@@ -28,12 +28,14 @@
 
 #include "acdef.h"
 #include "output.h"
+#include "report.h"
 #include "scanner.h"
 #include "token.h"
 #include "type.h"
 
 enum AC_expr_const_type
 {
+    AC_EXPR_CONST_BOOL,
     AC_EXPR_CONST_INT,
     AC_EXPR_CONST_FLOAT,
     AC_EXPR_CONST_LONG,
@@ -91,6 +93,7 @@ struct AC_expr_level1
 {
     enum AC_expr_level1_type type;
     union AC_expr_level1_union value;
+    AC_uint srcline;
 };
 
 enum AC_expr_level2_type
@@ -105,6 +108,7 @@ struct AC_expr_level2
 {
     enum AC_expr_level2_type type;
     struct AC_expr_level1 value;
+    AC_uint srcline;
 };
 
 enum AC_expr_level3_type
@@ -123,6 +127,7 @@ struct AC_expr_level3
     enum AC_expr_level3_type type;
     struct AC_expr_level2 value;
     union AC_expr_level3_meta meta;
+    AC_uint srcline;
 };
 
 enum AC_expr_level4_type
@@ -135,6 +140,7 @@ struct AC_expr_level4
 {
     enum AC_expr_level4_type type;
     struct AC_expr_level3 value;
+    AC_uint srcline;
 };
 
 enum AC_expr_level5_type
@@ -150,6 +156,7 @@ struct AC_expr_level5
     enum AC_expr_level5_type type;
     struct AC_expr_level4 low;
     struct AC_expr_level5* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level6_type
@@ -164,6 +171,7 @@ struct AC_expr_level6
     enum AC_expr_level6_type type;
     struct AC_expr_level5 low;
     struct AC_expr_level6* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level7_type
@@ -171,6 +179,8 @@ enum AC_expr_level7_type
     AC_EXPR_LEVEL7_NOP,
     AC_EXPR_LEVEL7_SHIFTLEFT,
     AC_EXPR_LEVEL7_SHIFTRIGHT,
+    AC_EXPR_LEVEL7_ROTATELEFT,
+    AC_EXPR_LEVEL7_ROTATERIGHT,
 };
 
 struct AC_expr_level7
@@ -178,6 +188,7 @@ struct AC_expr_level7
     enum AC_expr_level7_type type;
     struct AC_expr_level6 low;
     struct AC_expr_level7* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level8_type
@@ -194,6 +205,7 @@ struct AC_expr_level8
     enum AC_expr_level8_type type;
     struct AC_expr_level7 low;
     struct AC_expr_level8* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level9_type
@@ -208,6 +220,7 @@ struct AC_expr_level9
     enum AC_expr_level9_type type;
     struct AC_expr_level8 low;
     struct AC_expr_level9* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level10_type
@@ -221,6 +234,7 @@ struct AC_expr_level10
     enum AC_expr_level10_type type;
     struct AC_expr_level9 low;
     struct AC_expr_level10* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level11_type
@@ -234,6 +248,7 @@ struct AC_expr_level11
     enum AC_expr_level11_type type;
     struct AC_expr_level10 low;
     struct AC_expr_level11* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level12_type
@@ -247,6 +262,7 @@ struct AC_expr_level12
     enum AC_expr_level12_type type;
     struct AC_expr_level11 low;
     struct AC_expr_level12* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level13_type
@@ -260,6 +276,7 @@ struct AC_expr_level13
     enum AC_expr_level13_type type;
     struct AC_expr_level12 low;
     struct AC_expr_level13* next;
+    AC_uint srcline;
 };
 
 enum AC_expr_level14_type
@@ -273,6 +290,7 @@ struct AC_expr_level14
     enum AC_expr_level14_type type;
     struct AC_expr_level13 low;
     struct AC_expr_level14* next;
+    AC_uint srcline;
 };
 
 struct AC_expression
@@ -310,10 +328,25 @@ void AC_expr_level12_destroy(struct AC_expr_level12* object);
 void AC_expr_level13_destroy(struct AC_expr_level13* object);
 void AC_expr_level14_destroy(struct AC_expr_level14* object);
 
+struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, struct AC_output* output);
+struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, struct AC_output* output);
+struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, struct AC_output* output);
+struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, struct AC_output* output);
+struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, struct AC_output* output);
+struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, struct AC_output* output);
+struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, struct AC_output* output);
+struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, struct AC_output* output);
+struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, struct AC_output* output);
+struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, struct AC_output* output);
+struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, struct AC_output* output);
+struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, struct AC_output* output);
+struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, struct AC_output* output);
+struct AC_typename* AC_expr_level14_translate(struct AC_expr_level14* object, struct AC_output* output);
+
 struct AC_expression* AC_expression_make();
 void AC_expression_destroy(struct AC_expression* object);
 
 void AC_expression_load(struct AC_expression* object, struct AC_scanner* scanner);
-void AC_expression_translate(struct AC_expression* object, struct AC_output* output);
+struct AC_typename* AC_expression_translate(struct AC_expression* object, struct AC_output* output);
 
 #endif /* EXPRESSION_H_ */
