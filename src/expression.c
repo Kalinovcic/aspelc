@@ -26,11 +26,74 @@
 void AC_expr_level1_make(struct AC_expr_level1* object, struct AC_scanner* scanner)
 {
     object->srcline = AC_scanner_get(scanner, 0).line;
-    AC_scanner_next(scanner);
+    if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "new") == AC_TRUE)
+    {
+        object->type = AC_EXPR_LEVEL1_NEW;
+        AC_scanner_match(scanner, "new");
+        object->value.new.type = AC_typename_make();
+        AC_typename_load(object->value.new.type, scanner);
+        object->value.new.size = AC_NULL;
+        if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "[") == AC_TRUE)
+        {
+            AC_scanner_match(scanner, "[");
+            object->value.new.size = AC_expression_make();
+            AC_expression_load(object->value.new.size, scanner);
+            AC_scanner_match(scanner, "]");
+        }
+    }
+    else if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "size") == AC_TRUE)
+    {
+        object->type = AC_EXPR_LEVEL1_SIZE;
+        AC_scanner_match(scanner, "size");
+        AC_scanner_match(scanner, "(");
+        object->value.size = AC_typename_make();
+        AC_typename_load(object->value.size, scanner);
+        AC_scanner_match(scanner, ")");
+    }
+    else if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "(") == AC_TRUE)
+    {
+        object->type = AC_EXPR_LEVEL1_EXPRESSION;
+        AC_scanner_match(scanner, "(");
+        object->value.expression = AC_expression_make();
+        AC_expression_load(object->value.expression, scanner);
+        AC_scanner_match(scanner, ")");
+    }
+    else if(AC_scanner_isword(scanner, 0))
+    {
+        struct AC_token token = AC_scanner_get(scanner, 0);
+        if(AC_token_compare_raw(token, "true") == AC_TRUE
+        || AC_token_compare_raw(token, "false") == AC_TRUE
+        || AC_token_compare_raw(token, "null") == AC_TRUE)
+        {
+            object->type = AC_EXPR_LEVEL1_LITERAL;
+            object->value.literal = token;
+            AC_scanner_next(scanner);
+        }
+        else
+        {
+            object->type = AC_EXPR_LEVEL1_VAR;
+            object->value.name = AC_identifier_make();
+            AC_identifier_load(object->value.name, scanner);
+            if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "(") == AC_TRUE)
+            {
+                object->type = AC_EXPR_LEVEL1_FUNC;
+                AC_scanner_match(scanner, "(");
+                // TODO: read function arguments
+                AC_scanner_match(scanner, ")");
+            }
+        }
+    }
+    else
+    {
+        object->type = AC_EXPR_LEVEL1_LITERAL;
+        object->value.literal = AC_scanner_get(scanner, 0);
+        AC_scanner_next(scanner);
+    }
 }
 
 void AC_expr_level2_make(struct AC_expr_level2* object, struct AC_scanner* scanner)
 {
+    object->srcline = AC_scanner_get(scanner, 0).line;
     object->type = AC_EXPR_LEVEL2_NOP;
     AC_bool ispos = AC_token_compare_raw(AC_scanner_get(scanner, 0), "+");
     AC_bool isneg = AC_token_compare_raw(AC_scanner_get(scanner, 0), "-");
@@ -38,24 +101,20 @@ void AC_expr_level2_make(struct AC_expr_level2* object, struct AC_scanner* scann
     AC_bool isbnot = AC_token_compare_raw(AC_scanner_get(scanner, 0), "~");
     if(ispos == AC_TRUE)
     {
-        object->srcline = AC_scanner_get(scanner, 0).line;
         AC_scanner_match(scanner, "+");
     }
     else if(isneg == AC_TRUE)
     {
-        object->srcline = AC_scanner_get(scanner, 0).line;
         AC_scanner_match(scanner, "-");
         object->type = AC_EXPR_LEVEL2_NEGATE;
     }
     else if(islnot == AC_TRUE)
     {
-        object->srcline = AC_scanner_get(scanner, 0).line;
         AC_scanner_match(scanner, "!");
         object->type = AC_EXPR_LEVEL2_LNOT;
     }
     else if(isbnot == AC_TRUE)
     {
-        object->srcline = AC_scanner_get(scanner, 0).line;
         AC_scanner_match(scanner, "~");
         object->type = AC_EXPR_LEVEL2_BNOT;
     }
@@ -313,7 +372,28 @@ void AC_expr_level14_make(struct AC_expr_level14* object, struct AC_scanner* sca
 
 void AC_expr_level1_destroy(struct AC_expr_level1* object)
 {
-
+    switch(object->type)
+    {
+    case AC_EXPR_LEVEL1_LITERAL:
+        break;
+    case AC_EXPR_LEVEL1_VAR:
+        AC_identifier_destroy(object->value.name);
+        break;
+    case AC_EXPR_LEVEL1_FUNC:
+        AC_identifier_destroy(object->value.name);
+        break;
+    case AC_EXPR_LEVEL1_EXPRESSION:
+        AC_expression_destroy(object->value.expression);
+        break;
+    case AC_EXPR_LEVEL1_NEW:
+        if(object->value.new.size != AC_NULL)
+            AC_expression_destroy(object->value.new.size);
+        AC_typename_destroy(object->value.new.type);
+        break;
+    case AC_EXPR_LEVEL1_SIZE:
+        AC_typename_destroy(object->value.size);
+        break;
+    }
 }
 
 void AC_expr_level2_destroy(struct AC_expr_level2* object)
@@ -431,17 +511,61 @@ void AC_expr_level14_destroy(struct AC_expr_level14* object)
     }
 }
 
-struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, struct AC_output* output)
+struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* booltn = AC_typename_make();
-    booltn->type = AC_TYPENAME_PRIMITIVE;
-    booltn->value.primitive = AC_PRIMITIVE_INT;
-    return booltn;
+    struct AC_typename* type = AC_NULL;
+    switch(object->type)
+    {
+    case AC_EXPR_LEVEL1_LITERAL:
+        // TODO: not finished
+
+        AC_output_write(output, "%%PUSH%%");
+        type = AC_typename_make();
+        type->type = AC_TYPENAME_PRIMITIVE;
+        type->value.primitive = AC_PRIMITIVE_INT;
+        break;
+    case AC_EXPR_LEVEL1_EXPRESSION:
+        type = AC_expression_translate(object->value.expression, output, program);
+        break;
+    case AC_EXPR_LEVEL1_VAR:
+        // TODO: not finished
+
+        AC_output_write(output, "%%FETCH%%");
+        type = AC_typename_make();
+        type->type = AC_TYPENAME_PRIMITIVE;
+        type->value.primitive = AC_PRIMITIVE_INT;
+        break;
+    case AC_EXPR_LEVEL1_FUNC:
+        // TODO: not finished
+
+        AC_output_write(output, "%%CALL%%");
+        type = AC_typename_make();
+        type->type = AC_TYPENAME_PRIMITIVE;
+        type->value.primitive = AC_PRIMITIVE_INT;
+        break;
+    case AC_EXPR_LEVEL1_NEW:
+        // TODO: not finished
+
+        AC_output_write(output, "%%NEW%%");
+        type = AC_typename_make();
+        type->type = AC_TYPENAME_POINTER;
+        type->value.pointer = object->value.new.type;
+        break;
+    case AC_EXPR_LEVEL1_SIZE:
+        AC_output_write(output, "push8 %llu", AC_typename_size(object->value.size, program));
+
+        type = AC_typename_make();
+        type->type = AC_TYPENAME_PRIMITIVE;
+        type->value.primitive = AC_PRIMITIVE_ULONG;
+        break;
+    }
+    assert(type != AC_NULL);
+    return type;
 }
 
-struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, struct AC_output* output)
+struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level1_translate(&object->value, output);
+    struct AC_typename* type = AC_expr_level1_translate(&object->value, output, program);
     if(object->type != AC_EXPR_LEVEL2_NOP)
     {
         /*
@@ -457,9 +581,9 @@ struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, struct AC_output* output)
+struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level2_translate(&object->value, output);
+    struct AC_typename* type = AC_expr_level2_translate(&object->value, output, program);
     if(object->type != AC_EXPR_LEVEL3_NOP)
     {
 
@@ -467,9 +591,9 @@ struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, struct AC_output* output)
+struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level3_translate(&object->value, output);
+    struct AC_typename* type = AC_expr_level3_translate(&object->value, output, program);
     if(object->type != AC_EXPR_LEVEL4_NOP)
     {
         AC_output_write(output, "deref %d", AC_primitive_size(type->value.pointer->value.primitive));
@@ -479,9 +603,9 @@ struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, struct AC_output* output)
+struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level4_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level4_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL5_NOP)
     {
         if(AC_typename_isnumber(type) != AC_TRUE || (object->type == AC_EXPR_LEVEL5_REMAINDER && AC_typename_isinteger(type) != AC_TRUE))
@@ -494,7 +618,7 @@ struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, stru
                 AC_invalid_operand(type, "binary operator remainder", object->srcline);
         }
 
-        struct AC_typename* type2 = AC_expr_level5_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level5_translate(object->next, output, program);
         if(AC_typename_isnumber(type) != AC_TRUE || (object->type == AC_EXPR_LEVEL5_REMAINDER && AC_typename_isinteger(type) != AC_TRUE))
         {
             if(object->type == AC_EXPR_LEVEL5_MULTIPLY)
@@ -513,9 +637,9 @@ struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, struct AC_output* output)
+struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level5_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level5_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL6_NOP)
     {
         if(!AC_typename_isnumber(type))
@@ -526,7 +650,7 @@ struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, stru
                 AC_invalid_operand(type, "binary operator subtraction", object->srcline);
         }
 
-        struct AC_typename* type2 = AC_expr_level6_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level6_translate(object->next, output, program);
         if(!AC_typename_isnumber(type))
         {
             if(object->type == AC_EXPR_LEVEL6_ADD)
@@ -543,9 +667,9 @@ struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, struct AC_output* output)
+struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level6_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level6_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL7_NOP)
     {
         if(!AC_typename_isinteger(type))
@@ -560,7 +684,7 @@ struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, stru
                 AC_invalid_operand(type, "bitwise operator rotate right", object->srcline);
         }
 
-        struct AC_typename* type2 = AC_expr_level7_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level7_translate(object->next, output, program);
         if(!AC_typename_isinteger(type2))
         {
             if(object->type == AC_EXPR_LEVEL7_SHIFTLEFT)
@@ -590,9 +714,9 @@ struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, struct AC_output* output)
+struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level7_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level7_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL8_NOP)
     {
         if(!AC_typename_isnumber(type))
@@ -607,7 +731,7 @@ struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, stru
                 AC_invalid_operand(type, "relational operator greater equal", object->srcline);
         }
 
-        struct AC_typename* type2 = AC_expr_level8_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level8_translate(object->next, output, program);
         if(!AC_typename_isnumber(type2))
         {
             if(object->type == AC_EXPR_LEVEL8_LESS)
@@ -638,9 +762,9 @@ struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, struct AC_output* output)
+struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level8_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level8_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL9_NOP)
     {
         if(!AC_typename_isnumber(type) && type->type != AC_TYPENAME_POINTER)
@@ -650,7 +774,7 @@ struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, stru
             else if(object->type == AC_EXPR_LEVEL9_EQUAL)
                 AC_invalid_operand(type, "relational operator not equality", object->srcline);
         }
-        struct AC_typename* type2 = AC_expr_level9_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level9_translate(object->next, output, program);
         if(!AC_typename_isnumber(type2) && type2->type != AC_TYPENAME_POINTER)
         {
             if(object->type == AC_EXPR_LEVEL9_EQUAL)
@@ -684,14 +808,14 @@ struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, stru
     return type;
 }
 
-struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, struct AC_output* output)
+struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level9_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level9_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL10_NOP)
     {
         if(!AC_typename_isinteger(type))
             AC_invalid_operand(type, "logical operator AND", object->srcline);
-        struct AC_typename* type2 = AC_expr_level10_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level10_translate(object->next, output, program);
         if(!AC_typename_isinteger(type2))
             AC_invalid_operand(type2, "logical operator AND", object->srcline);
         type = AC_typename_stackconv(type2, type, object->srcline, output);
@@ -700,14 +824,14 @@ struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, st
     return type;
 }
 
-struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, struct AC_output* output)
+struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level10_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level10_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL11_NOP)
     {
         if(!AC_typename_isinteger(type))
             AC_invalid_operand(type, "logical operator XOR", object->srcline);
-        struct AC_typename* type2 = AC_expr_level11_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level11_translate(object->next, output, program);
         if(!AC_typename_isinteger(type2))
             AC_invalid_operand(type2, "logical operator XOR", object->srcline);
         type = AC_typename_stackconv(type2, type, object->srcline, output);
@@ -716,14 +840,14 @@ struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, st
     return type;
 }
 
-struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, struct AC_output* output)
+struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level11_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level11_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL12_NOP)
     {
         if(!AC_typename_isinteger(type))
             AC_invalid_operand(type, "logical operator OR", object->srcline);
-        struct AC_typename* type2 = AC_expr_level12_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level12_translate(object->next, output, program);
         if(!AC_typename_isinteger(type2))
             AC_invalid_operand(type2, "logical operator OR", object->srcline);
         type = AC_typename_stackconv(type2, type, object->srcline, output);
@@ -732,14 +856,14 @@ struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, st
     return type;
 }
 
-struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, struct AC_output* output)
+struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level12_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level12_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL13_NOP)
     {
         if(!AC_typename_isbool(type))
             AC_invalid_operand(type, "logical operator AND", object->srcline);
-        struct AC_typename* type2 = AC_expr_level13_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level13_translate(object->next, output, program);
         if(!AC_typename_isbool(type2))
             AC_invalid_operand(type2, "logical operator AND", object->srcline);
         AC_output_write(output, "land4");
@@ -747,14 +871,14 @@ struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, st
     return type;
 }
 
-struct AC_typename* AC_expr_level14_translate(struct AC_expr_level14* object, struct AC_output* output)
+struct AC_typename* AC_expr_level14_translate(struct AC_expr_level14* object, struct AC_output* output, struct AC_program* program)
 {
-    struct AC_typename* type = AC_expr_level13_translate(&object->low, output);
+    struct AC_typename* type = AC_expr_level13_translate(&object->low, output, program);
     if(object->type != AC_EXPR_LEVEL14_NOP)
     {
         if(!AC_typename_isbool(type))
             AC_invalid_operand(type, "logical operator OR", object->srcline);
-        struct AC_typename* type2 = AC_expr_level14_translate(object->next, output);
+        struct AC_typename* type2 = AC_expr_level14_translate(object->next, output, program);
         if(!AC_typename_isbool(type2))
             AC_invalid_operand(type2, "logical operator OR", object->srcline);
         AC_output_write(output, "lor4");
@@ -779,7 +903,7 @@ void AC_expression_load(struct AC_expression* object, struct AC_scanner* scanner
     AC_expr_level14_make(&object->top, scanner);
 }
 
-struct AC_typename* AC_expression_translate(struct AC_expression* object, struct AC_output* output)
+struct AC_typename* AC_expression_translate(struct AC_expression* object, struct AC_output* output, struct AC_program* program)
 {
-    return AC_expr_level14_translate(&object->top, output);
+    return AC_expr_level14_translate(&object->top, output, program);
 }

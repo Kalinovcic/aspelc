@@ -68,6 +68,6 @@ struct AC_statement
 struct AC_statement* AC_statement_make();
 void AC_statement_destroy(struct AC_statement* object);
 void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner, const char* rawend);
-void AC_statement_translate(struct AC_statement* object, struct AC_output* output);
+void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program);
 
 #endif /* STATEMENT_H_ */

@@ -42,12 +42,12 @@ struct AC_namespace
     struct AC_namespace* parent;
     struct AC_token name;
 
-    struct AC_type** typev_export;
+    struct AC_complex** typev_export;
     struct AC_variable** varv_export;
     struct AC_function** funcv_export;
     struct AC_namespace** childnsv_export;
 
-    struct AC_type** typev;
+    struct AC_complex** typev;
     struct AC_variable** varv;
     struct AC_function** funcv;
     struct AC_namespace** childnsv;
@@ -76,9 +76,9 @@ void AC_namespace_destroy(struct AC_namespace* object);
 void* AC_namespace_push(struct AC_namespace* object, void*** targetv, AC_uint* targetc, AC_make make);
 
 void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct AC_scanner* scanner);
-void AC_namespace_translate(struct AC_namespace* object, struct AC_output* output);
+void AC_namespace_translate(struct AC_namespace* object, struct AC_output* output, struct AC_program* program);
 
-struct AC_type* AC_namespace_findtype(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal);
+struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal);
 struct AC_function* AC_namespace_findfunc(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal);
 
 struct AC_program* AC_program_make(struct AC_scanner* scanner);
@@ -87,7 +87,7 @@ void AC_program_destroy(struct AC_program* object);
 void AC_program_load(struct AC_program* object, struct AC_scanner* scanner);
 void AC_program_translate(struct AC_program* object, struct AC_output* output);
 
-struct AC_type* AC_program_findtype(struct AC_program* object, struct AC_identifier* identifier);
+struct AC_complex* AC_program_findcomplex(struct AC_program* object, struct AC_identifier* identifier);
 struct AC_function* AC_program_findfunc(struct AC_program* object, struct AC_identifier* identifier);
 
 #endif /* PROGRAM_H_ */

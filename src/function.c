@@ -26,6 +26,7 @@
 struct AC_block* AC_block_make()
 {
     struct AC_block* object = malloc(sizeof(struct AC_block));
+    object->statementc = 0;
     object->statementv = malloc(0);
     return object;
 }
@@ -64,11 +65,11 @@ void AC_block_load(struct AC_block* object, struct AC_scanner* scanner)
     AC_scanner_match(scanner, "}");
 }
 
-void AC_block_translate(struct AC_block* object, struct AC_output* output)
+void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program)
 {
     AC_uint i = 0;
     for(; i < object->statementc; i++)
-        AC_statement_translate(object->statementv[i], output);
+        AC_statement_translate(object->statementv[i], output, program);
 }
 
 struct AC_function* AC_function_make()
@@ -103,12 +104,12 @@ void AC_function_load(struct AC_function* object, struct AC_scanner* scanner)
     AC_block_load(object->funcblock, scanner);
 }
 
-void AC_function_translate(struct AC_function* object, struct AC_output* output)
+void AC_function_translate(struct AC_function* object, struct AC_output* output, struct AC_program* program)
 {
     AC_output_writeraw(output, "f: ");
     AC_function_writensname(object, output);
     AC_output_writeraw(output, "\n");
-    AC_block_translate(object->funcblock, output);
+    AC_block_translate(object->funcblock, output, program);
 }
 
 void AC_function_writensname(struct AC_function* object, struct AC_output* output)

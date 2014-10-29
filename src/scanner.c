@@ -25,7 +25,7 @@
 
 static struct AC_scanner* scanner;
 static AC_byte currbyte;
-static AC_uint currline;
+static AC_uint currline = 1;
 
 inline AC_bool isAlpha(AC_byte c)
 {
@@ -207,6 +207,7 @@ void AC_scanner_prev(struct AC_scanner* object)
 void AC_scanner_next(struct AC_scanner* object)
 {
     object->curr++;
+    //printf("%.*s\n", object->tokenv[object->curr].tokenl, object->tokenv[object->curr].token);
 }
 
 void AC_scanner_match(struct AC_scanner* object, const char* cstr)

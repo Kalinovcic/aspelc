@@ -33,48 +33,17 @@
 #include "token.h"
 #include "type.h"
 
-enum AC_expr_const_type
-{
-    AC_EXPR_CONST_BOOL,
-    AC_EXPR_CONST_INT,
-    AC_EXPR_CONST_FLOAT,
-    AC_EXPR_CONST_LONG,
-    AC_EXPR_CONST_DOUBLE,
-};
-
-struct AC_expr_const
-{
-    enum AC_expr_const_type type;
-    struct AC_token value;
-};
-
-enum AC_expr_var_type
-{
-    AC_EXPR_VAR_VALUE,
-    AC_EXPR_VAR_POINTER,
-};
-
-struct AC_expr_var
-{
-    enum AC_expr_var_type type;
-    struct AC_token name;
-};
-
 struct AC_expr_new
 {
     struct AC_typename* type;
-    struct AC_token size;
-};
-
-struct AC_expr_size
-{
-    struct AC_typename* type;
+    void* size;
 };
 
 enum AC_expr_level1_type
 {
-    AC_EXPR_LEVEL1_CONST,
+    AC_EXPR_LEVEL1_LITERAL,
     AC_EXPR_LEVEL1_VAR,
+    AC_EXPR_LEVEL1_FUNC,
     AC_EXPR_LEVEL1_NEW,
     AC_EXPR_LEVEL1_SIZE,
     AC_EXPR_LEVEL1_EXPRESSION,
@@ -82,11 +51,11 @@ enum AC_expr_level1_type
 
 union AC_expr_level1_union
 {
-    struct AC_expr_const zconst;
-    struct AC_expr_var var;
+    struct AC_token literal;
+    struct AC_identifier* name;
     struct AC_expr_new new;
-    struct AC_expr_size size;
-    struct AC_expr_expression* exprssion;
+    struct AC_typename* size;
+    struct AC_expression* expression;
 };
 
 struct AC_expr_level1
@@ -328,25 +297,25 @@ void AC_expr_level12_destroy(struct AC_expr_level12* object);
 void AC_expr_level13_destroy(struct AC_expr_level13* object);
 void AC_expr_level14_destroy(struct AC_expr_level14* object);
 
-struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, struct AC_output* output);
-struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, struct AC_output* output);
-struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, struct AC_output* output);
-struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, struct AC_output* output);
-struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, struct AC_output* output);
-struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, struct AC_output* output);
-struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, struct AC_output* output);
-struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, struct AC_output* output);
-struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, struct AC_output* output);
-struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, struct AC_output* output);
-struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, struct AC_output* output);
-struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, struct AC_output* output);
-struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, struct AC_output* output);
-struct AC_typename* AC_expr_level14_translate(struct AC_expr_level14* object, struct AC_output* output);
+struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level2_translate(struct AC_expr_level2* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level3_translate(struct AC_expr_level3* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level4_translate(struct AC_expr_level4* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level5_translate(struct AC_expr_level5* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level6_translate(struct AC_expr_level6* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level7_translate(struct AC_expr_level7* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level8_translate(struct AC_expr_level8* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level9_translate(struct AC_expr_level9* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level10_translate(struct AC_expr_level10* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level11_translate(struct AC_expr_level11* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level12_translate(struct AC_expr_level12* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level13_translate(struct AC_expr_level13* object, struct AC_output* output, struct AC_program* program);
+struct AC_typename* AC_expr_level14_translate(struct AC_expr_level14* object, struct AC_output* output, struct AC_program* program);
 
 struct AC_expression* AC_expression_make();
 void AC_expression_destroy(struct AC_expression* object);
 
 void AC_expression_load(struct AC_expression* object, struct AC_scanner* scanner);
-struct AC_typename* AC_expression_translate(struct AC_expression* object, struct AC_output* output);
+struct AC_typename* AC_expression_translate(struct AC_expression* object, struct AC_output* output, struct AC_program* program);
 
 #endif /* EXPRESSION_H_ */

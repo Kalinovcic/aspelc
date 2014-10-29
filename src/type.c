@@ -72,7 +72,7 @@ AC_bool AC_primitive_unsigned(enum AC_primitive object)
     return AC_FALSE;
 }
 
-AC_uint AC_primitive_size(enum AC_primitive object)
+AC_ulong AC_primitive_size(enum AC_primitive object)
 {
     switch(object)
     {
@@ -159,7 +159,10 @@ struct AC_typename* AC_typename_stackconv(struct AC_typename* top, struct AC_typ
 
     if((AC_primitive_signed(ptop) == AC_TRUE && AC_primitive_unsigned(pbottom) == AC_TRUE)
     || (AC_primitive_unsigned(ptop) == AC_TRUE && AC_primitive_signed(pbottom) == AC_TRUE))
-        AC_report("integer signedness error");
+    {
+        AC_report("integer signedness error near line %d\n", srcline);
+        AC_report_abort();
+    }
 
     if(ptop == AC_PRIMITIVE_UINT)
         ptop = AC_PRIMITIVE_INT;
@@ -318,6 +321,21 @@ void AC_typename_print(struct AC_typename* object)
     }
 }
 
+AC_ulong AC_typename_size(struct AC_typename* object, struct AC_program* program)
+{
+    switch(object->type)
+    {
+    case AC_TYPENAME_PRIMITIVE:
+        return AC_primitive_size(object->value.primitive);
+    case AC_TYPENAME_POINTER:
+        return 8;
+    case AC_TYPENAME_USERTYPE:
+        return AC_complex_size(AC_program_findcomplex(program, object->value.usertype), program);
+    }
+    assert(0);
+    return 0;
+}
+
 AC_bool AC_typename_isbool(struct AC_typename* typename)
 {
     if(typename->type == AC_TYPENAME_PRIMITIVE)
@@ -376,49 +394,47 @@ AC_bool AC_typename_ispointer(struct AC_typename* typename)
     return AC_FALSE;
 }
 
-struct AC_basetype* AC_basetype_make()
+struct AC_complex* AC_complex_make()
 {
-    struct AC_basetype* object = malloc(sizeof(struct AC_basetype));
+    struct AC_complex* object = malloc(sizeof(struct AC_complex));
     return object;
 }
-void AC_basetype_destroy(struct AC_basetype* object)
+
+void AC_complex_destroy(struct AC_complex* object)
 {
     switch(object->type)
     {
-    case AC_BASETYPE_STRUCT: AC_struct_destroy(object->value.created); break;
+    case AC_COMPLEX_STRUCT: AC_struct_destroy(object->value.zstruct); break;
+    case AC_COMPLEX_DELEGATE: break;
     }
     free(object);
 }
 
-void AC_basetype_load(struct AC_basetype* object, struct AC_scanner* scanner)
+void AC_complex_load(struct AC_complex* object, struct AC_scanner* scanner)
 {
     struct AC_token token = AC_scanner_getword(scanner, 0);
 
     if(AC_token_compare_raw(token, "struct") == AC_TRUE)
     {
-        object->type = AC_BASETYPE_STRUCT;
-        object->value.created = AC_struct_make();
-        AC_struct_load(object->value.created, scanner);
+        object->type = AC_COMPLEX_STRUCT;
+        object->value.zstruct = AC_struct_make();
+        AC_struct_load(object->value.zstruct, scanner);
     }
     else assert(0);
-}
 
-struct AC_type* AC_type_make()
-{
-    struct AC_type* object = malloc(sizeof(struct AC_type));
-    object->basetype = AC_basetype_make();
-    return object;
-}
-void AC_type_destroy(struct AC_type* object)
-{
-    AC_basetype_destroy(object->basetype);
-    free(object);
-}
-
-void AC_type_load(struct AC_type* object, struct AC_scanner* scanner)
-{
-    AC_basetype_load(object->basetype, scanner);
     object->name = AC_scanner_getword(scanner, 0);
     AC_scanner_next(scanner);
+
     AC_scanner_match(scanner, ";");
+}
+
+AC_ulong AC_complex_size(struct AC_complex* object, struct AC_program* program)
+{
+    switch(object->type)
+    {
+    case AC_COMPLEX_STRUCT: return AC_struct_size(object->value.zstruct, program);
+    case AC_COMPLEX_DELEGATE: return 8; // TODO: ?
+    }
+    assert(0);
+    return 0;
 }

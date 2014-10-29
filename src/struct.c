@@ -60,3 +60,11 @@ void AC_struct_load(struct AC_struct* object, struct AC_scanner* scanner)
     AC_scanner_match(scanner, "}");
 }
 
+AC_ulong AC_struct_size(struct AC_struct* object, struct AC_program* program)
+{
+    AC_ulong size = 0;
+    AC_uint i = 0;
+    for(; i < object->varc; i++)
+        size += AC_typename_size(object->varv[i]->typename, program);
+    return size;
+}

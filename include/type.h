@@ -66,7 +66,7 @@ void AC_primitive_print(enum AC_primitive object);
 AC_bool AC_primitive_integer(enum AC_primitive object);
 AC_bool AC_primitive_signed(enum AC_primitive object);
 AC_bool AC_primitive_unsigned(enum AC_primitive object);
-AC_uint AC_primitive_size(enum AC_primitive object);
+AC_ulong AC_primitive_size(enum AC_primitive object);
 AC_uint AC_primitive_prec(enum AC_primitive object);
 enum AC_primitive AC_primitive_greater(enum AC_primitive p1, enum AC_primitive p2);
 struct AC_typename* AC_typename_stackconv(struct AC_typename* top, struct AC_typename* bottom, AC_uint srcline, struct AC_output* output);
@@ -78,6 +78,8 @@ void AC_typename_destroy_noptr(struct AC_typename* object);
 void AC_typename_load(struct AC_typename* object, struct AC_scanner* scanner);
 void AC_typename_print(struct AC_typename* object);
 
+AC_ulong AC_typename_size(struct AC_typename* object, struct AC_program* program);
+
 AC_bool AC_typename_isbool(struct AC_typename* typename);
 AC_bool AC_typename_isinteger(struct AC_typename* typename);
 AC_bool AC_typename_issigned(struct AC_typename* typename);
@@ -86,37 +88,30 @@ AC_bool AC_typename_isfloat(struct AC_typename* typename);
 AC_bool AC_typename_isnumber(struct AC_typename* typename);
 AC_bool AC_typename_ispointer(struct AC_typename* typename);
 
-enum AC_basetype_type
+enum AC_complex_type
 {
-    AC_BASETYPE_STRUCT,
+    AC_COMPLEX_STRUCT,
+    AC_COMPLEX_DELEGATE,
 };
 
-union AC_basetype_union
+union AC_complex_union
 {
-    struct AC_typename* existing;
-    struct AC_struct* created;
+    struct AC_struct* zstruct;
+    void* delegate;     // TODO: delegate profile
 };
 
-struct AC_basetype
-{
-    enum AC_basetype_type type;
-    union AC_basetype_union value;
-};
-
-struct AC_basetype* AC_basetype_make();
-void AC_basetype_destroy(struct AC_basetype* object);
-
-void AC_basetype_load(struct AC_basetype* object, struct AC_scanner* scanner);
-
-struct AC_type
+struct AC_complex
 {
     struct AC_token name;
-    struct AC_basetype* basetype;
+
+    enum AC_complex_type type;
+    union AC_complex_union value;
 };
 
-struct AC_type* AC_type_make();
-void AC_type_destroy(struct AC_type* object);
+struct AC_complex* AC_complex_make();
+void AC_complex_destroy(struct AC_complex* object);
 
-void AC_type_load(struct AC_type* object, struct AC_scanner* scanner);
+void AC_complex_load(struct AC_complex* object, struct AC_scanner* scanner);
+AC_ulong AC_complex_size(struct AC_complex* object, struct AC_program* program);
 
 #endif /* TYPE_H_ */

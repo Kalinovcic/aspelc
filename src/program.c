@@ -52,7 +52,7 @@ void AC_namespace_destroy(struct AC_namespace* object)
 {
     AC_uint i;
     for(i = 0; i < object->typec_export; i++)
-        AC_type_destroy(object->typev_export[i]);
+        AC_complex_destroy(object->typev_export[i]);
     for(i = 0; i < object->varc_export; i++)
         AC_variable_destroy(object->varv_export[i]);
     for(i = 0; i < object->funcc_export; i++)
@@ -65,7 +65,7 @@ void AC_namespace_destroy(struct AC_namespace* object)
     free(object->childnsv_export);
 
     for(i = 0; i < object->typec; i++)
-        AC_type_destroy(object->typev[i]);
+        AC_complex_destroy(object->typev[i]);
     for(i = 0; i < object->varc; i++)
         AC_variable_destroy(object->varv[i]);
     for(i = 0; i < object->funcc; i++)
@@ -112,7 +112,7 @@ void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct A
 
         struct AC_namespace*** tv_ns = &(object->childnsv);
         struct AC_function*** tv_func = &(object->funcv);
-        struct AC_type*** tv_tdef = &(object->typev);
+        struct AC_complex*** tv_tdef = &(object->typev);
         AC_uint* tc_ns = &(object->childnsc);
         AC_uint* tc_func = &(object->funcc);
         AC_uint* tc_tdef = &(object->typec);
@@ -144,8 +144,8 @@ void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct A
         }
         else if(AC_token_compare_raw(token, "struct") == AC_TRUE)
         {
-            struct AC_type* newtype = AC_namespace_push(object, (void***) tv_tdef, tc_tdef, (AC_make) &AC_type_make);
-            AC_type_load(newtype, scanner);
+            struct AC_complex* newtype = AC_namespace_push(object, (void***) tv_tdef, tc_tdef, (AC_make) &AC_complex_make);
+            AC_complex_load(newtype, scanner);
         }
         else assert(0);
     }
@@ -154,28 +154,28 @@ void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct A
         AC_scanner_match(scanner, "}");
 }
 
-void AC_namespace_translate(struct AC_namespace* object, struct AC_output* output)
+void AC_namespace_translate(struct AC_namespace* object, struct AC_output* output, struct AC_program* program)
 {
     AC_uint i;
     for(i = 0; i < object->funcc_export; i++)
-        AC_function_translate(object->funcv_export[i], output);
+        AC_function_translate(object->funcv_export[i], output, program);
     for(i = 0; i < object->funcc; i++)
-        AC_function_translate(object->funcv[i], output);
+        AC_function_translate(object->funcv[i], output, program);
 
     for(i = 0; i < object->childnsc_export; i++)
-        AC_namespace_translate(object->childnsv_export[i], output);
+        AC_namespace_translate(object->childnsv_export[i], output, program);
     for(i = 0; i < object->childnsc; i++)
-        AC_namespace_translate(object->childnsv[i], output);
+        AC_namespace_translate(object->childnsv[i], output, program);
 }
 
-struct AC_type* AC_namespace_findtype(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal)
+struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal)
 {
     AC_uint i = 0;
     if(AC_identifier_hassub(identifier) == AC_TRUE)
     {
         for(; i < object->childnsc; i++)
             if(AC_token_compare(object->childnsv[i]->name, identifier->name))
-                return AC_namespace_findtype(object->childnsv[i], identifier->sub, AC_FALSE);
+                return AC_namespace_findcomplex(object->childnsv[i], identifier->sub, AC_FALSE);
     }
     else
     {
@@ -227,12 +227,12 @@ void AC_program_load(struct AC_program* object, struct AC_scanner* scanner)
 
 void AC_program_translate(struct AC_program* object, struct AC_output* output)
 {
-    AC_namespace_translate(object->globalns, output);
+    AC_namespace_translate(object->globalns, output, object);
 }
 
-struct AC_type* AC_program_findtype(struct AC_program* object, struct AC_identifier* identifier)
+struct AC_complex* AC_program_findcomplex(struct AC_program* object, struct AC_identifier* identifier)
 {
-    return AC_namespace_findtype(object->globalns, identifier, AC_TRUE);
+    return AC_namespace_findcomplex(object->globalns, identifier, AC_TRUE);
 }
 
 struct AC_function* AC_program_findfunc(struct AC_program* object, struct AC_identifier* identifier)

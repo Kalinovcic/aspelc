@@ -46,6 +46,7 @@ void AC_struct_destroy(struct AC_struct* object);
 void AC_struct_addvar(struct AC_struct* object, struct AC_variable* var);
 
 void AC_struct_load(struct AC_struct* object, struct AC_scanner* scanner);
+AC_ulong AC_struct_size(struct AC_struct* object, struct AC_program* program);
 
 
 #endif /* STRUCT_H_ */

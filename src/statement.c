@@ -85,27 +85,27 @@ void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner, 
         AC_statement_load_simple(object, scanner, rawend);
 }
 
-static void AC_statement_translate_simple(struct AC_statement* object, struct AC_output* output)
+static void AC_statement_translate_simple(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
 {
 
 }
 
-static void AC_statement_translate_if(struct AC_statement* object, struct AC_output* output)
+static void AC_statement_translate_if(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
 {
-    AC_expression_translate(object->value.zif.condition, output);
+    AC_expression_translate(object->value.zif.condition, output, program);
     char* label1 = AC_label_newname();
     char* label2 = AC_NULL;
     if(object->value.zif.elseblock != AC_NULL)
         label2 = AC_label_newname();
 
     AC_output_write(output, "ifn %s", label1);
-    AC_block_translate(object->value.zif.execblock, output);
+    AC_block_translate(object->value.zif.execblock, output, program);
     if(label2 != AC_NULL)
         AC_output_write(output, "goto %s", label2);
     AC_output_writeraw(output, "%s: \n", label1);
     if(label2 != AC_NULL)
     {
-        AC_block_translate(object->value.zif.elseblock, output);
+        AC_block_translate(object->value.zif.elseblock, output, program);
         AC_output_writeraw(output, "%s: \n", label2);
     }
 
@@ -114,11 +114,11 @@ static void AC_statement_translate_if(struct AC_statement* object, struct AC_out
         free(label2);
 }
 
-void AC_statement_translate(struct AC_statement* object, struct AC_output* output)
+void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
 {
     switch(object->type)
     {
-    case AC_STATEMENT_SIMPLE: AC_statement_translate_simple(object, output); break;
-    case AC_STATEMENT_IF: AC_statement_translate_if(object, output); break;
+    case AC_STATEMENT_SIMPLE: AC_statement_translate_simple(object, output, program); break;
+    case AC_STATEMENT_IF: AC_statement_translate_if(object, output, program); break;
     }
 }

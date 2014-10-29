@@ -44,7 +44,7 @@ void AC_block_destroy(struct AC_block* object);
 struct AC_statement* AC_block_pushstatement(struct AC_block* object);
 
 void AC_block_load(struct AC_block* object, struct AC_scanner* scanner);
-void AC_block_translate(struct AC_block* object, struct AC_output* output);
+void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program);
 
 struct AC_function
 {
@@ -60,7 +60,7 @@ struct AC_function* AC_function_make();
 void AC_function_destroy(struct AC_function* object);
 
 void AC_function_load(struct AC_function* object, struct AC_scanner* scanner);
-void AC_function_translate(struct AC_function* object, struct AC_output* output);
+void AC_function_translate(struct AC_function* object, struct AC_output* output, struct AC_program* program);
 void AC_function_writensname(struct AC_function* object, struct AC_output* output);
 
 #endif /* FUNCTION_H_ */
