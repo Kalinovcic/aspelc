@@ -221,7 +221,10 @@ void AC_typename_destroy(struct AC_typename* object)
     {
     case AC_TYPENAME_PRIMITIVE: break;
     case AC_TYPENAME_USERTYPE: AC_identifier_destroy(object->value.usertype); break;
-    case AC_TYPENAME_POINTER: AC_typename_destroy(object->value.pointer); break;
+    case AC_TYPENAME_POINTER:
+        if(object->value.pointer != AC_NULL)
+            AC_typename_destroy(object->value.pointer);
+        break;
     }
     free(object);
 }

@@ -517,12 +517,117 @@ struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, stru
     switch(object->type)
     {
     case AC_EXPR_LEVEL1_LITERAL:
-        // TODO: not finished
-
-        AC_output_write(output, "%%PUSH%%");
         type = AC_typename_make();
         type->type = AC_TYPENAME_PRIMITIVE;
-        type->value.primitive = AC_PRIMITIVE_INT;
+
+        struct AC_token literal = object->value.literal;
+        if(AC_token_compare_raw(literal, "true") == AC_TRUE)
+        {
+            AC_output_write(output, "push4 1");
+            type->value.primitive = AC_PRIMITIVE_BOOL;
+        }
+        else if(AC_token_compare_raw(literal, "false") == AC_TRUE)
+        {
+            AC_output_write(output, "push4 0");
+            type->value.primitive = AC_PRIMITIVE_BOOL;
+        }
+        else if(AC_token_compare_raw(literal, "null") == AC_TRUE)
+        {
+            AC_output_write(output, "push8 0");
+            type->type = AC_TYPENAME_POINTER;
+            type->value.pointer = AC_NULL;
+        }
+        else
+        {
+            AC_uint origlen = literal.tokenl;
+            enum AC_primitive defaulttype = AC_PRIMITIVE_INT;
+
+            if(literal.tokenl >= 2 && literal.token[0] == '0' && literal.token[1] == 'x')
+            {
+                // TODO: hexadecimal literals
+                AC_report("hexadecimal literals are not supported");
+                AC_report_abort();
+            }
+            else
+            {
+                AC_uint i;
+                for(i = 0; i < literal.tokenl; i++)
+                    if(literal.token[i] == '.')
+                    {
+                        if(defaulttype == AC_PRIMITIVE_DOUBLE)
+                        {
+                            AC_report("multiple decimal points in literal \"%.*s\" near line %d", literal.tokenl, literal.token, literal.line);
+                            AC_report_abort();
+                        }
+                        defaulttype = AC_PRIMITIVE_DOUBLE;
+                    }
+
+                enum AC_primitive suffixtype = AC_PRIMITIVE_BOOL;   // the BOOL primitive type is used as "no type"
+                if(literal.token[literal.tokenl - 1] == 'i' || literal.token[literal.tokenl - 1] == 'I')
+                {
+                    suffixtype = AC_PRIMITIVE_INT;
+                    literal.tokenl--;
+                }
+                else if(literal.token[literal.tokenl - 1] == 'l' || literal.token[literal.tokenl - 1] == 'L')
+                {
+                    suffixtype = AC_PRIMITIVE_LONG;
+                    literal.tokenl--;
+                }
+
+                if(literal.token[literal.tokenl - 1] == 'u' || literal.token[literal.tokenl - 1] == 'U')
+                {
+                    if(suffixtype == AC_PRIMITIVE_BOOL || suffixtype == AC_PRIMITIVE_INT)
+                        suffixtype = AC_PRIMITIVE_UINT;
+                    else if(suffixtype == AC_PRIMITIVE_LONG)
+                        suffixtype = AC_PRIMITIVE_ULONG;
+                }
+
+                if(suffixtype == AC_PRIMITIVE_BOOL)
+                {
+                    if(literal.token[literal.tokenl - 1] == 'f' || literal.token[literal.tokenl - 1] == 'F')
+                    {
+                        suffixtype = AC_PRIMITIVE_FLOAT;
+                        literal.tokenl--;
+                    }
+                    else if(literal.token[literal.tokenl - 1] == 'd' || literal.token[literal.tokenl - 1] == 'D')
+                    {
+                        suffixtype = AC_PRIMITIVE_DOUBLE;
+                        literal.tokenl--;
+                    }
+                }
+
+                if(suffixtype == AC_PRIMITIVE_BOOL)
+                    suffixtype = defaulttype;
+                if(suffixtype != defaulttype)
+                {
+                    if(defaulttype == AC_PRIMITIVE_DOUBLE && (suffixtype == AC_PRIMITIVE_INT || suffixtype == AC_PRIMITIVE_LONG
+                                                           || suffixtype == AC_PRIMITIVE_UINT || suffixtype == AC_PRIMITIVE_ULONG))
+                    {
+                        AC_report("invalid suffix type in literal \"%.*s\" near line %d", origlen, literal.token, literal.line);
+                        AC_report_abort();
+                    }
+                    for(i = 0; i < literal.tokenl; i++)
+                        if(!((literal.token[i] >= '0' && literal.token[i] <= '9') || literal.token[i] == '.'))
+                        {
+                            AC_report("invalid literal \"%.*s\" near line %d", origlen, literal.token, literal.line);
+                            AC_report_abort();
+                        }
+                }
+
+                type->value.primitive = suffixtype;
+                switch(suffixtype)
+                {
+                case AC_PRIMITIVE_INT: case AC_PRIMITIVE_UINT: case AC_PRIMITIVE_FLOAT:
+                    AC_output_write(output, "push4 %.*s", literal.tokenl, literal.token);
+                    break;
+                case AC_PRIMITIVE_LONG: case AC_PRIMITIVE_ULONG: case AC_PRIMITIVE_DOUBLE:
+                    AC_output_write(output, "push8 %.*s", literal.tokenl, literal.token);
+                    break;
+                default: AC_internal_error("unexpected type");
+                }
+            }
+        }
+
         break;
     case AC_EXPR_LEVEL1_EXPRESSION:
         type = AC_expression_translate(object->value.expression, output, program);
@@ -536,17 +641,37 @@ struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, stru
         type->value.primitive = AC_PRIMITIVE_INT;
         break;
     case AC_EXPR_LEVEL1_FUNC:
-        // TODO: not finished
+        // TODO: avoid using writeraw
+        AC_output_writeraw(output, "             call ");
+        struct AC_function* function = AC_namespace_findfunc(program->globalns, object->value.name, 1);
+        if(function == AC_NULL)
+        {
+            AC_report("function called in expression near line %d not found", object->srcline);
+        }
+        AC_function_writensname(function, output);
+        AC_output_writeraw(output, "\n");
 
-        AC_output_write(output, "%%CALL%%");
         type = AC_typename_make();
         type->type = AC_TYPENAME_PRIMITIVE;
         type->value.primitive = AC_PRIMITIVE_INT;
         break;
     case AC_EXPR_LEVEL1_NEW:
-        // TODO: not finished
+        AC_output_write(output, "push8 %d", AC_typename_size(object->value.size, program));
+        if(object->value.new.size != AC_NULL)
+        {
+            struct AC_typename* sizetype = AC_expression_translate(object->value.new.size, output, program);
+            if(!AC_typename_isinteger(sizetype))
+            {
+                AC_report("invalid size expression to dynamic memory allocator \"new\" near line %d\n", object->srcline);
+                AC_report_abort();
+            }
+            if(sizetype->value.primitive != AC_PRIMITIVE_LONG || sizetype->value.primitive != AC_PRIMITIVE_ULONG)
+                AC_output_write(output, "ci48");
+            AC_output_write(output, "muli8");
+            AC_typename_destroy(sizetype);
+        }
+        AC_output_write(output, "alloc");
 
-        AC_output_write(output, "%%NEW%%");
         type = AC_typename_make();
         type->type = AC_TYPENAME_POINTER;
         type->value.pointer = object->value.new.type;

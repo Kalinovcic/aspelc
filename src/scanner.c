@@ -37,6 +37,11 @@ inline AC_bool isDigit(AC_byte c)
     return c >= '0' && c <= '9';
 }
 
+inline AC_bool isNumberAllowed(AC_byte c)
+{
+    return c == 'i' || c == 'I' || c == 'l' || c == 'L' || c == 'u' || c == 'U' || c == 'f' || c == 'F' || c == 'd' || c == 'D';
+}
+
 inline AC_bool isOp(AC_byte c)
 {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '<' || c == '>' || c == '&' || c == '|' || c == '=' || c == '!';
@@ -78,7 +83,8 @@ static struct AC_token readnumber()
 {
     struct AC_token token;
     token.token = scanner->datav - 1;
-    while(isDigit(currbyte)) nextbyte();
+    while(isDigit(currbyte) || currbyte == '.') nextbyte();
+    while(isNumberAllowed(currbyte)) nextbyte();
     token.tokenl = scanner->datav - token.token - 1;
     token.line = currline;
     skipwhite();
@@ -197,6 +203,16 @@ AC_bool AC_scanner_isnumber(struct AC_scanner* object, AC_int off)
 AC_bool AC_scanner_isop(struct AC_scanner* object, AC_int off)
 {
     return isOp(*AC_scanner_get(object, off).token);
+}
+
+AC_uint AC_scanner_getpos(struct AC_scanner* object)
+{
+    return object->curr;
+}
+
+void AC_scanner_setpos(struct AC_scanner* object, AC_uint newpos)
+{
+    object->curr = newpos;
 }
 
 void AC_scanner_prev(struct AC_scanner* object)

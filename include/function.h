@@ -32,6 +32,12 @@
 #include "scanner.h"
 #include "statement.h"
 
+struct AC_blockvar
+{
+    struct AC_token name;
+    AC_ulong memloc;
+};
+
 struct AC_block
 {
     struct AC_statement** statementv;

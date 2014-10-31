@@ -78,8 +78,8 @@ void* AC_namespace_push(struct AC_namespace* object, void*** targetv, AC_uint* t
 void AC_namespace_load(struct AC_namespace* object, AC_bool incomplete, struct AC_scanner* scanner);
 void AC_namespace_translate(struct AC_namespace* object, struct AC_output* output, struct AC_program* program);
 
-struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal);
-struct AC_function* AC_namespace_findfunc(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal);
+struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_int allowlocal);
+struct AC_function* AC_namespace_findfunc(struct AC_namespace* object, struct AC_identifier* identifier, AC_int allowlocal);
 
 struct AC_program* AC_program_make(struct AC_scanner* scanner);
 void AC_program_destroy(struct AC_program* object);

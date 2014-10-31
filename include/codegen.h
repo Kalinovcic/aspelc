@@ -25,6 +25,7 @@
 #define CODEGEN_H_
 
 #include "acdef.h"
+#include "error.h"
 #include "output.h"
 
 void AC_codegen_swap(AC_uint top, AC_uint bottom, struct AC_output* output);

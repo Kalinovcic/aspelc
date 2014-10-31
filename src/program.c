@@ -168,38 +168,54 @@ void AC_namespace_translate(struct AC_namespace* object, struct AC_output* outpu
         AC_namespace_translate(object->childnsv[i], output, program);
 }
 
-struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal)
+struct AC_complex* AC_namespace_findcomplex(struct AC_namespace* object, struct AC_identifier* identifier, AC_int allowlocal)
 {
     AC_uint i = 0;
     if(AC_identifier_hassub(identifier) == AC_TRUE)
     {
-        for(; i < object->childnsc; i++)
-            if(AC_token_compare(object->childnsv[i]->name, identifier->name))
-                return AC_namespace_findcomplex(object->childnsv[i], identifier->sub, AC_FALSE);
+        if(allowlocal > 0)
+            for(; i < object->childnsc; i++)
+                if(AC_token_compare(object->childnsv[i]->name, identifier->name))
+                    return AC_namespace_findcomplex(object->childnsv[i], identifier->sub, allowlocal - 1);
+        for(; i < object->childnsc_export; i++)
+            if(AC_token_compare(object->childnsv_export[i]->name, identifier->name))
+                return AC_namespace_findcomplex(object->childnsv_export[i], identifier->sub, allowlocal - 1);
     }
     else
     {
-        for(; i < object->typec; i++)
-            if(AC_token_compare(object->typev[i]->name, identifier->name))
-                return object->typev[i];
+        if(allowlocal > 0)
+            for(; i < object->typec; i++)
+                if(AC_token_compare(object->typev[i]->name, identifier->name))
+                    return object->typev[i];
+        for(; i < object->typec_export; i++)
+            if(AC_token_compare(object->typev_export[i]->name, identifier->name))
+                return object->typev_export[i];
     }
     return AC_NULL;
 }
 
-struct AC_function* AC_namespace_findfunc(struct AC_namespace* object, struct AC_identifier* identifier, AC_bool allowlocal)
+struct AC_function* AC_namespace_findfunc(struct AC_namespace* object, struct AC_identifier* identifier, AC_int allowlocal)
 {
     AC_uint i = 0;
     if(AC_identifier_hassub(identifier) == AC_TRUE)
     {
-        for(; i < object->childnsc; i++)
-            if(AC_token_compare(object->childnsv[i]->name, identifier->name))
-                return AC_namespace_findfunc(object->childnsv[i], identifier->sub, AC_FALSE);
+        if(allowlocal > 0)
+            for(; i < object->childnsc; i++)
+                if(AC_token_compare(object->childnsv[i]->name, identifier->name))
+                    return AC_namespace_findfunc(object->childnsv[i], identifier->sub, allowlocal - 1);
+        for(; i < object->childnsc_export; i++)
+            if(AC_token_compare(object->childnsv_export[i]->name, identifier->name))
+                return AC_namespace_findfunc(object->childnsv_export[i], identifier->sub, allowlocal - 1);
     }
     else
     {
-        for(; i < object->funcc; i++)
-            if(AC_token_compare(object->funcv[i]->name, identifier->name))
-                return object->funcv[i];
+        if(allowlocal > 0)
+            for(; i < object->funcc; i++)
+                if(AC_token_compare(object->funcv[i]->name, identifier->name))
+                    return object->funcv[i];
+        for(; i < object->funcc_export; i++)
+            if(AC_token_compare(object->funcv_export[i]->name, identifier->name))
+                return object->funcv_export[i];
     }
     return AC_NULL;
 }

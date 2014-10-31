@@ -52,6 +52,8 @@ struct AC_token AC_scanner_getop(struct AC_scanner* object, AC_int off);
 AC_bool AC_scanner_isword(struct AC_scanner* object, AC_int off);
 AC_bool AC_scanner_isnumber(struct AC_scanner* object, AC_int off);
 AC_bool AC_scanner_isop(struct AC_scanner* object, AC_int off);
+AC_uint AC_scanner_getpos(struct AC_scanner* object);
+void AC_scanner_setpos(struct AC_scanner* object, AC_uint newpos);
 void AC_scanner_prev(struct AC_scanner* object);
 void AC_scanner_next(struct AC_scanner* object);
 void AC_scanner_match(struct AC_scanner* object, const char* cstr);
