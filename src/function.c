@@ -63,11 +63,11 @@ void AC_block_load(struct AC_block* object, struct AC_scanner* scanner)
     AC_scanner_match(scanner, "}");
 }
 
-void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program)
+void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel)
 {
     AC_uint i = 0;
     for(; i < object->statementc; i++)
-        AC_statement_translate(object->statementv[i], output, program);
+        AC_statement_translate(object->statementv[i], output, program, breaklabel, continuelabel);
 }
 
 struct AC_function* AC_function_make()
@@ -107,7 +107,7 @@ void AC_function_translate(struct AC_function* object, struct AC_output* output,
     AC_output_writeraw(output, "f: ");
     AC_function_writensname(object, output);
     AC_output_writeraw(output, "\n");
-    AC_block_translate(object->funcblock, output, program);
+    AC_block_translate(object->funcblock, output, program, AC_NULL, AC_NULL);
 }
 
 void AC_function_writensname(struct AC_function* object, struct AC_output* output)

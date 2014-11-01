@@ -50,7 +50,7 @@ void AC_block_destroy(struct AC_block* object);
 struct AC_statement* AC_block_pushstatement(struct AC_block* object);
 
 void AC_block_load(struct AC_block* object, struct AC_scanner* scanner);
-void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program);
+void AC_block_translate(struct AC_block* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel);
 
 struct AC_function
 {

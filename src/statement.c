@@ -120,12 +120,6 @@ static void AC_statement_load_while(struct AC_statement* object, struct AC_scann
     object->value.zwhile.execblock = AC_block_make();
     AC_expression_load(object->value.zwhile.condition, scanner);
     AC_block_load(object->value.zwhile.execblock, scanner);
-    if(AC_token_compare_raw(AC_scanner_get(scanner, 0), "else") == AC_TRUE)
-    {
-        AC_scanner_match(scanner, "else");
-        object->value.zif.elseblock = AC_block_make();
-        AC_block_load(object->value.zif.elseblock, scanner);
-    }
 }
 
 static void AC_statement_load_return(struct AC_statement* object, struct AC_scanner* scanner)
@@ -220,46 +214,36 @@ void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner)
     switch(object->type)
     {
     case AC_STATEMENT_BLOCK:
-        printf("block\n");
         object->value.block.block = AC_block_make();
         AC_block_load(object->value.block.block, scanner);
         break;
     case AC_STATEMENT_ASSIGNMENT:
-        printf("assignment\n");
         AC_statement_load_assignment(object, scanner);
         break;
     case AC_STATEMENT_IF:
-        printf("if\n");
         AC_statement_load_if(object, scanner);
         break;
     case AC_STATEMENT_WHILE:
-        printf("while\n");
         AC_statement_load_while(object, scanner);
         break;
     case AC_STATEMENT_BREAK:
-        printf("break\n");
         AC_scanner_match(scanner, "break");
         AC_scanner_match(scanner, ";");
         break;
     case AC_STATEMENT_CONTINUE:
-        printf("continue\n");
         AC_scanner_match(scanner, "continue");
         AC_scanner_match(scanner, ";");
         break;
     case AC_STATEMENT_RETURN:
-        printf("return\n");
         AC_statement_load_return(object, scanner);
         break;
     case AC_STATEMENT_FUNCTIONCALL:
-        printf("function call\n");
         AC_statement_load_functioncall(object, scanner);
         break;
     case AC_STATEMENT_DECLARATION:
-        printf("declaration\n");
         AC_statement_load_declaration(object, scanner);
         break;
     case AC_STATEMENT_DEALLOCATION:
-        printf("free\n");
         AC_statement_load_deallocation(object, scanner);
         break;
     default:
@@ -272,7 +256,7 @@ static void AC_statement_translate_assignment(struct AC_statement* object, struc
 
 }
 
-static void AC_statement_translate_if(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
+static void AC_statement_translate_if(struct AC_statement* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel)
 {
     struct AC_typename* type = AC_expression_translate(object->value.zif.condition, output, program);
     if(!AC_typename_isbool(type))
@@ -288,13 +272,13 @@ static void AC_statement_translate_if(struct AC_statement* object, struct AC_out
         label2 = AC_label_newname();
 
     AC_output_write(output, "ifn %s", label1);
-    AC_block_translate(object->value.zif.execblock, output, program);
+    AC_block_translate(object->value.zif.execblock, output, program, breaklabel, continuelabel);
     if(label2 != AC_NULL)
         AC_output_write(output, "goto %s", label2);
     AC_output_writeraw(output, "%s: \n", label1);
     if(label2 != AC_NULL)
     {
-        AC_block_translate(object->value.zif.elseblock, output, program);
+        AC_block_translate(object->value.zif.elseblock, output, program, breaklabel, continuelabel);
         AC_output_writeraw(output, "%s: \n", label2);
     }
 
@@ -303,7 +287,7 @@ static void AC_statement_translate_if(struct AC_statement* object, struct AC_out
         free(label2);
 }
 
-static void AC_statement_translate_while(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
+static void AC_statement_translate_while(struct AC_statement* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel)
 {
     char* label1 = AC_label_newname();
     char* label2 = AC_label_newname();
@@ -320,7 +304,7 @@ static void AC_statement_translate_while(struct AC_statement* object, struct AC_
 
     AC_output_write(output, "ifn %s", label2);
 
-    AC_block_translate(object->value.block.block, output, program);
+    AC_block_translate(object->value.zwhile.execblock, output, program, label2, label1);
 
     AC_output_write(output, "goto %s", label1);
     AC_output_writeraw(output, "%s: \n", label2);
@@ -354,16 +338,30 @@ static void AC_statement_translate_functioncall(struct AC_statement* object, str
     AC_output_write(output, "pop %llu", size);
 }
 
-void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program)
+void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel)
 {
     switch(object->type)
     {
-    case AC_STATEMENT_BLOCK: AC_block_translate(object->value.block.block, output, program); break;
+    case AC_STATEMENT_BLOCK: AC_block_translate(object->value.block.block, output, program, breaklabel, continuelabel); break;
     case AC_STATEMENT_ASSIGNMENT: AC_statement_translate_assignment(object, output, program); break;
-    case AC_STATEMENT_IF: AC_statement_translate_if(object, output, program); break;
-    case AC_STATEMENT_WHILE: AC_statement_translate_while(object, output, program); break;
-    case AC_STATEMENT_BREAK: /* TODO: implement break */ break;
-    case AC_STATEMENT_CONTINUE: /* TODO: implement continue */ break;
+    case AC_STATEMENT_IF: AC_statement_translate_if(object, output, program, breaklabel, continuelabel); break;
+    case AC_STATEMENT_WHILE: AC_statement_translate_while(object, output, program, breaklabel, continuelabel); break;
+    case AC_STATEMENT_BREAK:
+        if(breaklabel == AC_NULL)
+        {
+            AC_report("invalid break near line %d\n", object->srcline);
+            AC_report_abort();
+        }
+        AC_output_write(output, "goto %s", breaklabel);
+        break;
+    case AC_STATEMENT_CONTINUE:
+        if(breaklabel == AC_NULL)
+        {
+            AC_report("invalid continue near line %d\n", object->srcline);
+            AC_report_abort();
+        }
+        AC_output_write(output, "goto %s", continuelabel);
+        break;
     case AC_STATEMENT_RETURN: AC_statement_translate_return(object, output, program); break;
     case AC_STATEMENT_FUNCTIONCALL: AC_statement_translate_functioncall(object, output, program); break;
     case AC_STATEMENT_DECLARATION: break;

@@ -123,6 +123,6 @@ struct AC_statement
 struct AC_statement* AC_statement_make();
 void AC_statement_destroy(struct AC_statement* object);
 void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner);
-void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program);
+void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program, char* breaklabel, char* continuelabel);
 
 #endif /* STATEMENT_H_ */
