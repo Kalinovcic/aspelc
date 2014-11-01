@@ -57,9 +57,7 @@ void AC_block_load(struct AC_block* object, struct AC_scanner* scanner)
         if(AC_token_compare_raw(token, "}") == AC_TRUE) break;
 
         struct AC_statement* statement = AC_block_pushstatement(object);
-        AC_statement_load(statement,  scanner, ";");
-        if(statement->type != AC_STATEMENT_IF)
-            AC_scanner_match(scanner, ";");
+        AC_statement_load(statement,  scanner);
     } while(1);
 
     AC_scanner_match(scanner, "}");

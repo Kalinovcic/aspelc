@@ -36,14 +36,34 @@
 
 enum AC_statement_type
 {
-    AC_STATEMENT_SIMPLE,
+    AC_STATEMENT_BLOCK,
+    AC_STATEMENT_ASSIGNMENT,
     AC_STATEMENT_IF,
+    AC_STATEMENT_WHILE,
+    AC_STATEMENT_BREAK,
+    AC_STATEMENT_CONTINUE,
+    AC_STATEMENT_RETURN,
+    AC_STATEMENT_FUNCTIONCALL,
+    AC_STATEMENT_DECLARATION,
+    AC_STATEMENT_DEALLOCATION,
 };
 
-struct AC_statement_simple
+enum AC_statement_assignment_type
 {
-    struct AC_token* tokenv;
-    AC_uint tokenc;
+    AC_STATEMENT_ASSIGNMENT_VALUE,
+    AC_STATEMENT_ASSIGNMENT_POINTER,
+};
+
+struct AC_statement_block
+{
+    struct AC_block* block;
+};
+
+struct AC_statement_assignment
+{
+    struct AC_identifier* name;
+    enum AC_statement_assignment_type type;
+    struct AC_expression* value;
 };
 
 struct AC_statement_if
@@ -53,21 +73,56 @@ struct AC_statement_if
     struct AC_block* elseblock;
 };
 
+struct AC_statement_while
+{
+    struct AC_expression* condition;
+    struct AC_block* execblock;
+};
+
+struct AC_statement_return
+{
+    struct AC_expression* value;
+};
+
+struct AC_statement_functioncall
+{
+    struct AC_identifier* name;
+};
+
+struct AC_statement_declaration
+{
+    struct AC_typename* type;
+    struct AC_token name;
+    struct AC_expression* value;
+};
+
+struct AC_statement_deallocation
+{
+    struct AC_identifier* name;
+};
+
 union AC_statement_value
 {
-    struct AC_statement_simple simple;
+    struct AC_statement_block block;
+    struct AC_statement_assignment assignment;
     struct AC_statement_if zif;
+    struct AC_statement_while zwhile;
+    struct AC_statement_return zreturn;
+    struct AC_statement_functioncall functioncall;
+    struct AC_statement_declaration declaration;
+    struct AC_statement_deallocation deallocation;
 };
 
 struct AC_statement
 {
+    AC_uint srcline;
     enum AC_statement_type type;
     union AC_statement_value value;
 };
 
 struct AC_statement* AC_statement_make();
 void AC_statement_destroy(struct AC_statement* object);
-void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner, const char* rawend);
+void AC_statement_load(struct AC_statement* object, struct AC_scanner* scanner);
 void AC_statement_translate(struct AC_statement* object, struct AC_output* output, struct AC_program* program);
 
 #endif /* STATEMENT_H_ */

@@ -333,7 +333,14 @@ AC_ulong AC_typename_size(struct AC_typename* object, struct AC_program* program
     case AC_TYPENAME_POINTER:
         return 8;
     case AC_TYPENAME_USERTYPE:
-        return AC_complex_size(AC_program_findcomplex(program, object->value.usertype), program);
+    {
+        struct AC_complex* complex = AC_program_findcomplex(program, object->value.usertype);
+        if(complex == AC_NULL)
+        {
+            AC_report("type not found near line %d", object->value.usertype->name.line);
+        }
+        return AC_complex_size(complex, program);
+    }
     }
     assert(0);
     return 0;

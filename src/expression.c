@@ -646,7 +646,8 @@ struct AC_typename* AC_expr_level1_translate(struct AC_expr_level1* object, stru
         struct AC_function* function = AC_namespace_findfunc(program->globalns, object->value.name, 1);
         if(function == AC_NULL)
         {
-            AC_report("function called in expression near line %d not found", object->srcline);
+            AC_report("function in expression not found near line %d", object->srcline);
+            AC_report_abort();
         }
         AC_function_writensname(function, output);
         AC_output_writeraw(output, "\n");
